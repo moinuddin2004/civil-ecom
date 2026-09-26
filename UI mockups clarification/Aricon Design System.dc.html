@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&amp;family=Noto+Sans:wght@400;500;600;700&amp;display=swap">
+<script src="aricon-icons.js"></script>
+<script src="aricon-data.js"></script>
+<style>body{margin:0;background:#EEF0F1;color:#1E2A32;font-family:'Noto Sans',sans-serif;-webkit-font-smoothing:antialiased}a{color:#1F5AA6}a:hover{color:#174785}*{box-sizing:border-box}button,input,select,textarea{font-family:inherit}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:2px solid #1F5AA6;outline-offset:2px}@keyframes ari-spin{to{transform:rotate(360deg)}}@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}</style>
+</helmet>
+<div style="min-height:100vh">
+  <header style="background:#1E2A32;color:#FFFFFF">
+    <div style="max-width:1280px;margin:0 auto;padding:20px 32px;display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+      <div style="display:flex;align-items:baseline;gap:6px"><span style="font:700 24px/28px 'Barlow Semi Condensed',sans-serif;letter-spacing:0.02em">ARICON</span><span style="font:500 20px/28px 'Barlow Semi Condensed',sans-serif;color:#A9B1B7">Shop</span></div>
+      <nav style="display:flex;gap:20px;margin-left:auto;flex-wrap:wrap;font-size:14px;line-height:20px">
+        <a href="Aricon Shop.dc.html" style="color:#FFFFFF">Storefront prototype</a>
+        <a href="Aricon Admin.dc.html" style="color:#FFFFFF">Admin prototype</a>
+      </nav>
+    </div>
+  </header>
+  <main style="max-width:1280px;margin:0 auto;padding:48px 32px 96px;display:flex;flex-direction:column;gap:64px">
+    <div style="display:flex;flex-direction:column;gap:12px;max-width:720px">
+      <h1 style="margin:0;font:700 52px/56px 'Barlow Semi Condensed',sans-serif">Design system</h1>
+      <p style="margin:0;font-size:16px;line-height:24px;color:#33424D;text-wrap:pretty">Tokens and components for shop.aricon.com.pk and its admin panel. Names match SPEC.md §15. The bulk price ladder is the signature component; everything else stays quiet so it can lead.</p>
+    </div>
+
+    <section id="colour" style="display:flex;flex-direction:column;gap:20px">
+      <h2 style="margin:0;font:600 26px/32px 'Barlow Semi Condensed',sans-serif">Colour</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px">
+        <sc-for list="{{ core }}" as="c" hint-placeholder-count="6">
+          <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;overflow:hidden">
+            <div style="height:96px;background:{{ c.hex }};border-bottom:1px solid #DDE1E4"></div>
+            <div style="padding:12px 14px 14px;display:flex;flex-direction:column;gap:2px">
+              <div style="font-weight:600;font-size:16px;line-height:22px">{{ c.name }}</div>
+              <div style="font-size:14px;line-height:20px;color:#33424D;font-variant-numeric:tabular-nums">{{ c.hex }}</div>
+              <div style="font-size:13px;line-height:18px;color:#6B747B;margin-top:6px;text-wrap:pretty">{{ c.role }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px 20px">
+        <sc-for list="{{ ext }}" as="c" hint-placeholder-count="14">
+          <div style="display:flex;gap:12px;align-items:center">
+            <div style="width:40px;height:40px;border-radius:6px;background:{{ c.hex }};border:1px solid #DDE1E4;flex:none"></div>
+            <div style="display:flex;flex-direction:column">
+              <span style="font-size:14px;line-height:20px;font-weight:600">{{ c.name }}</span>
+              <span style="font-size:12px;line-height:16px;color:#6B747B">{{ c.hex }} — {{ c.use }}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+      <p style="margin:0;font-size:14px;line-height:20px;color:#33424D">Text on amber is always ink. Cement text only on white; on concrete use ink-700.</p>
+    </section>
+
+    <section id="type" style="display:flex;flex-direction:column;gap:20px">
+      <h2 style="margin:0;font:600 26px/32px 'Barlow Semi Condensed',sans-serif">Typography</h2>
+      <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px">
+        <div style="display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px;padding:20px 24px;border-bottom:1px solid #DDE1E4;align-items:baseline"><div style="font-size:13px;line-height:18px;color:#6B747B">Display<br>Barlow SC 52/56 · 700</div><div style="font:700 52px/56px 'Barlow Semi Condensed',sans-serif">Cement, wiring and pipes, delivered to your site.</div></div>
+        <div style="display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px;padding:20px 24px;border-bottom:1px solid #DDE1E4;align-items:baseline"><div style="font-size:13px;line-height:18px;color:#6B747B">Page title H1<br>Barlow SC 36/42 · 700</div><div style="font:700 36px/42px 'Barlow Semi Condensed',sans-serif">Cement &amp; plaster</div></div>
+        <div style="display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px;padding:20px 24px;border-bottom:1px solid #DDE1E4;align-items:baseline"><div style="font-size:13px;line-height:18px;color:#6B747B">Section title H2<br>Barlow SC 26/32 · 600</div><div style="font:600 26px/32px 'Barlow Semi Condensed',sans-serif">Shop by category</div></div>
+        <div style="display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px;padding:20px 24px;border-bottom:1px solid #DDE1E4;align-items:baseline"><div style="font-size:13px;line-height:18px;color:#6B747B">Card title H3<br>Noto Sans 18/24 · 600</div><div style="font:600 18px/24px 'Noto Sans',sans-serif">Delivery address</div></div>
+        <div style="display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px;padding:20px 24px;border-bottom:1px solid #DDE1E4;align-items:baseline"><div style="font-size:13px;line-height:18px;color:#6B747B">Price large<br>Barlow SC 34/38 · 700 · tabular</div><div style="font:700 34px/38px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums">Rs 1,430 <span style="font:400 16px/24px 'Noto Sans',sans-serif;color:#33424D">/ bag</span></div></div>
+        <div style="display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px;padding:20px 24px;border-bottom:1px solid #DDE1E4;align-items:baseline"><div style="font-size:13px;line-height:18px;color:#6B747B">Price card<br>Barlow SC 20/24 · 700 · tabular</div><div style="font:700 20px/24px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums">Rs 1,250,000</div></div>
+        <div style="display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px;padding:20px 24px;border-bottom:1px solid #DDE1E4;align-items:baseline"><div style="font-size:13px;line-height:18px;color:#6B747B">Body<br>Noto Sans 16/24 · 400</div><div style="font-size:16px;line-height:24px;max-width:62ch">Genuine brands at bulk prices across Karachi. Pay cash on delivery or by bank transfer.</div></div>
+        <div style="display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px;padding:20px 24px;border-bottom:1px solid #DDE1E4;align-items:baseline"><div style="font-size:13px;line-height:18px;color:#6B747B">Body small<br>Noto Sans 14/20 · 400 / 500</div><div style="font-size:14px;line-height:20px">Free on orders over Rs 50,000. <span style="font-weight:500">Cash on delivery available.</span></div></div>
+        <div style="display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px;padding:20px 24px;border-bottom:1px solid #DDE1E4;align-items:baseline"><div style="font-size:13px;line-height:18px;color:#6B747B">Caption (minimum)<br>Noto Sans 12/16 · 500</div><div style="font-size:12px;line-height:16px;font-weight:500">Placed 26 Sep 2026, 4:05 pm</div></div>
+        <div style="display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px;padding:20px 24px;align-items:baseline"><div style="font-size:13px;line-height:18px;color:#6B747B">Button / admin table<br>Noto Sans 16/20 · 600 — 14/20</div><div style="display:flex;gap:24px;flex-wrap:wrap"><span style="font:600 16px/20px 'Noto Sans'">Place order</span><span style="font:400 14px/20px 'Noto Sans'">ARC-2026-000123   Imran Qureshi   Rs 38,160</span></div></div>
+      </div>
+    </section>
+
+    <section id="shape" style="display:flex;flex-direction:column;gap:20px">
+      <h2 style="margin:0;font:600 26px/32px 'Barlow Semi Condensed',sans-serif">Space, shape and depth</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:16px">
+        <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:10px">
+          <div style="font:600 18px/24px 'Noto Sans'">Spacing</div>
+          <sc-for list="{{ space }}" as="s" hint-placeholder-count="8">
+            <div style="display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:center"><span style="font-size:13px;color:#6B747B;font-variant-numeric:tabular-nums">{{ s.v }}</span><div style="height:12px;width:{{ s.w }};background:#1F5AA6;border-radius:2px"></div></div>
+          </sc-for>
+          <div style="font-size:13px;line-height:18px;color:#6B747B;margin-top:4px">Mobile margin 16. Desktop max width 1280. Grid 4/8/12 columns, gutters 16/20/24.</div>
+        </div>
+        <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:16px">
+          <div style="font:600 18px/24px 'Noto Sans'">Radius</div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap">
+            <div style="display:flex;flex-direction:column;gap:8px;align-items:center"><div style="width:72px;height:56px;border:2px solid #1E2A32;border-radius:4px"></div><span style="font-size:13px;color:#33424D">4 badges</span></div>
+            <div style="display:flex;flex-direction:column;gap:8px;align-items:center"><div style="width:72px;height:56px;border:2px solid #1E2A32;border-radius:6px"></div><span style="font-size:13px;color:#33424D">6 controls</span></div>
+            <div style="display:flex;flex-direction:column;gap:8px;align-items:center"><div style="width:72px;height:56px;border:2px solid #1E2A32;border-radius:10px"></div><span style="font-size:13px;color:#33424D">10 panels</span></div>
+          </div>
+          <div style="font:600 18px/24px 'Noto Sans';margin-top:8px">Focus</div>
+          <div style="display:flex;gap:16px;align-items:center"><div style="height:40px;padding:0 16px;border:1px solid #1E2A32;border-radius:6px;display:flex;align-items:center;font-weight:600;box-shadow:0 0 0 2px #FFFFFF,0 0 0 4px #1F5AA6">Keyboard focus</div><span style="font-size:13px;color:#6B747B">2 px blueprint, 2 px offset</span></div>
+        </div>
+        <div style="background:#EEF0F1;border:1px solid #DDE1E4;border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:16px">
+          <div style="font:600 18px/24px 'Noto Sans'">Depth</div>
+          <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:16px;font-size:14px;line-height:20px">Cards and panels: 1 px concrete-200 border, no shadow.</div>
+          <div style="background:#FFFFFF;border-radius:10px;padding:16px;font-size:14px;line-height:20px;box-shadow:0 8px 24px rgba(30,42,50,0.16)">Floating layers only (dropdowns, dialogs, sticky bars, toasts): 0 8 24 rgba(30,42,50,.16).</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="icons" style="display:flex;flex-direction:column;gap:20px">
+      <h2 style="margin:0;font:600 26px/32px 'Barlow Semi Condensed',sans-serif">Icons</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:16px">
+        <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font:600 18px/24px 'Noto Sans'">UI icons</span><span style="font-size:13px;color:#6B747B">Lucide, 1.75 stroke, 24 storefront / 20 admin</span></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:4px">
+            <sc-for list="{{ uiList }}" as="i" hint-placeholder-count="30">
+              <div title="{{ i.n }}" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0;border-radius:6px;color:#1E2A32" style-hover="background:#F6F7F8">{{ i.el }}<span style="font-size:11px;line-height:14px;color:#6B747B">{{ i.n }}</span></div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font:600 18px/24px 'Noto Sans'">Category icons</span><span style="font-size:13px;color:#6B747B">Technical-drawing line, square caps, single weight</span></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px">
+            <sc-for list="{{ catList }}" as="i" hint-placeholder-count="16">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 4px;border:1px solid #DDE1E4;border-radius:6px;color:#1E2A32">{{ i.el }}<span style="font-size:12px;line-height:16px;color:#33424D;text-align:center">{{ i.n }}</span></div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="buttons" style="display:flex;flex-direction:column;gap:20px">
+      <h2 style="margin:0;font:600 26px/32px 'Barlow Semi Condensed',sans-serif">Buttons</h2>
+      <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:20px 24px;overflow-x:auto">
+        <div style="display:grid;grid-template-columns:110px repeat(6,minmax(128px,1fr));gap:16px 16px;align-items:center;min-width:960px">
+          <span></span><span style="font-size:13px;color:#6B747B">Default</span><span style="font-size:13px;color:#6B747B">Hover</span><span style="font-size:13px;color:#6B747B">Pressed</span><span style="font-size:13px;color:#6B747B">Focus</span><span style="font-size:13px;color:#6B747B">Disabled</span><span style="font-size:13px;color:#6B747B">Loading</span>
+          <sc-for list="{{ btnRows }}" as="r" hint-placeholder-count="4">
+            <span style="font-size:14px;font-weight:600">{{ r.name }}</span>
+            <sc-for list="{{ r.cells }}" as="c">
+              <div style="height:40px;padding:0 14px;border-radius:6px;background:{{ c.bg }};color:{{ c.fg }};border:{{ c.bd }};box-shadow:{{ c.ring }};text-decoration:{{ c.ul }};display:flex;align-items:center;justify-content:center;gap:8px;font:600 16px/20px 'Noto Sans';white-space:nowrap">{{ c.spin }}{{ c.label }}</div>
+            </sc-for>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:24px;align-items:flex-end;margin-top:28px;padding-top:20px;border-top:1px solid #DDE1E4;flex-wrap:wrap">
+          <div style="display:flex;flex-direction:column;gap:6px"><button style="height:48px;padding:0 24px;border:0;border-radius:6px;background:#F2A900;color:#1E2A32;font:600 16px/20px 'Noto Sans';cursor:pointer" style-hover="background:#D99600">Place order</button><span style="font-size:12px;color:#6B747B">48 mobile</span></div>
+          <div style="display:flex;flex-direction:column;gap:6px"><button style="height:40px;padding:0 20px;border:0;border-radius:6px;background:#F2A900;color:#1E2A32;font:600 16px/20px 'Noto Sans';cursor:pointer" style-hover="background:#D99600">Place order</button><span style="font-size:12px;color:#6B747B">40 desktop</span></div>
+          <div style="display:flex;flex-direction:column;gap:6px"><button style="height:36px;padding:0 14px;border:0;border-radius:6px;background:#F2A900;color:#1E2A32;font:600 14px/20px 'Noto Sans';cursor:pointer" style-hover="background:#D99600">Confirm order</button><span style="font-size:12px;color:#6B747B">36 admin</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="forms" style="display:flex;flex-direction:column;gap:20px">
+      <h2 style="margin:0;font:600 26px/32px 'Barlow Semi Condensed',sans-serif">Inputs, stepper and chips</h2>
+      <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:24px">
+        <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;line-height:20px;font-weight:500">Phone</span><input placeholder="0300 1234567" style="height:48px;border:1px solid #A9B1B7;border-radius:6px;padding:0 14px;font-size:16px;color:#1E2A32;background:#FFFFFF"><span style="font-size:13px;line-height:18px;color:#6B747B">The rider calls this number before delivery.</span></label>
+        <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;line-height:20px;font-weight:500">Contact name</span><input defaultValue="Imran Qureshi" style="height:48px;border:1px solid #1F5AA6;border-radius:6px;padding:0 14px;font-size:16px;color:#1E2A32;box-shadow:0 0 0 2px #FFFFFF,0 0 0 4px #1F5AA6;outline:none"><span style="font-size:13px;line-height:18px;color:#6B747B">Focus</span></label>
+        <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;line-height:20px;font-weight:500">Phone</span><input defaultValue="0300 12345" style="height:48px;border:1px solid #B42318;border-radius:6px;padding:0 14px;font-size:16px;color:#1E2A32"><span style="font-size:13px;line-height:18px;color:#B42318;display:flex;gap:6px;align-items:flex-start">{{ i16.alert }}<span>Enter an 11-digit mobile number, like 0300 1234567.</span></span></label>
+        <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;line-height:20px;font-weight:500;color:#6B747B">Email</span><input disabled="{{ true }}" defaultValue="sana@aricon.com.pk" style="height:48px;border:1px solid #DDE1E4;border-radius:6px;padding:0 14px;font-size:16px;color:#6B747B;background:#F6F7F8"><span style="font-size:13px;line-height:18px;color:#6B747B">Can't be changed</span></label>
+        <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;line-height:20px;font-weight:500">Area</span>
+          <div style="position:relative"><select style="appearance:none;width:100%;height:48px;border:1px solid #A9B1B7;border-radius:6px;padding:0 40px 0 14px;font-size:16px;color:#1E2A32;background:#FFFFFF"><option>Gulshan-e-Iqbal</option><option>DHA</option><option>Clifton</option><option disabled="{{ true }}">Bahria Town Karachi (not delivering yet)</option></select><span style="position:absolute;right:12px;top:12px;pointer-events:none;color:#33424D">{{ i24.down }}</span></div>
+        </label>
+        <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;line-height:20px;font-weight:500">Note for the rider (optional)</span><textarea placeholder="Gate 2, ask for the site supervisor" style="min-height:88px;border:1px solid #A9B1B7;border-radius:6px;padding:12px 14px;font-size:16px;line-height:24px;color:#1E2A32;resize:vertical"></textarea></label>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,380px),1fr));gap:16px">
+        <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:24px;display:flex;flex-direction:column;gap:20px">
+          <div style="font:600 18px/24px 'Noto Sans'">Quantity stepper</div>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <div style="display:flex;border:1px solid #A9B1B7;border-radius:6px;overflow:hidden"><button disabled="{{ true }}" style="width:48px;height:48px;border:0;background:#FFFFFF;color:#A9B1B7;display:flex;align-items:center;justify-content:center">{{ i24.minus }}</button><div style="width:64px;display:flex;align-items:center;justify-content:center;border-left:1px solid #DDE1E4;border-right:1px solid #DDE1E4;font:600 18px/24px 'Noto Sans';font-variant-numeric:tabular-nums">1</div><button style="width:48px;height:48px;border:0;background:#FFFFFF;color:#1E2A32;display:flex;align-items:center;justify-content:center">{{ i24.plus }}</button></div>
+            <span style="font-size:14px;color:#33424D">bag — minus disabled at 1</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:center;gap:12px"><div style="display:flex;border:1px solid #A9B1B7;border-radius:6px;overflow:hidden"><button style="width:48px;height:48px;border:0;background:#FFFFFF;color:#1E2A32;display:flex;align-items:center;justify-content:center">{{ i24.minus }}</button><div style="width:64px;display:flex;align-items:center;justify-content:center;border-left:1px solid #DDE1E4;border-right:1px solid #DDE1E4;font:600 18px/24px 'Noto Sans';font-variant-numeric:tabular-nums">38</div><button disabled="{{ true }}" style="width:48px;height:48px;border:0;background:#FFFFFF;color:#A9B1B7;display:flex;align-items:center;justify-content:center">{{ i24.plus }}</button></div><span style="font-size:14px;color:#33424D">bags</span></div>
+            <span style="font-size:13px;line-height:18px;color:#33424D">Only 38 in stock</span>
+          </div>
+        </div>
+        <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:24px;display:flex;flex-direction:column;gap:16px">
+          <div style="font:600 18px/24px 'Noto Sans'">Variant chips</div>
+          <div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:14px;font-weight:500">Pack size</span>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <sc-for list="{{ chips }}" as="c" hint-placeholder-count="3">
+                <button onClick="{{ c.pick }}" disabled="{{ c.dis }}" style="min-height:44px;padding:0 16px;border-radius:6px;border:{{ c.bd }};background:{{ c.bg }};color:{{ c.fg }};font:500 15px/20px 'Noto Sans';cursor:{{ c.cur }}">{{ c.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="font-size:13px;line-height:18px;color:#6B747B">Selected: blueprint-50 fill, blueprint border. Unavailable: dashed border, still readable.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="badges" style="display:flex;flex-direction:column;gap:20px">
+      <h2 style="margin:0;font:600 26px/32px 'Barlow Semi Condensed',sans-serif">Badges</h2>
+      <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:24px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:24px">
+        <sc-for list="{{ badgeGroups }}" as="g" hint-placeholder-count="4">
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <span style="font-size:14px;font-weight:600">{{ g.name }}</span>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <sc-for list="{{ g.items }}" as="b"><span style="background:{{ b.bg }};color:{{ b.fg }};border:{{ b.bd }};font-size:12px;line-height:16px;font-weight:500;padding:3px 7px;border-radius:4px;white-space:nowrap">{{ b.label }}</span></sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section id="card" style="display:flex;flex-direction:column;gap:20px">
+      <h2 style="margin:0;font:600 26px/32px 'Barlow Semi Condensed',sans-serif">Product card</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;align-items:stretch">
+        <sc-for list="{{ cards }}" as="c" hint-placeholder-count="4">
+          <dc-import name="Aricon Product Card" p="{{ c }}" hint-size="100%,440px"></dc-import>
+        </sc-for>
+        <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:10px">
+          <div style="aspect-ratio:1/1;border-radius:6px;background:#EEF0F1"></div>
+          <div style="height:14px;width:45%;background:#EEF0F1;border-radius:4px"></div>
+          <div style="height:16px;width:90%;background:#EEF0F1;border-radius:4px"></div>
+          <div style="height:16px;width:70%;background:#EEF0F1;border-radius:4px"></div>
+          <div style="height:22px;width:50%;background:#EEF0F1;border-radius:4px;margin-top:4px"></div>
+          <div style="flex:1"></div>
+          <div style="height:44px;background:#EEF0F1;border-radius:6px"></div>
+        </div>
+      </div>
+      <p style="margin:0;font-size:14px;line-height:20px;color:#33424D">Default, several variants, low stock, out of stock, skeleton.</p>
+    </section>
+
+    <section id="ladder" style="display:flex;flex-direction:column;gap:20px">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <h2 style="margin:0;font:600 26px/32px 'Barlow Semi Condensed',sans-serif">Price block and bulk price ladder</h2>
+        <p style="margin:0;font-size:14px;line-height:20px;color:#33424D">Live: change the quantity, tap a tier row, or use the next-tier link. The highlight and marker move in 150 ms.</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));gap:16px;align-items:start">
+        <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:24px;display:flex;flex-direction:column;gap:16px;max-width:460px">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div style="display:flex;align-items:baseline;gap:6px"><span style="font:700 34px/38px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums">{{ lad.priceLabel }}</span><span style="font-size:16px;color:#33424D">/ {{ lad.unit }}</span></div>
+            <sc-if value="{{ lad.hasSave }}" hint-placeholder-val="{{ true }}"><div style="display:flex;gap:10px;align-items:baseline;font-size:14px;line-height:20px"><s style="color:#6B747B">{{ lad.mrpLabel }}</s><span style="color:#1E7B4F;font-weight:500">{{ lad.saveLabel }}</span></div></sc-if>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <span style="font-size:14px;line-height:20px;font-weight:600">Price for your quantity</span>
+            <div style="position:relative;height:58px;margin:0 12px">
+              <div style="position:absolute;left:0;right:0;top:22px;height:1px;background:#33424D"></div>
+              <sc-for list="{{ lad.ticks }}" as="t" hint-placeholder-count="4">
+                <div style="position:absolute;left:{{ t.left }};top:16px;width:1px;height:13px;background:#33424D"></div>
+                <div style="position:absolute;left:{{ t.left }};top:0;transform:translateX(-50%);font-size:12px;line-height:14px;font-weight:500;color:#33424D;font-variant-numeric:tabular-nums">{{ t.label }}</div>
+              </sc-for>
+              <div style="position:absolute;left:{{ lad.marker }};top:26px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:1px;transition:left 150ms ease-out">
+                <div style="width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:8px solid #1E2A32"></div>
+                <span style="font-size:12px;line-height:16px;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums">{{ lad.qLabel }}</span>
+              </div>
+            </div>
+            <div style="border:1px solid #DDE1E4;border-radius:6px;overflow:hidden">
+              <sc-for list="{{ lad.rows }}" as="r" hint-placeholder-count="4">
+                <div onClick="{{ r.pick }}" style="display:flex;justify-content:space-between;gap:12px;padding:11px 14px 11px 18px;border-top:{{ r.bt }};background:{{ r.bg }};box-shadow:{{ r.edge }};font-weight:{{ r.fw }};font-size:15px;line-height:22px;cursor:pointer;transition:background-color 150ms ease-out,box-shadow 150ms ease-out"><span>{{ r.label }}</span><span style="font-variant-numeric:tabular-nums">{{ r.price }}</span></div>
+              </sc-for>
+            </div>
+            <sc-if value="{{ lad.hasNext }}" hint-placeholder-val="{{ true }}"><button onClick="{{ lad.toNext }}" style="align-self:flex-start;border:0;background:none;padding:6px 0;min-height:32px;color:#1F5AA6;font:500 14px/20px 'Noto Sans';cursor:pointer;text-align:left" style-hover="color:#174785;text-decoration:underline">{{ lad.nextLabel }}</button></sc-if>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px;border-top:1px solid #DDE1E4;padding-top:16px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="font-size:14px;font-weight:500;width:72px">Quantity</span>
+              <div style="display:flex;border:1px solid #A9B1B7;border-radius:6px;overflow:hidden"><button onClick="{{ dec }}" disabled="{{ lad.minusDis }}" aria-label="Decrease" style="width:48px;height:48px;border:0;background:#FFFFFF;color:{{ lad.minusC }};display:flex;align-items:center;justify-content:center;cursor:pointer">{{ i24.minus }}</button><input value="{{ qStr }}" onChange="{{ typeQ }}" inputMode="numeric" aria-label="Quantity" style="width:64px;border:0;border-left:1px solid #DDE1E4;border-right:1px solid #DDE1E4;text-align:center;font:600 18px/24px 'Noto Sans';font-variant-numeric:tabular-nums;color:#1E2A32"><button onClick="{{ inc }}" disabled="{{ lad.plusDis }}" aria-label="Increase" style="width:48px;height:48px;border:0;background:#FFFFFF;color:{{ lad.plusC }};display:flex;align-items:center;justify-content:center;cursor:pointer">{{ i24.plus }}</button></div>
+              <span style="font-size:14px;color:#33424D">{{ lad.units }}</span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:12px"><span style="font-size:14px;font-weight:500;width:72px">Total</span><span style="font:700 22px/28px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums">{{ lad.total }}</span></div>
+            <button style="height:48px;border:0;border-radius:6px;background:#F2A900;color:#1E2A32;font:600 16px/20px 'Noto Sans';display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer" style-hover="background:#D99600" style-active="background:#B97F00">{{ i24.cart }}Add to cart</button>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:24px;display:flex;flex-direction:column;gap:12px">
+            <span style="font-size:13px;color:#6B747B">No tiers</span>
+            <div style="display:flex;align-items:baseline;gap:6px"><span style="font:700 34px/38px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums">Rs 2,450</span><span style="font-size:16px;color:#33424D">/ bag</span></div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:14px;line-height:20px;color:#33424D">{{ i20.check }}Same price for any quantity</div>
+          </div>
+          <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:24px;display:flex;flex-direction:column;gap:6px">
+            <span style="font-size:13px;color:#6B747B;margin-bottom:6px">Cart version (compact)</span>
+            <span style="font:700 20px/24px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums">{{ lad.priceLabel }} <span style="font:400 14px/20px 'Noto Sans';color:#6B747B">/ bag</span></span>
+            <sc-if value="{{ lad.applied }}" hint-placeholder-val="{{ true }}"><span style="font-size:14px;line-height:20px;color:#1E7B4F;font-weight:500">{{ lad.applied }}</span></sc-if>
+            <sc-if value="{{ lad.hasNext }}" hint-placeholder-val="{{ true }}"><span style="font-size:14px;line-height:20px;color:#1F5AA6">{{ lad.compactNext }}</span></sc-if>
+          </div>
+          <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:24px;display:flex;flex-direction:column;gap:12px">
+            <span style="font-size:13px;color:#6B747B">Free-delivery measured bar (second and last use of the dimension line)</span>
+            <div style="font-size:14px;line-height:20px">Add <strong style="font-variant-numeric:tabular-nums">Rs 12,340</strong> more for free delivery</div>
+            <div style="position:relative;height:40px;margin:0 2px">
+              <div style="position:absolute;left:0;right:0;top:8px;height:10px;background:#EEF0F1;border:1px solid #DDE1E4;border-radius:2px;overflow:hidden"><div style="width:75.3%;height:100%;background:#1F5AA6"></div></div>
+              <sc-for list="{{ barTicks }}" as="t" hint-placeholder-count="6"><div style="position:absolute;left:{{ t.left }};top:4px;width:1px;height:18px;background:#33424D"></div><sc-if value="{{ t.label }}"><span style="position:absolute;left:{{ t.left }};top:24px;transform:{{ t.tx }};font-size:12px;line-height:16px;color:#33424D;white-space:nowrap;font-variant-numeric:tabular-nums">{{ t.label }}</span></sc-if></sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="commerce" style="display:flex;flex-direction:column;gap:20px">
+      <h2 style="margin:0;font:600 26px/32px 'Barlow Semi Condensed',sans-serif">Cart, delivery and payment</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));gap:16px;align-items:start">
+        <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px">
+          <div style="padding:16px;display:grid;grid-template-columns:72px minmax(0,1fr);gap:14px;border-bottom:1px solid #DDE1E4">
+            <div style="width:72px;height:72px;border-radius:6px;background:#F6F7F8;display:flex;align-items:center;justify-content:center;color:#A9B1B7">{{ c40.cement }}</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <span style="font-size:16px;line-height:22px">Lucky Cement PPC, 50 kg bag</span>
+              <span style="font:700 18px/22px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums">Rs 1,430 <span style="font:400 14px/20px 'Noto Sans';color:#6B747B">/ bag</span></span>
+              <span style="font-size:14px;line-height:20px;color:#1E7B4F;font-weight:500">Bulk price applied (10+).</span>
+              <span style="font-size:14px;line-height:20px;color:#1F5AA6">Add 38 more to pay Rs 1,410 each.</span>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px;flex-wrap:wrap">
+                <div style="display:flex;border:1px solid #A9B1B7;border-radius:6px;overflow:hidden"><button style="width:44px;height:44px;border:0;background:#FFFFFF;display:flex;align-items:center;justify-content:center">{{ i20.minus }}</button><div style="width:48px;display:flex;align-items:center;justify-content:center;border-left:1px solid #DDE1E4;border-right:1px solid #DDE1E4;font-weight:600;font-variant-numeric:tabular-nums">12</div><button style="width:44px;height:44px;border:0;background:#FFFFFF;display:flex;align-items:center;justify-content:center">{{ i20.plus }}</button></div>
+                <div style="display:flex;align-items:center;gap:4px"><span style="font:700 20px/24px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums">Rs 17,160</span><button aria-label="Remove" style="width:44px;height:44px;border:0;background:none;color:#6B747B;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="color:#B42318">{{ i20.trash }}</button></div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:16px;display:grid;grid-template-columns:72px minmax(0,1fr);gap:14px">
+            <div style="width:72px;height:72px;border-radius:6px;background:#F6F7F8;display:flex;align-items:center;justify-content:center;color:#A9B1B7">{{ c40.wire }}</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <span style="font-size:16px;line-height:22px">Pakistan Cables single-core wire 3/29, 90 m coil</span>
+              <div style="display:flex;align-items:center;gap:10px;background:#FFF3CC;border-radius:6px;padding:8px 8px 8px 12px;flex-wrap:wrap">
+                <span style="color:#1E2A32;display:flex">{{ i20.warn }}</span><span style="font-size:14px;line-height:20px;flex:1;min-width:120px">Only 6 in stock.</span>
+                <button style="height:36px;padding:0 12px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;font:600 14px/20px 'Noto Sans';cursor:pointer">Set to 6</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div style="background:#1E2A32;border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px">
+            <span style="font-size:13px;color:#A9B1B7">Delivery area selector — header chip</span>
+            <button style="align-self:flex-start;min-height:44px;padding:0 12px;border:1px solid #33424D;border-radius:6px;background:transparent;color:#FFFFFF;display:flex;align-items:center;gap:8px;font:500 14px/20px 'Noto Sans';cursor:pointer" style-hover="background:#33424D">{{ i20.pin }}Delivering to Gulshan-e-Iqbal{{ i20.down }}</button>
+          </div>
+          <div style="background:#FFFFFF;border-radius:10px;box-shadow:0 8px 24px rgba(30,42,50,0.16);overflow:hidden">
+            <div style="padding:16px 16px 12px;display:flex;flex-direction:column;gap:12px;border-bottom:1px solid #DDE1E4"><span style="font:600 18px/24px 'Noto Sans'">Where should we deliver?</span><div style="display:flex;align-items:center;gap:10px;height:44px;border:1px solid #A9B1B7;border-radius:6px;padding:0 12px;color:#6B747B">{{ i20.search }}<span style="font-size:15px">Search areas…</span></div></div>
+            <sc-for list="{{ areaRows }}" as="a" hint-placeholder-count="4">
+              <div style="min-height:52px;padding:8px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #DDE1E4;background:{{ a.bg }}">
+                <div style="flex:1;display:flex;flex-direction:column"><span style="font-size:15px;line-height:22px;color:{{ a.fg }};font-weight:{{ a.fw }}">{{ a.name }}</span><span style="font-size:13px;line-height:18px;color:#33424D">{{ a.meta }}</span></div>
+                <sc-if value="{{ a.sel }}"><span style="color:#1F5AA6;display:flex">{{ i20.check }}</span></sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px;align-items:start">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <sc-for list="{{ payCards }}" as="pc" hint-placeholder-count="3">
+            <div onClick="{{ pc.pick }}" style="background:#FFFFFF;border:{{ pc.bd }};border-radius:10px;padding:{{ pc.pad }};display:flex;gap:12px;cursor:{{ pc.cur }};opacity:{{ pc.op }}">
+              <div style="width:22px;height:22px;border-radius:50%;border:2px solid {{ pc.ringC }};display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px"><div style="width:10px;height:10px;border-radius:50%;background:{{ pc.dot }}"></div></div>
+              <div style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:600;font-size:16px;line-height:22px">{{ pc.title }}</span><span style="font-size:14px;line-height:20px;color:#33424D">{{ pc.body }}</span><sc-if value="{{ pc.reason }}"><span style="font-size:13px;line-height:18px;color:#B42318;display:flex;gap:6px;margin-top:4px">{{ i16.alert }}{{ pc.reason }}</span></sc-if></div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:16px 20px;display:flex;flex-direction:column">
+          <span style="font:600 18px/24px 'Noto Sans';margin-bottom:8px">Bank details</span>
+          <sc-for list="{{ bankRows }}" as="b" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px solid #DDE1E4">
+              <div style="flex:1;display:flex;flex-direction:column"><span style="font-size:13px;line-height:18px;color:#6B747B">{{ b.k }}</span><span style="font-size:15px;line-height:22px;font-weight:500;font-variant-numeric:tabular-nums">{{ b.v }}</span></div>
+              <button onClick="{{ b.copy }}" style="min-height:44px;padding:0 10px;border:0;background:none;color:#1F5AA6;display:flex;align-items:center;gap:6px;font:600 14px/20px 'Noto Sans';cursor:pointer" style-hover="color:#174785">{{ b.icon }}{{ b.label }}</button>
+            </div>
+          </sc-for>
+        </div>
+        <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:12px">
+          <span style="font:600 18px/24px 'Noto Sans'">Order summary</span>
+          <div style="display:flex;justify-content:space-between;font-size:15px;line-height:22px"><span>Subtotal</span><span style="font-variant-numeric:tabular-nums">Rs 37,660</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:15px;line-height:22px"><span>Delivery (Gulshan-e-Iqbal)</span><span style="font-variant-numeric:tabular-nums">Rs 500</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid #DDE1E4;padding-top:12px"><span style="font-weight:600">Total</span><span style="font:700 28px/32px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums">Rs 38,160</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="status" style="display:flex;flex-direction:column;gap:20px">
+      <h2 style="margin:0;font:600 26px/32px 'Barlow Semi Condensed',sans-serif">Order status and receipts</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px;align-items:start">
+        <sc-for list="{{ timelines }}" as="tl" hint-placeholder-count="3">
+          <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:0">
+            <span style="font-size:13px;color:#6B747B;margin-bottom:12px">{{ tl.name }}</span>
+            <sc-for list="{{ tl.steps }}" as="s">
+              <div style="display:grid;grid-template-columns:28px 1fr;gap:12px">
+                <div style="display:flex;flex-direction:column;align-items:center">
+                  <div style="width:28px;height:28px;border-radius:50%;background:{{ s.bg }};color:{{ s.fg }};border:{{ s.bd }};display:flex;align-items:center;justify-content:center;font:600 13px/1 'Noto Sans';flex:none">{{ s.mark }}</div>
+                  <div style="width:2px;flex:1;min-height:14px;background:{{ s.line }}"></div>
+                </div>
+                <div style="display:flex;flex-direction:column;padding:3px 0 16px"><span style="font-size:15px;line-height:22px;font-weight:{{ s.fw }};color:{{ s.tc }}">{{ s.label }}</span><span style="font-size:13px;line-height:18px;color:#33424D">{{ s.time }}</span></div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px;align-items:start">
+        <div style="background:#FFFFFF;border:1px dashed #A9B1B7;border-radius:10px;padding:28px 20px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center">
+          <span style="color:#33424D">{{ i24.upload }}</span>
+          <span style="font-size:15px;line-height:22px;font-weight:500">Drop your receipt here, or <span style="color:#1F5AA6">choose a file</span></span>
+          <span style="font-size:13px;line-height:18px;color:#6B747B">JPG, PNG or PDF up to 5 MB</span>
+        </div>
+        <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:12px">
+          <button style="height:48px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;font:600 16px/20px 'Noto Sans';display:flex;align-items:center;justify-content:center;gap:8px">{{ i24.camera }}Take photo or choose file</button>
+          <span style="font-size:13px;line-height:18px;color:#6B747B;text-align:center">Mobile</span>
+        </div>
+        <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:8px 16px">
+          <sc-for list="{{ receipts }}" as="r" hint-placeholder-count="3">
+            <div style="display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:{{ r.bt }}">
+              <div style="width:40px;height:48px;border-radius:4px;background:#F6F7F8;border:1px solid #DDE1E4;display:flex;align-items:center;justify-content:center;color:#6B747B;flex:none">{{ i20.file }}</div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:4px;min-width:0"><span style="font-size:14px;line-height:20px;font-weight:500">{{ r.file }}</span><sc-if value="{{ r.reason }}"><span style="font-size:13px;line-height:18px;color:#B42318">{{ r.reason }}</span></sc-if></div>
+              <span style="background:{{ r.bg }};color:{{ r.fg }};font-size:12px;line-height:16px;font-weight:500;padding:3px 7px;border-radius:4px;white-space:nowrap">{{ r.status }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </section>
+
+    <section id="feedback" style="display:flex;flex-direction:column;gap:20px">
+      <h2 style="margin:0;font:600 26px/32px 'Barlow Semi Condensed',sans-serif">Feedback, search and floating layers</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:16px;align-items:start">
+        <div style="background:#EEF0F1;border:1px solid #DDE1E4;border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:12px">
+          <div style="background:#1E2A32;color:#FFFFFF;border-radius:6px;padding:12px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(30,42,50,0.16)"><span style="color:#7FD1A4;display:flex">{{ i20.ok }}</span><span style="flex:1;font-size:14px;line-height:20px">Added 12 bags to your cart</span><a href="#" style="color:#FFFFFF;font-weight:600;font-size:14px">View cart</a></div>
+          <div style="background:#FFFFFF;border-radius:6px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;box-shadow:0 8px 24px rgba(30,42,50,0.16);border-left:0"><span style="color:#B42318;display:flex">{{ i20.alert }}</span><span style="flex:1;font-size:14px;line-height:20px">Couldn't add to cart. Check your connection and try again.</span></div>
+          <div style="display:flex;align-items:center;gap:16px;justify-content:flex-end;margin-top:8px">
+            <div style="height:48px;padding:0 18px 0 14px;border-radius:24px;background:#1E7B4F;color:#FFFFFF;display:flex;align-items:center;gap:8px;font:600 15px/20px 'Noto Sans';box-shadow:0 8px 24px rgba(30,42,50,0.16)">{{ i24.chat }}Chat on WhatsApp</div>
+            <div style="width:56px;height:56px;border-radius:50%;background:#1E7B4F;color:#FFFFFF;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(30,42,50,0.16)">{{ i24.chat }}</div>
+          </div>
+        </div>
+        <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center">
+          <span style="color:#A9B1B7">{{ c56.cement }}</span>
+          <p style="margin:0;font-size:16px;line-height:24px;max-width:30ch">Your cart is empty. Browse cement, wires and pipes.</p>
+          <button style="height:44px;padding:0 20px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;font:600 16px/20px 'Noto Sans';cursor:pointer" style-hover="background:#F6F7F8">Browse categories</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="height:48px;border:1px solid #1F5AA6;border-radius:6px;background:#FFFFFF;display:flex;align-items:center;gap:10px;padding:0 14px;box-shadow:0 0 0 2px #FFFFFF,0 0 0 4px #1F5AA6">{{ i20.search }}<span style="font-size:16px">wire</span></div>
+          <div style="background:#FFFFFF;border-radius:10px;box-shadow:0 8px 24px rgba(30,42,50,0.16);padding:8px 0;font-size:14px;line-height:20px">
+            <div style="padding:6px 16px;font-size:12px;font-weight:600;color:#6B747B">Products</div>
+            <div style="display:flex;gap:12px;align-items:center;padding:8px 16px" style-hover="background:#F6F7F8"><div style="width:40px;height:40px;background:#F6F7F8;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#A9B1B7">{{ c24.wire }}</div><span style="flex:1">Pakistan Cables single-core <strong>wire</strong> 3/29</span><span style="font-weight:600;font-variant-numeric:tabular-nums">Rs 9,350</span></div>
+            <div style="display:flex;gap:12px;align-items:center;padding:8px 16px" style-hover="background:#F6F7F8"><div style="width:40px;height:40px;background:#F6F7F8;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#A9B1B7">{{ c24.wire }}</div><span style="flex:1">Fast Cables single-core <strong>wire</strong> 7/29</span><span style="font-weight:600;font-variant-numeric:tabular-nums">Rs 15,200</span></div>
+            <div style="padding:10px 16px 6px;font-size:12px;font-weight:600;color:#6B747B;border-top:1px solid #DDE1E4;margin-top:4px">Categories</div>
+            <div style="padding:8px 16px" style-hover="background:#F6F7F8"><strong>Wire</strong>s &amp; cables</div>
+            <div style="padding:10px 16px 6px;font-size:12px;font-weight:600;color:#6B747B;border-top:1px solid #DDE1E4;margin-top:4px">Brands</div>
+            <div style="padding:8px 16px" style-hover="background:#F6F7F8">Pakistan Cables</div>
+            <div style="padding:10px 16px;border-top:1px solid #DDE1E4;margin-top:4px;color:#1F5AA6;font-weight:600">See all results for 'wire'</div>
+          </div>
+        </div>
+      </div>
+      <div style="max-width:390px;background:#FFFFFF;box-shadow:0 -8px 24px rgba(30,42,50,0.16);border-radius:10px 10px 0 0;padding:12px 16px;display:flex;align-items:center;gap:16px">
+        <div style="display:flex;flex-direction:column;flex:1"><span style="font:700 22px/26px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums">{{ lad.total }}</span><span style="font-size:13px;line-height:18px;color:#33424D">{{ lad.qLabel }}</span></div>
+        <button style="height:48px;padding:0 24px;border:0;border-radius:6px;background:#F2A900;color:#1E2A32;font:600 16px/20px 'Noto Sans'">Add to cart</button>
+      </div>
+    </section>
+
+    <section id="admin" style="display:flex;flex-direction:column;gap:20px">
+      <h2 style="margin:0;font:600 26px/32px 'Barlow Semi Condensed',sans-serif">Admin table, side sheet and permissions</h2>
+      <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;overflow:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:14px;line-height:20px;min-width:820px">
+          <thead><tr style="background:#F6F7F8;text-align:left">
+            <th style="padding:10px 16px;font-weight:600;border-bottom:1px solid #DDE1E4"><span style="display:inline-flex;align-items:center;gap:4px">Order{{ i16.down }}</span></th>
+            <th style="padding:10px 16px;font-weight:600;border-bottom:1px solid #DDE1E4">Date</th>
+            <th style="padding:10px 16px;font-weight:600;border-bottom:1px solid #DDE1E4">Customer</th>
+            <th style="padding:10px 16px;font-weight:600;border-bottom:1px solid #DDE1E4">Area</th>
+            <th style="padding:10px 16px;font-weight:600;border-bottom:1px solid #DDE1E4;text-align:right">Total</th>
+            <th style="padding:10px 16px;font-weight:600;border-bottom:1px solid #DDE1E4">Payment</th>
+            <th style="padding:10px 16px;font-weight:600;border-bottom:1px solid #DDE1E4">Status</th>
+            <th style="padding:10px 8px;border-bottom:1px solid #DDE1E4;width:44px"></th>
+          </tr></thead>
+          <tbody>
+            <sc-for list="{{ tableRows }}" as="r" hint-placeholder-count="4">
+              <tr style="border-bottom:1px solid #DDE1E4" style-hover="background:#F6F7F8">
+                <td style="padding:10px 16px;font-weight:600;color:#1F5AA6">{{ r.no }}</td>
+                <td style="padding:10px 16px">{{ r.date }}</td>
+                <td style="padding:10px 16px">{{ r.cust }}</td>
+                <td style="padding:10px 16px">{{ r.area }}</td>
+                <td style="padding:10px 16px;text-align:right;font-variant-numeric:tabular-nums">{{ r.total }}</td>
+                <td style="padding:10px 16px"><span style="background:{{ r.pb.bg }};color:{{ r.pb.fg }};border:{{ r.pb.bd }};font-size:12px;line-height:16px;font-weight:500;padding:3px 7px;border-radius:4px;white-space:nowrap">{{ r.pb.label }}</span></td>
+                <td style="padding:10px 16px"><span style="background:{{ r.sb.bg }};color:{{ r.sb.fg }};border:{{ r.sb.bd }};font-size:12px;line-height:16px;font-weight:500;padding:3px 7px;border-radius:4px;white-space:nowrap">{{ r.sb.label }}</span></td>
+                <td style="padding:4px 8px;color:#6B747B">{{ i20.more }}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;font-size:14px;color:#33424D"><span>1–20 of 356</span><div style="display:flex;gap:8px"><button style="width:36px;height:36px;border:1px solid #DDE1E4;border-radius:6px;background:#FFFFFF;color:#A9B1B7;display:flex;align-items:center;justify-content:center">{{ i20.left }}</button><button style="width:36px;height:36px;border:1px solid #DDE1E4;border-radius:6px;background:#FFFFFF;display:flex;align-items:center;justify-content:center">{{ i20.right }}</button></div></div>
+      </div>
+      <div style="background:#33424D;border-radius:10px;padding:32px 0 32px 32px;display:flex;justify-content:flex-end;overflow:hidden">
+        <div style="width:560px;max-width:100%;background:#FFFFFF;border-radius:10px 0 0 10px;box-shadow:0 8px 24px rgba(30,42,50,0.16);display:flex;flex-direction:column">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #DDE1E4"><span style="font:600 18px/24px 'Noto Sans'">Edit staff member</span><button aria-label="Close" style="width:36px;height:36px;border:0;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer">{{ i20.x }}</button></div>
+          <div style="padding:20px;display:flex;flex-direction:column;gap:16px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:600;font-size:16px">Permissions</span><span style="font-size:14px;color:#33424D">{{ permCount }} selected</span></div>
+            <div style="border:1px solid #DDE1E4;border-radius:6px">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#F6F7F8;border-bottom:1px solid #DDE1E4">
+                <span style="font-weight:600;font-size:14px">Orders</span>
+                <label onClick="{{ toggleAll }}" style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer"><span style="width:18px;height:18px;border-radius:4px;border:1.5px solid {{ allBd }};background:{{ allBg }};display:flex;align-items:center;justify-content:center;color:#FFFFFF">{{ allMark }}</span>Select all</label>
+              </div>
+              <sc-for list="{{ permRows }}" as="p" hint-placeholder-count="7">
+                <label onClick="{{ p.toggle }}" style="display:flex;align-items:center;gap:10px;padding:9px 14px;font-size:14px;line-height:20px;cursor:pointer" style-hover="background:#F6F7F8">
+                  <span style="width:18px;height:18px;border-radius:4px;border:1.5px solid {{ p.bd }};background:{{ p.bg }};display:flex;align-items:center;justify-content:center;color:#FFFFFF;flex:none">{{ p.mark }}</span>
+                  <span style="flex:1">{{ p.label }}</span>
+                  <sc-if value="{{ p.sensitive }}"><span style="background:#FDECEA;color:#B42318;font-size:12px;line-height:16px;font-weight:500;padding:2px 6px;border-radius:4px">Sensitive</span></sc-if>
+                </label>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid #DDE1E4"><button style="height:36px;padding:0 14px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;font:600 14px/20px 'Noto Sans'">Cancel</button><button style="height:36px;padding:0 14px;border:0;border-radius:6px;background:#F2A900;color:#1E2A32;font:600 14px/20px 'Noto Sans'">Save changes</button></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { q: 12, chip: '50 kg', pay: 'bank', copied: '', perms: { view: true, confirm: true, cancel: false, riders: true, cod: true, receipts: true, export: false } };
+  componentDidMount() { if (!window.AriIcons || !window.AriData) this._t = setInterval(() => { if (window.AriIcons && window.AriData) { clearInterval(this._t); this.forceUpdate(); } }, 50); }
+  componentWillUnmount() { clearInterval(this._t); clearTimeout(this._c); }
+  renderVals() {
+    const I = window.AriIcons, D = window.AriData;
+    if (!I || !D) return {};
+    const i24 = I.icons(React, 24), i20 = I.icons(React, 20), i16 = I.icons(React, 16), c40 = I.cats(React, 40), c56 = I.cats(React, 56), c24 = I.cats(React, 28);
+    const s = this.state;
+    const setQ = (q) => this.setState({ q: Math.max(1, Math.min(240, q || 1)) });
+    const lucky = D.byId['lucky-ppc'];
+    const lad = D.ladderVM(lucky, s.q, setQ);
+    const core = [
+      { name: 'ink (Rebar)', hex: '#1E2A32', role: 'Main text, header, admin sidebar, dark surfaces' },
+      { name: 'concrete', hex: '#EEF0F1', role: 'Page background. Cool grey, never cream' },
+      { name: 'surface', hex: '#FFFFFF', role: 'Panels, product images, inputs, tables' },
+      { name: 'amber (Safety amber)', hex: '#F2A900', role: 'Primary actions and the active bulk tier only. Ink text' },
+      { name: 'blueprint', hex: '#1F5AA6', role: 'Links, secondary actions, focus ring, info' },
+      { name: 'cement', hex: '#6B747B', role: 'Secondary text and icons, on white only' }
+    ];
+    const ext = [['ink-700', '#33424D', 'text on concrete'], ['concrete-50', '#F6F7F8', 'zebra, hover'], ['concrete-200', '#DDE1E4', 'borders'], ['concrete-400', '#A9B1B7', 'disabled, placeholder'], ['amber-600', '#D99600', 'primary hover'], ['amber-700', '#B97F00', 'primary pressed'], ['amber-100', '#FFF3CC', 'active tier, warning'], ['blueprint-700', '#174785', 'link hover'], ['blueprint-50', '#EAF1FB', 'info, selected chip'], ['success-700', '#1E7B4F', 'in stock, paid'], ['success-50', '#E7F4EC', 'success bg'], ['danger-700', '#B42318', 'errors, cancelled'], ['danger-50', '#FDECEA', 'danger bg']].map(([name, hex, use]) => ({ name, hex, use }));
+    const space = [4, 8, 12, 16, 24, 32, 48, 64].map((v) => ({ v, w: v * 3 + 'px' }));
+    const uiNames = ['menu', 'search', 'cart', 'user', 'pin', 'truck', 'cash', 'shield', 'steps', 'building', 'phone', 'chat', 'copy', 'upload', 'download', 'camera', 'lock', 'alert', 'info', 'warn', 'ok', 'share', 'filter', 'sort', 'plus', 'minus', 'trash', 'x', 'check', 'down', 'dash', 'orders', 'box', 'users', 'image', 'chart', 'settings', 'history', 'key', 'mail'];
+    const uiList = uiNames.map((n) => ({ n, el: i24[n] }));
+    const catNames = [['cement', 'Cement bag'], ['tiles', 'Tile grid'], ['ply', 'Ply sheets'], ['paint', 'Paint tin'], ['waterproof', 'Waterproofing'], ['wire', 'Wire coil'], ['switch', 'Switch plate'], ['breaker', 'Breaker'], ['conduit', 'Conduit bend'], ['bulb', 'Bulb'], ['fan', 'Fan'], ['elbow', 'Pipe elbow'], ['tap', 'Tap'], ['hinge', 'Hinge'], ['padlock', 'Padlock'], ['drill', 'Drill']];
+    const catList = catNames.map(([k, n]) => ({ n, el: c40[k] }));
+    const ring = '0 0 0 2px #FFFFFF,0 0 0 4px #1F5AA6';
+    const spin = React.createElement('span', { style: { display: 'inline-flex', animation: 'ari-spin 0.8s linear infinite' } }, i20.loader);
+    const mk = (label, d, h, p, dis, loadLabel) => [
+      Object.assign({ label, ring: 'none', ul: 'none', spin: null }, d),
+      Object.assign({ label, ring: 'none', ul: 'none', spin: null }, d, h),
+      Object.assign({ label, ring: 'none', ul: 'none', spin: null }, d, p),
+      Object.assign({ label, ul: 'none', spin: null }, d, { ring }),
+      Object.assign({ label, ring: 'none', ul: 'none', spin: null }, d, dis),
+      Object.assign({ ring: 'none', ul: 'none' }, d, { label: loadLabel, spin })
+    ];
+    const btnRows = [
+      { name: 'Primary', cells: mk('Add to cart', { bg: '#F2A900', fg: '#1E2A32', bd: '1px solid transparent' }, { bg: '#D99600' }, { bg: '#B97F00' }, { bg: '#EEF0F1', fg: '#A9B1B7' }, 'Adding…') },
+      { name: 'Secondary', cells: mk('View cart', { bg: '#FFFFFF', fg: '#1E2A32', bd: '1px solid #1E2A32' }, { bg: '#F6F7F8' }, { bg: '#EEF0F1' }, { fg: '#A9B1B7', bd: '1px solid #DDE1E4' }, 'Loading…') },
+      { name: 'Tertiary', cells: mk('Change area', { bg: 'transparent', fg: '#1F5AA6', bd: '1px solid transparent' }, { fg: '#174785', ul: 'underline' }, { fg: '#174785', bg: '#EAF1FB' }, { fg: '#A9B1B7' }, 'Saving…') },
+      { name: 'Destructive', cells: mk('Cancel order', { bg: '#B42318', fg: '#FFFFFF', bd: '1px solid transparent' }, { bg: '#9C1E14' }, { bg: '#841910' }, { bg: '#EEF0F1', fg: '#A9B1B7' }, 'Cancelling…') }
+    ];
+    const chips = [['50 kg', true], ['40 kg', true], ['25 kg', false]].map(([label, ok]) => {
+      const sel = ok && s.chip === label;
+      return { label, dis: !ok, pick: () => ok && this.setState({ chip: label }), bd: !ok ? '1px dashed #A9B1B7' : sel ? '1px solid #1F5AA6' : '1px solid #A9B1B7', bg: sel ? '#EAF1FB' : '#FFFFFF', fg: !ok ? '#6B747B' : '#1E2A32', cur: ok ? 'pointer' : 'not-allowed' };
+    });
+    const B = {
+      blue: { bg: '#EAF1FB', fg: '#1F5AA6', bd: '1px solid transparent' }, white: { bg: '#FFFFFF', fg: '#1E2A32', bd: '1px solid #1E2A32' }, amber: { bg: '#FFF3CC', fg: '#1E2A32', bd: '1px solid transparent' },
+      ok: { bg: '#E7F4EC', fg: '#1E7B4F', bd: '1px solid transparent' }, bad: { bg: '#FDECEA', fg: '#B42318', bd: '1px solid transparent' }, grey: { bg: '#F6F7F8', fg: '#33424D', bd: '1px solid #DDE1E4' }, refund: { bg: '#FFFFFF', fg: '#33424D', bd: '1px solid #6B747B' }
+    };
+    const bd = (label, k) => Object.assign({ label }, B[k]);
+    const badgeGroups = [
+      { name: 'Stock', items: [bd('In stock', 'ok'), bd('Only 4 left', 'amber'), bd('Out of stock', 'bad')] },
+      { name: 'Discount', items: [bd('Save 3%', 'ok'), bd('Save Rs 70 per bag', 'ok')] },
+      { name: 'Order status', items: [bd('New', 'blue'), bd('Confirmed', 'white'), bd('On the way', 'amber'), bd('Delivered', 'ok'), bd('Cancelled', 'bad'), bd('Returned', 'bad')] },
+      { name: 'Payment status', items: [bd('Pending', 'grey'), bd('Awaiting verification', 'amber'), bd('Paid', 'ok'), bd('Rejected', 'bad'), bd('Refunded', 'refund')] }
+    ];
+    const cv = (id) => D.cardVM(D.byId[id], { cat: I.cats(React, 96), steps: i16.steps, cart: i20.cart, mobile: false });
+    const cards = ['lucky-ppc', 'dulux-ws', 'dg-src', 'maple-plaster'].map(cv);
+    const barTicks = [0, 20, 40, 60, 80, 100].map((v, i) => ({ left: v + '%', label: i === 0 ? 'Rs 0' : i === 5 ? 'Rs 50,000' : i === 3 ? 'Rs 30,000' : '', tx: i === 0 ? 'none' : i === 5 ? 'translateX(-100%)' : 'translateX(-50%)' }));
+    const areaRows = D.areas.slice(0, 3).concat([D.areas[6]]).map((a, i) => ({ name: a.name, meta: a.ok ? 'Delivery ' + D.fmt(a.fee) + '. Free above ' + D.fmt(a.free) : 'Not delivering yet', sel: i === 0, bg: i === 0 ? '#EAF1FB' : '#FFFFFF', fg: a.ok ? '#1E2A32' : '#6B747B', fw: i === 0 ? 600 : 400 }));
+    const payDefs = [['cod', 'Cash on delivery', 'Pay the rider when your order arrives.', ''], ['bank', 'Bank transfer', 'Transfer and upload your receipt.', ''], ['cod-off', 'Cash on delivery', 'Pay the rider when your order arrives.', 'Not available for orders above Rs 200,000.']];
+    const payCards = payDefs.map(([id, title, body, reason]) => {
+      const dis = !!reason, sel = !dis && s.pay === id;
+      return { title, body, reason, pick: () => !dis && this.setState({ pay: id }), bd: sel ? '2px solid #1E2A32' : '1px solid #DDE1E4', pad: sel ? '15px' : '16px', cur: dis ? 'not-allowed' : 'pointer', op: dis ? 0.75 : 1, ringC: sel ? '#1E2A32' : '#A9B1B7', dot: sel ? '#1E2A32' : 'transparent' };
+    });
+    const bankRows = D.bank.map(([k, v]) => ({ k, v, icon: s.copied === k ? i16.check : i16.copy, label: s.copied === k ? 'Copied' : 'Copy', copy: () => { try { navigator.clipboard.writeText(v); } catch (e) {} this.setState({ copied: k }); clearTimeout(this._c); this._c = setTimeout(() => this.setState({ copied: '' }), 1600); } }));
+    const tlStep = (label, time, st, n) => ({ label, time, mark: st === 'done' ? i16.check : st === 'bad' ? i16.x : n, bg: st === 'done' ? '#1E2A32' : st === 'bad' ? '#B42318' : '#FFFFFF', fg: st === 'done' || st === 'bad' ? '#FFFFFF' : st === 'now' ? '#1E2A32' : '#6B747B', bd: st === 'now' ? '2px solid #1E2A32' : st === 'todo' ? '1px solid #A9B1B7' : '0', line: st === 'done' ? '#1E2A32' : '#DDE1E4', fw: st === 'todo' ? 400 : 600, tc: st === 'bad' ? '#B42318' : st === 'todo' ? '#6B747B' : '#1E2A32' });
+    const last = (arr) => { arr[arr.length - 1].line = 'transparent'; return arr; };
+    const timelines = [
+      { name: 'In progress', steps: last([tlStep('Placed', '26 Sep, 4:05 pm', 'done', '1'), tlStep('Confirmed', '26 Sep, 5:20 pm', 'done', '2'), tlStep('On the way', 'Rider: Asif Khan', 'now', '3'), tlStep('Delivered', '', 'todo', '4')]) },
+      { name: 'Delivered', steps: last([tlStep('Placed', '22 Sep, 11:10 am', 'done', '1'), tlStep('Confirmed', '22 Sep, 11:45 am', 'done', '2'), tlStep('On the way', '23 Sep, 9:30 am', 'done', '3'), tlStep('Delivered', '23 Sep, 12:15 pm', 'done', '4')]) },
+      { name: 'Cancelled', steps: last([tlStep('Placed', '20 Sep, 2:40 pm', 'done', '1'), tlStep('Cancelled', '20 Sep, 3:05 pm. Customer asked to cancel', 'bad', '')]) }
+    ];
+    const receipts = [['receipt-meezan-26sep.jpg', 'Pending', B.grey, ''], ['transfer-slip.pdf', 'Approved', B.ok, ''], ['IMG_2041.jpg', 'Rejected', B.bad, 'Amount on the receipt is Rs 30,000; order total is Rs 38,160.']].map(([file, status, b, reason], i) => ({ file, status, bg: b.bg, fg: b.fg, reason, bt: i ? '1px solid #DDE1E4' : '0' }));
+    const tableRows = [
+      ['ARC-2026-000123', '26 Sep, 4:05 pm', 'Imran Qureshi', 'Gulshan-e-Iqbal', 'Rs 38,160', bd('Awaiting verification', 'amber'), bd('New', 'blue')],
+      ['ARC-2026-000122', '26 Sep, 2:48 pm', 'Qureshi Builders', 'PECHS', 'Rs 142,500', bd('Pending', 'grey'), bd('Confirmed', 'white')],
+      ['ARC-2026-000121', '26 Sep, 11:02 am', 'Bilal Siddiqui', 'DHA', 'Rs 9,950', bd('Pending', 'grey'), bd('On the way', 'amber')],
+      ['ARC-2026-000118', '25 Sep, 6:30 pm', 'Ayesha Raza', 'Clifton', 'Rs 22,780', bd('Paid', 'ok'), bd('Delivered', 'ok')],
+      ['ARC-2026-000117', '25 Sep, 3:14 pm', 'Kamran Sheikh', 'North Nazimabad', 'Rs 4,560', bd('Refunded', 'refund'), bd('Returned', 'bad')]
+    ].map(([no, date, cust, area, total, pb, sb]) => ({ no, date, cust, area, total, pb, sb }));
+    const permDefs = [['view', 'View orders and invoices'], ['confirm', 'Confirm, dispatch and deliver orders'], ['cancel', 'Cancel and return orders', true], ['riders', 'Assign riders'], ['cod', 'Mark cash on delivery collected'], ['receipts', 'Approve or reject bank receipts'], ['export', 'Export orders to Excel']];
+    const box = (on) => ({ bd: on ? '#1E2A32' : '#A9B1B7', bg: on ? '#1E2A32' : '#FFFFFF', mark: on ? I.icons(React, 14, 2.5).check : null });
+    const permRows = permDefs.map(([k, label, sensitive]) => Object.assign({ label, sensitive: !!sensitive, toggle: (e) => { e.preventDefault(); this.setState((st) => ({ perms: Object.assign({}, st.perms, { [k]: !st.perms[k] }) })); } }, box(s.perms[k])));
+    const nOn = Object.values(s.perms).filter(Boolean).length, all = nOn === permDefs.length;
+    const minus14 = I.icons(React, 14, 2.5).minus;
+    return {
+      i24, i20, i16, c40, c56, c24, core, ext, space, uiList, catList, btnRows, chips, badgeGroups, cards, lad, barTicks, areaRows, payCards, bankRows, timelines, receipts, tableRows, permRows,
+      qStr: String(s.q), dec: () => setQ(s.q - 1), inc: () => setQ(s.q + 1), typeQ: (e) => setQ(parseInt(e.target.value.replace(/\D/g, ''), 10)),
+      permCount: nOn + 2, allBd: nOn ? '#1E2A32' : '#A9B1B7', allBg: nOn ? '#1E2A32' : '#FFFFFF', allMark: all ? I.icons(React, 14, 2.5).check : nOn ? minus14 : null,
+      toggleAll: (e) => { e.preventDefault(); const v = !all; const p = {}; permDefs.forEach(([k]) => (p[k] = v)); this.setState({ perms: p }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

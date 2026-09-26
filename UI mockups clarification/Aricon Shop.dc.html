@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&amp;family=Noto+Sans:wght@400;500;600;700&amp;display=swap">
+<script src="aricon-icons.js"></script>
+<script src="aricon-data.js"></script>
+<style>body{margin:0;background:#C9CED2;color:#1E2A32;font-family:'Noto Sans',sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}a{color:#1F5AA6}a:hover{color:#174785}*{box-sizing:border-box}button{white-space:nowrap}button,input,select,textarea{font-family:inherit;color:inherit}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible,label:focus-visible{outline:2px solid #1F5AA6;outline-offset:2px}input::placeholder,textarea::placeholder{color:#6B747B}.ari-noscroll{scrollbar-width:none}.ari-noscroll::-webkit-scrollbar{display:none}@keyframes ari-spin{to{transform:rotate(360deg)}}@keyframes ari-up{from{transform:translateY(16px);opacity:0}to{transform:none;opacity:1}}@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}</style>
+</helmet>
+<div style="height:100vh;display:flex;flex-direction:column">
+  <div style="height:56px;flex:none;background:#FFFFFF;border-bottom:1px solid #A9B1B7;display:flex;align-items:center;gap:12px;padding:0 16px;overflow-x:auto;white-space:nowrap" class="ari-noscroll">
+    <span style="font:700 16px/20px 'Barlow Semi Condensed',sans-serif">Aricon Shop prototype</span>
+    <div style="display:flex;border:1px solid #A9B1B7;border-radius:6px;overflow:hidden;flex:none">
+      <button onClick="{{ setM }}" style="height:32px;padding:0 12px;border:0;background:{{ tbM }};color:{{ tbMc }};font:600 13px/16px 'Noto Sans';cursor:pointer">Mobile 390</button>
+      <button onClick="{{ setD }}" style="height:32px;padding:0 12px;border:0;border-left:1px solid #A9B1B7;background:{{ tbD }};color:{{ tbDc }};font:600 13px/16px 'Noto Sans';cursor:pointer">Desktop 1440</button>
+    </div>
+    <select value="{{ route }}" onChange="{{ pickRoute }}" style="height:32px;border:1px solid #A9B1B7;border-radius:6px;padding:0 8px;font:500 13px/16px 'Noto Sans';background:#FFFFFF;flex:none">
+      <sc-for list="{{ routes }}" as="r"><option value="{{ r.id }}">{{ r.label }}</option></sc-for>
+    </select>
+    <span style="font-size:12px;color:#6B747B;flex:none">States</span>
+    <div style="display:flex;gap:6px;flex:none">
+      <sc-for list="{{ demo }}" as="x" hint-placeholder-count="3"><button onClick="{{ x.fn }}" style="height:32px;padding:0 10px;border-radius:6px;border:1px solid {{ x.bd }};background:{{ x.bg }};color:#1E2A32;font:500 13px/16px 'Noto Sans';cursor:pointer">{{ x.label }}</button></sc-for>
+    </div>
+    <div style="flex:1"></div>
+    <a href="Aricon Design System.dc.html" style="font-size:13px;flex:none">Design system</a>
+    <a href="Aricon Admin.dc.html" style="font-size:13px;flex:none">Admin</a>
+  </div>
+  <div style="flex:1;min-height:0;display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow:hidden">
+    <div style="width:{{ outerW }};height:{{ outerH }};position:relative;flex:none"><div style="position:absolute;left:0;top:0;transform:{{ scaleT }};transform-origin:0 0;width:{{ frameW }};height:{{ frameH }};background:#EEF0F1;border-radius:{{ frameR }};overflow:hidden;box-shadow:0 8px 24px rgba(30,42,50,0.16)">
+      <div ref="{{ scrollRef }}" class="ari-noscroll" style="position:absolute;inset:0;overflow-y:auto;overflow-x:hidden">
+
+        <sc-if value="{{ showHeader }}" hint-placeholder-val="{{ true }}">
+        <sc-if value="{{ m }}" hint-placeholder-val="{{ true }}">
+          <header style="background:#1E2A32;color:#FFFFFF">
+            <div style="height:56px;display:flex;align-items:center;padding:0 4px">
+              <button onClick="{{ openDrawer }}" aria-label="Menu" style="width:48px;height:48px;border:0;background:none;color:#FFFFFF;display:flex;align-items:center;justify-content:center;cursor:pointer">{{ i24.menu }}</button>
+              <button onClick="{{ goHome }}" style="border:0;background:none;color:#FFFFFF;display:flex;align-items:baseline;gap:5px;cursor:pointer;padding:0 4px;height:44px"><span style="font:700 22px/26px 'Barlow Semi Condensed',sans-serif;letter-spacing:0.02em">ARICON</span><span style="font:500 18px/26px 'Barlow Semi Condensed',sans-serif;color:#A9B1B7">Shop</span></button>
+              <div style="flex:1"></div>
+              <button onClick="{{ goAccount }}" aria-label="Account" style="width:48px;height:48px;border:0;background:none;color:#FFFFFF;display:flex;align-items:center;justify-content:center;cursor:pointer">{{ i24.user }}</button>
+              <button onClick="{{ goCart }}" aria-label="Cart" style="width:48px;height:48px;border:0;background:none;color:#FFFFFF;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative">{{ i24.cart }}<sc-if value="{{ cartCount }}"><span style="position:absolute;top:4px;right:2px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#F2A900;color:#1E2A32;font:700 12px/20px 'Noto Sans';text-align:center;transform:{{ bumpT }};transition:transform 150ms ease-out">{{ cartCount }}</span></sc-if></button>
+            </div>
+            <div style="padding:0 12px 12px;position:relative">
+              <div style="height:48px;background:#FFFFFF;border-radius:6px;display:flex;align-items:center;gap:10px;padding:0 12px;color:#6B747B">{{ i20.search }}<input value="{{ sq }}" onChange="{{ typeSearch }}" onFocus="{{ focusSearch }}" onBlur="{{ blurSearch }}" onKeyDown="{{ keySearch }}" placeholder="Search cement, wires, pipes…" aria-label="Search" style="flex:1;min-width:0;height:44px;border:0;outline:none;font-size:16px;color:#1E2A32;background:transparent"></div>
+              <sc-if value="{{ sugOpen }}"><div style="position:absolute;left:12px;right:12px;top:52px;z-index:40">
+                <div style="background:#FFFFFF;border-radius:10px;box-shadow:0 8px 24px rgba(30,42,50,0.16);padding:6px 0;color:#1E2A32;font-size:15px;line-height:22px;max-height:460px;overflow:auto">
+                  <sc-if value="{{ sug.none }}"><div style="padding:16px">No matches for '{{ sq }}'. Try a brand or product type.</div></sc-if>
+                  <sc-if value="{{ sug.hasP }}"><div style="padding:8px 16px 4px;font-size:12px;font-weight:600;color:#6B747B">Products</div></sc-if>
+                  <sc-for list="{{ sug.products }}" as="g"><div onMouseDown="{{ g.pick }}" style="display:flex;gap:12px;align-items:center;padding:8px 16px;min-height:52px;cursor:pointer" style-hover="background:#F6F7F8"><div style="width:40px;height:40px;background:#F6F7F8;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#A9B1B7;flex:none">{{ g.img }}</div><span style="flex:1;min-width:0">{{ g.pre }}<strong>{{ g.hit }}</strong>{{ g.post }}</span><span style="font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap">{{ g.price }}</span></div></sc-for>
+                  <sc-if value="{{ sug.hasC }}"><div style="padding:10px 16px 4px;font-size:12px;font-weight:600;color:#6B747B;border-top:1px solid #DDE1E4;margin-top:4px">Categories</div></sc-if>
+                  <sc-for list="{{ sug.cats }}" as="g"><div onMouseDown="{{ g.pick }}" style="padding:10px 16px;cursor:pointer" style-hover="background:#F6F7F8">{{ g.pre }}<strong>{{ g.hit }}</strong>{{ g.post }}</div></sc-for>
+                  <sc-if value="{{ sug.hasB }}"><div style="padding:10px 16px 4px;font-size:12px;font-weight:600;color:#6B747B;border-top:1px solid #DDE1E4;margin-top:4px">Brands</div></sc-if>
+                  <sc-for list="{{ sug.brands }}" as="g"><div onMouseDown="{{ g.pick }}" style="padding:10px 16px;cursor:pointer" style-hover="background:#F6F7F8">{{ g.pre }}<strong>{{ g.hit }}</strong>{{ g.post }}</div></sc-for>
+                  <sc-if value="{{ sug.any }}"><div onMouseDown="{{ runSearch }}" style="padding:12px 16px;border-top:1px solid #DDE1E4;margin-top:4px;color:#1F5AA6;font-weight:600;cursor:pointer">See all results for '{{ sq }}'</div></sc-if>
+                </div>
+              </div></sc-if>
+            </div>
+          </header>
+          <button onClick="{{ openArea }}" style="width:100%;height:44px;border:0;border-bottom:1px solid #DDE1E4;background:#EEF0F1;display:flex;align-items:center;gap:8px;padding:0 16px;font:500 14px/20px 'Noto Sans';color:#1E2A32;cursor:pointer">{{ i20.pin }}Delivering to {{ areaName }}{{ i20.down }}</button>
+        </sc-if>
+        <sc-if value="{{ d }}" hint-placeholder-val="{{ false }}">
+          <header style="position:relative;z-index:30">
+            <div style="background:#1E2A32;color:#FFFFFF">
+              <div style="max-width:1344px;margin:0 auto;padding:0 32px;height:72px;display:flex;align-items:center;gap:16px">
+                <button onClick="{{ goHome }}" style="border:0;background:none;color:#FFFFFF;display:flex;align-items:baseline;gap:6px;cursor:pointer;padding:0;height:44px;align-items:center"><span style="font:700 26px/30px 'Barlow Semi Condensed',sans-serif;letter-spacing:0.02em">ARICON</span><span style="font:500 22px/30px 'Barlow Semi Condensed',sans-serif;color:#A9B1B7">Shop</span></button>
+                <button onClick="{{ toggleMega }}" style="height:44px;padding:0 14px;border:1px solid #6B747B;border-radius:6px;background:{{ megaBg }};color:#FFFFFF;display:flex;align-items:center;gap:8px;font:600 15px/20px 'Noto Sans';cursor:pointer;flex:none;white-space:nowrap" style-hover="background:#33424D">{{ i20.grid }}All categories{{ i16.down }}</button>
+                <div style="flex:1;position:relative;min-width:0">
+                  <div style="height:44px;background:#FFFFFF;border-radius:6px;display:flex;align-items:center;gap:10px;padding:0 14px;color:#6B747B">{{ i20.search }}<input value="{{ sq }}" onChange="{{ typeSearch }}" onFocus="{{ focusSearch }}" onBlur="{{ blurSearch }}" onKeyDown="{{ keySearch }}" placeholder="Search cement, wires, pipes…" aria-label="Search" style="flex:1;min-width:0;height:40px;border:0;outline:none;font-size:16px;color:#1E2A32;background:transparent"></div>
+                  <sc-if value="{{ sugOpen }}"><div style="position:absolute;left:0;right:0;top:50px;z-index:40">
+                    <div style="background:#FFFFFF;border-radius:10px;box-shadow:0 8px 24px rgba(30,42,50,0.16);padding:6px 0;color:#1E2A32;font-size:15px;line-height:22px">
+                      <sc-if value="{{ sug.none }}"><div style="padding:16px">No matches for '{{ sq }}'. Try a brand or product type.</div></sc-if>
+                      <sc-if value="{{ sug.hasP }}"><div style="padding:8px 16px 4px;font-size:12px;font-weight:600;color:#6B747B">Products</div></sc-if>
+                      <sc-for list="{{ sug.products }}" as="g"><div onMouseDown="{{ g.pick }}" style="display:flex;gap:12px;align-items:center;padding:8px 16px;cursor:pointer" style-hover="background:#F6F7F8"><div style="width:40px;height:40px;background:#F6F7F8;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#A9B1B7;flex:none">{{ g.img }}</div><span style="flex:1;min-width:0">{{ g.pre }}<strong>{{ g.hit }}</strong>{{ g.post }}</span><span style="font-weight:600;font-variant-numeric:tabular-nums">{{ g.price }}</span></div></sc-for>
+                      <sc-if value="{{ sug.hasC }}"><div style="padding:10px 16px 4px;font-size:12px;font-weight:600;color:#6B747B;border-top:1px solid #DDE1E4;margin-top:4px">Categories</div></sc-if>
+                      <sc-for list="{{ sug.cats }}" as="g"><div onMouseDown="{{ g.pick }}" style="padding:8px 16px;cursor:pointer" style-hover="background:#F6F7F8">{{ g.pre }}<strong>{{ g.hit }}</strong>{{ g.post }}</div></sc-for>
+                      <sc-if value="{{ sug.hasB }}"><div style="padding:10px 16px 4px;font-size:12px;font-weight:600;color:#6B747B;border-top:1px solid #DDE1E4;margin-top:4px">Brands</div></sc-if>
+                      <sc-for list="{{ sug.brands }}" as="g"><div onMouseDown="{{ g.pick }}" style="padding:8px 16px;cursor:pointer" style-hover="background:#F6F7F8">{{ g.pre }}<strong>{{ g.hit }}</strong>{{ g.post }}</div></sc-for>
+                      <sc-if value="{{ sug.any }}"><div onMouseDown="{{ runSearch }}" style="padding:12px 16px;border-top:1px solid #DDE1E4;margin-top:4px;color:#1F5AA6;font-weight:600;cursor:pointer">See all results for '{{ sq }}'</div></sc-if>
+                    </div>
+                  </div></sc-if>
+                </div>
+                <button onClick="{{ openArea }}" style="height:44px;padding:0 10px;border:0;border-radius:6px;background:none;color:#FFFFFF;display:flex;align-items:center;gap:8px;text-align:left;cursor:pointer;flex:none" style-hover="background:#33424D">{{ i20.pin }}<span style="display:flex;flex-direction:column"><span style="font-size:12px;line-height:16px;color:#A9B1B7">Delivering to</span><span style="font:600 14px/18px 'Noto Sans'">{{ areaName }}</span></span>{{ i16.down }}</button>
+                <button onClick="{{ goAccount }}" style="height:44px;padding:0 10px;border:0;border-radius:6px;background:none;color:#FFFFFF;display:flex;align-items:center;gap:8px;font:600 14px/20px 'Noto Sans';cursor:pointer;flex:none" style-hover="background:#33424D">{{ i24.user }}Imran</button>
+                <button onClick="{{ goCart }}" style="height:44px;padding:0 12px;border:0;border-radius:6px;background:none;color:#FFFFFF;display:flex;align-items:center;gap:8px;font:600 14px/20px 'Noto Sans';cursor:pointer;position:relative;flex:none" style-hover="background:#33424D">{{ i24.cart }}Cart<sc-if value="{{ cartCount }}"><span style="min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:#F2A900;color:#1E2A32;font:700 12px/22px 'Noto Sans';text-align:center;transform:{{ bumpT }};transition:transform 150ms ease-out">{{ cartCount }}</span></sc-if></button>
+              </div>
+            </div>
+            <div style="background:#FFFFFF;border-bottom:1px solid #DDE1E4">
+              <div style="max-width:1344px;margin:0 auto;padding:0 32px;height:44px;display:flex;align-items:center;gap:28px;font:600 14px/20px 'Noto Sans'">
+                <sc-for list="{{ deptLinks }}" as="x"><button onClick="{{ x.go }}" style="border:0;background:none;padding:0;height:44px;cursor:pointer;font:inherit;color:#1E2A32" style-hover="color:#1F5AA6">{{ x.name }}</button></sc-for>
+                <div style="flex:1"></div>
+                <span style="display:flex;align-items:center;gap:6px;font-weight:500;color:#33424D">{{ i16.phone }}021 3456 7890</span>
+                <a href="#" style="display:flex;align-items:center;gap:6px;color:#1E7B4F;text-decoration:none">{{ i16.chat }}WhatsApp 0300 8274266</a>
+              </div>
+            </div>
+            <sc-if value="{{ megaOpen }}"><div onMouseLeave="{{ closeMega }}" style="position:absolute;left:0;right:0;top:72px;background:#FFFFFF;border-bottom:1px solid #DDE1E4;box-shadow:0 8px 24px rgba(30,42,50,0.16)">
+              <div style="max-width:1344px;margin:0 auto;padding:28px 32px 32px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:32px">
+                <sc-for list="{{ depts }}" as="dp"><div style="display:flex;flex-direction:column;gap:2px">
+                  <span style="font:600 22px/28px 'Barlow Semi Condensed',sans-serif;margin-bottom:8px">{{ dp.name }}</span>
+                  <sc-for list="{{ dp.cats }}" as="ct"><button onClick="{{ ct.go }}" style="display:flex;align-items:center;gap:12px;min-height:44px;white-space:normal;border:0;background:none;padding:4px 8px;margin:0 -8px;border-radius:6px;text-align:left;font:400 15px/20px 'Noto Sans';color:#1E2A32;cursor:pointer" style-hover="background:#F6F7F8"><span style="color:#33424D;display:flex">{{ ct.icon }}</span>{{ ct.name }}</button></sc-for>
+                </div></sc-for>
+              </div>
+            </div></sc-if>
+          </header>
+        </sc-if>
+        </sc-if>
+
+        <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+          <main data-screen-label="Home">
+            <section style="background:#1E2A32;color:#FFFFFF">
+              <div style="max-width:{{ L.maxw }};margin:0 auto;display:grid;grid-template-columns:{{ L.heroCols }};min-height:{{ L.heroH }}">
+                <div style="padding:{{ L.heroPad }};display:flex;flex-direction:column;justify-content:center;gap:16px;order:{{ L.heroOrder }}">
+                  <h1 style="margin:0;font:{{ L.disp }};text-wrap:balance">Cement, wiring and pipes, delivered to your site.</h1>
+                  <p style="margin:0;font-size:16px;line-height:24px;color:#DDE1E4;max-width:44ch">Genuine brands at bulk prices across Karachi. Pay cash on delivery or by bank transfer.</p>
+                  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">
+                    <button onClick="{{ goCement }}" style="height:48px;padding:0 24px;border:0;border-radius:6px;background:#F2A900;color:#1E2A32;font:600 16px/20px 'Noto Sans';cursor:pointer" style-hover="background:#D99600" style-active="background:#B97F00">Shop cement</button>
+                    <button onClick="{{ openCats }}" style="height:48px;padding:0 20px;border:1px solid #FFFFFF;border-radius:6px;background:transparent;color:#FFFFFF;font:600 16px/20px 'Noto Sans';cursor:pointer;white-space:nowrap" style-hover="background:#33424D">Browse all categories</button>
+                  </div>
+                </div>
+                <div style="background:#33424D;display:flex;align-items:flex-end;justify-content:flex-end;padding:12px 16px;min-height:{{ L.heroImgH }};order:{{ L.heroImgOrder }}"><span style="font-size:12px;line-height:16px;color:#DDE1E4;font-weight:500">Aricon project photograph</span></div>
+              </div>
+            </section>
+            <div style="background:#FFFFFF;border-bottom:1px solid #DDE1E4">
+              <div class="ari-noscroll" style="max-width:{{ L.maxw }};margin:0 auto;padding:0 {{ L.pad }};display:flex;gap:{{ L.trustGap }};overflow-x:auto;min-height:56px;align-items:center">
+                <sc-for list="{{ trust }}" as="t"><span style="display:flex;align-items:center;gap:8px;font:500 14px/20px 'Noto Sans';white-space:nowrap;padding:14px 0"><span style="color:#1E7B4F;display:flex">{{ t.icon }}</span>{{ t.label }}</span></sc-for>
+              </div>
+            </div>
+            <div style="max-width:{{ L.maxw }};margin:0 auto;padding:{{ L.secPad }};display:flex;flex-direction:column;gap:{{ L.secGap }}">
+              <section style="display:flex;flex-direction:column;gap:16px">
+                <h2 style="margin:0;font:{{ L.h2 }}">Shop by category</h2>
+                <div style="display:grid;grid-template-columns:{{ L.tileCols }};gap:{{ L.gap }}">
+                  <sc-for list="{{ tiles }}" as="t" hint-placeholder-count="6"><button onClick="{{ t.go }}" style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:16px;display:flex;flex-direction:column;align-items:flex-start;gap:12px;text-align:left;cursor:pointer;min-height:132px;white-space:normal" style-hover="border-color:#1E2A32"><span style="color:#1E2A32;display:flex">{{ t.icon }}</span><span style="display:flex;flex-direction:column"><span style="font:600 16px/22px 'Noto Sans'">{{ t.name }}</span><span style="font-size:13px;line-height:18px;color:#6B747B">{{ t.count }}</span></span></button></sc-for>
+                </div>
+                <sc-if value="{{ m }}"><button onClick="{{ openCats }}" style="height:48px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;font:600 16px/20px 'Noto Sans';cursor:pointer">All categories</button></sc-if>
+              </section>
+              <sc-for list="{{ rows }}" as="row" hint-placeholder-count="3">
+                <section style="display:flex;flex-direction:column;gap:16px">
+                  <div style="display:flex;justify-content:space-between;align-items:baseline"><h2 style="margin:0;font:{{ L.h2 }}">{{ row.title }}</h2><button onClick="{{ goCement }}" style="border:0;background:none;color:#1F5AA6;font:600 14px/20px 'Noto Sans';cursor:pointer;min-height:44px;padding:0 4px">See all</button></div>
+                  <div class="ari-noscroll" style="display:grid;grid-auto-flow:column;grid-auto-columns:{{ L.rowCol }};gap:{{ L.gap }};overflow-x:auto;margin:0 {{ L.rowBleed }};padding:0 {{ L.rowBleedP }};scroll-snap-type:x mandatory;scroll-padding:0 {{ L.rowBleedP }}">
+                    <sc-for list="{{ row.cards }}" as="c"><div style="scroll-snap-align:start"><dc-import name="Aricon Product Card" p="{{ c }}" hint-size="100%,420px"></dc-import></div></sc-for>
+                  </div>
+                </section>
+              </sc-for>
+              <section style="display:flex;flex-direction:column;gap:16px">
+                <h2 style="margin:0;font:{{ L.h2 }}">Brands we stock</h2>
+                <div style="display:grid;grid-template-columns:{{ L.brandCols }};gap:1px;background:#DDE1E4;border:1px solid #DDE1E4;border-radius:10px;overflow:hidden">
+                  <sc-for list="{{ brands }}" as="b"><div style="background:#FFFFFF;height:72px;display:flex;align-items:center;justify-content:center;padding:0 8px;text-align:center;font:700 17px/20px 'Barlow Semi Condensed',sans-serif;color:#6B747B;cursor:default" style-hover="color:#1E2A32">{{ b }}</div></sc-for>
+                </div>
+              </section>
+              <section style="background:#1E2A32;color:#FFFFFF;border-radius:10px;padding:{{ L.quotePad }};display:flex;flex-direction:{{ L.quoteDir }};gap:20px;align-items:{{ L.quoteAlign }};justify-content:space-between">
+                <div style="display:flex;flex-direction:column;gap:8px"><h2 style="margin:0;font:{{ L.h2 }}">Ordering for a whole project?</h2><p style="margin:0;font-size:16px;line-height:24px;color:#DDE1E4;max-width:46ch">Send us your list on WhatsApp and we'll prepare a quote.</p></div>
+                <button style="height:48px;padding:0 22px;border:0;border-radius:6px;background:#F2A900;color:#1E2A32;font:600 16px/20px 'Noto Sans';display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;flex:none" style-hover="background:#D99600">{{ i20.chat }}Chat on WhatsApp</button>
+              </section>
+            </div>
+          </main>
+        </sc-if>
+
+        <sc-if value="{{ isList }}" hint-placeholder-val="{{ false }}">
+          <main data-screen-label="{{ listLabel }}" style="max-width:{{ L.maxw }};margin:0 auto;padding:{{ L.listPad }};display:flex;flex-direction:column;gap:16px">
+            <nav style="display:flex;gap:6px;align-items:center;font-size:14px;line-height:20px;color:#33424D;flex-wrap:wrap"><button onClick="{{ goHome }}" style="border:0;background:none;padding:0;color:#1F5AA6;cursor:pointer;font:inherit">Home</button><span>/</span><sc-if value="{{ isCat }}"><span style="display:flex;gap:6px"><button onClick="{{ openCats }}" style="border:0;background:none;padding:0;color:#1F5AA6;cursor:pointer;font:inherit">Civil</button><span>/</span><span>Cement &amp; plaster</span></span></sc-if><sc-if value="{{ isSearch }}"><span>Search</span></sc-if></nav>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap"><h1 style="margin:0;font:{{ L.h1 }}">{{ listTitle }}</h1><span style="font-size:14px;line-height:20px;color:#33424D">{{ countLabel }}</span></div>
+            <sc-if value="{{ isCat }}"><div class="ari-noscroll" style="display:flex;gap:8px;overflow-x:auto;margin:0 {{ L.rowBleed }};padding:0 {{ L.rowBleedP }}">
+              <sc-for list="{{ subChips }}" as="c"><button onClick="{{ c.toggle }}" style="min-height:44px;padding:0 16px;border-radius:6px;border:1px solid {{ c.bd }};background:{{ c.bg }};font:500 15px/20px 'Noto Sans';white-space:nowrap;cursor:pointer">{{ c.label }}</button></sc-for>
+            </div></sc-if>
+            <sc-if value="{{ m }}"><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <button onClick="{{ openFilters }}" style="height:48px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;gap:8px;font:600 16px/20px 'Noto Sans';cursor:pointer">{{ i20.filter }}{{ filterBtn }}</button>
+              <div style="position:relative"><select value="{{ sort }}" onChange="{{ pickSort }}" aria-label="Sort" style="appearance:none;width:100%;height:48px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;padding:0 36px 0 40px;font:600 16px/20px 'Noto Sans'"><option value="rel">Relevance</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option></select><span style="position:absolute;left:12px;top:14px;pointer-events:none;display:flex">{{ i20.sort }}</span></div>
+            </div></sc-if>
+            <div style="display:grid;grid-template-columns:{{ L.listCols }};gap:24px;align-items:start">
+              <sc-if value="{{ d }}"><aside style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:4px 16px 16px">
+                <sc-for list="{{ facets }}" as="fc"><div style="border-bottom:1px solid #DDE1E4;padding:4px 0 8px">
+                  <button onClick="{{ fc.toggleOpen }}" style="width:100%;min-height:44px;border:0;background:none;padding:0;display:flex;justify-content:space-between;align-items:center;font:600 15px/20px 'Noto Sans';cursor:pointer">{{ fc.name }}<span style="display:flex;color:#33424D">{{ fc.chev }}</span></button>
+                  <sc-if value="{{ fc.open }}"><div style="display:flex;flex-direction:column">
+                    <sc-for list="{{ fc.opts }}" as="o"><label onClick="{{ o.toggle }}" style="display:flex;align-items:center;gap:10px;min-height:36px;font-size:14px;line-height:20px;cursor:pointer"><span style="width:20px;height:20px;border-radius:4px;border:1.5px solid {{ o.bd }};background:{{ o.bg }};display:flex;align-items:center;justify-content:center;color:#FFFFFF;flex:none">{{ o.mark }}</span><span style="flex:1">{{ o.label }}</span><span style="color:#6B747B;font-variant-numeric:tabular-nums">{{ o.count }}</span></label></sc-for>
+                  </div></sc-if>
+                </div></sc-for>
+                <div style="padding:12px 0;border-bottom:1px solid #DDE1E4;display:flex;flex-direction:column;gap:10px"><span style="font:600 15px/20px 'Noto Sans'">Price per unit</span><div style="display:flex;gap:8px;align-items:center"><input value="{{ pmin }}" onChange="{{ typeMin }}" placeholder="Min" inputMode="numeric" aria-label="Minimum price" style="width:100%;min-width:0;height:40px;border:1px solid #A9B1B7;border-radius:6px;padding:0 10px;font-size:14px"><span style="color:#6B747B">–</span><input value="{{ pmax }}" onChange="{{ typeMax }}" placeholder="Max" inputMode="numeric" aria-label="Maximum price" style="width:100%;min-width:0;height:40px;border:1px solid #A9B1B7;border-radius:6px;padding:0 10px;font-size:14px"></div></div>
+                <label onClick="{{ toggleStock }}" style="display:flex;align-items:center;gap:10px;min-height:44px;font-size:14px;cursor:pointer;padding-top:6px"><span style="width:20px;height:20px;border-radius:4px;border:1.5px solid {{ stockBox.bd }};background:{{ stockBox.bg }};display:flex;align-items:center;justify-content:center;color:#FFFFFF;flex:none">{{ stockBox.mark }}</span>In stock only</label>
+              </aside></sc-if>
+              <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+                <sc-if value="{{ d }}"><div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                  <label style="display:flex;align-items:center;gap:8px;font-size:14px;color:#33424D">Sort<select value="{{ sort }}" onChange="{{ pickSort }}" style="height:40px;border:1px solid #A9B1B7;border-radius:6px;padding:0 10px;font:500 14px/20px 'Noto Sans';background:#FFFFFF;color:#1E2A32"><option value="rel">Relevance</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option></select></label>
+                  <sc-if value="{{ hasActive }}"><span style="font-size:14px;color:#33424D;margin-left:12px">Active</span></sc-if>
+                  <sc-for list="{{ activeChips }}" as="a"><button onClick="{{ a.remove }}" style="height:32px;padding:0 8px 0 12px;border-radius:6px;border:1px solid #1F5AA6;background:#EAF1FB;display:flex;align-items:center;gap:6px;font:500 14px/20px 'Noto Sans';cursor:pointer" aria-label="Remove filter">{{ a.label }}{{ i16.x }}</button></sc-for>
+                  <sc-if value="{{ hasActive }}"><button onClick="{{ clearFilters }}" style="border:0;background:none;color:#1F5AA6;font:600 14px/20px 'Noto Sans';cursor:pointer;height:32px">Clear all</button></sc-if>
+                </div></sc-if>
+                <sc-if value="{{ mActive }}"><div class="ari-noscroll" style="display:flex;gap:8px;overflow-x:auto">
+                  <sc-for list="{{ activeChips }}" as="a"><button onClick="{{ a.remove }}" style="height:36px;padding:0 8px 0 12px;border-radius:6px;border:1px solid #1F5AA6;background:#EAF1FB;display:flex;align-items:center;gap:6px;font:500 14px/20px 'Noto Sans';white-space:nowrap;cursor:pointer">{{ a.label }}{{ i16.x }}</button></sc-for>
+                </div></sc-if>
+                <sc-if value="{{ listEmpty }}"><div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:48px 24px;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center"><span style="color:#A9B1B7">{{ c56.cement }}</span><p style="margin:0;font-size:16px;line-height:24px">No products match these filters.</p><button onClick="{{ clearFilters }}" style="height:44px;padding:0 20px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;font:600 16px/20px 'Noto Sans';cursor:pointer">Clear filters</button></div></sc-if>
+                <div style="display:grid;grid-template-columns:{{ L.gridCols }};gap:{{ L.gap }}">
+                  <sc-for list="{{ listCards }}" as="c" hint-placeholder-count="8"><dc-import name="Aricon Product Card" p="{{ c }}" hint-size="100%,420px"></dc-import></sc-for>
+                </div>
+                <sc-if value="{{ showPager }}"><div style="display:flex;justify-content:center;gap:6px;padding:8px 0">
+                  <button aria-label="Previous page" style="width:40px;height:40px;border:1px solid #DDE1E4;border-radius:6px;background:#FFFFFF;color:#A9B1B7;display:flex;align-items:center;justify-content:center">{{ i20.left }}</button>
+                  <sc-for list="{{ pages }}" as="pg"><button onClick="{{ pg.go }}" style="min-width:40px;height:40px;border:1px solid {{ pg.bd }};border-radius:6px;background:{{ pg.bg }};color:{{ pg.fg }};font:600 14px/20px 'Noto Sans';cursor:pointer">{{ pg.label }}</button></sc-for>
+                  <button aria-label="Next page" style="width:40px;height:40px;border:1px solid #DDE1E4;border-radius:6px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;cursor:pointer">{{ i20.right }}</button>
+                </div></sc-if>
+                <sc-if value="{{ showMore }}"><button onClick="{{ loadMore }}" style="height:48px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;font:600 16px/20px 'Noto Sans';cursor:pointer">Load more</button></sc-if>
+              </div>
+            </div>
+          </main>
+        </sc-if>
+
+        <sc-if value="{{ isProduct }}" hint-placeholder-val="{{ false }}">
+          <main data-screen-label="Product" style="max-width:{{ L.maxw }};margin:0 auto;padding:{{ L.prodPad }};display:flex;flex-direction:column;gap:{{ L.prodGap }}">
+            <sc-if value="{{ m }}"><div style="display:flex;justify-content:space-between;align-items:center;margin:0 -8px"><button onClick="{{ goBack }}" style="height:44px;border:0;background:none;display:flex;align-items:center;gap:2px;font:600 15px/20px 'Noto Sans';cursor:pointer;padding:0 8px">{{ i20.left }}Back</button><button aria-label="Share" style="width:44px;height:44px;border:0;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer">{{ i20.share }}</button></div></sc-if>
+            <sc-if value="{{ d }}"><nav style="display:flex;gap:6px;font-size:14px;color:#33424D;padding-top:8px"><button onClick="{{ goHome }}" style="border:0;background:none;padding:0;color:#1F5AA6;cursor:pointer;font:inherit">Home</button><span>/</span><button onClick="{{ goCement }}" style="border:0;background:none;padding:0;color:#1F5AA6;cursor:pointer;font:inherit">{{ pv.catName }}</button><span>/</span><span>{{ pv.short }}</span></nav></sc-if>
+            <div style="display:grid;grid-template-columns:{{ L.prodCols }};gap:{{ L.prodColGap }};align-items:start">
+              <div style="display:flex;flex-direction:column;gap:12px;margin:{{ L.galBleed }}">
+                <div onScroll="{{ galScroll }}" class="ari-noscroll" style="display:flex;overflow-x:auto;scroll-snap-type:x mandatory;background:#FFFFFF;border:{{ L.galBorder }};border-radius:{{ L.galR }}">
+                  <sc-for list="{{ pv.gallery }}" as="gi"><div style="flex:0 0 100%;aspect-ratio:1/1;scroll-snap-align:start;padding:{{ L.galPad }};display:flex;opacity:{{ pv.imgOp }}"><div style="flex:1;border-radius:6px;background:#F6F7F8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#A9B1B7">{{ pv.bigIcon }}<span style="font-size:12px;font-weight:500;color:#6B747B">{{ gi.label }}</span></div></div></sc-for>
+                </div>
+                <sc-if value="{{ m }}"><div style="display:flex;justify-content:center;gap:6px"><sc-for list="{{ pv.gallery }}" as="gi"><span style="width:8px;height:8px;border-radius:4px;background:{{ gi.dot }}"></span></sc-for></div></sc-if>
+                <sc-if value="{{ d }}"><div style="display:grid;grid-template-columns:repeat(4,96px);gap:12px"><sc-for list="{{ pv.gallery }}" as="gi"><button onClick="{{ gi.pick }}" style="width:96px;height:96px;border-radius:10px;border:{{ gi.bd }};background:#FFFFFF;padding:8px;cursor:pointer"><span style="display:flex;width:100%;height:100%;border-radius:4px;background:#F6F7F8;align-items:center;justify-content:center;color:#A9B1B7">{{ pv.thumbIcon }}</span></button></sc-for></div></sc-if>
+              </div>
+              <div style="position:{{ L.panelPos }};top:24px;display:flex;flex-direction:column;gap:20px;background:{{ L.panelBg }};border:{{ L.panelBorder }};border-radius:10px;padding:{{ L.panelPad }}">
+                <div style="display:flex;flex-direction:column;gap:6px">
+                  <span style="font-size:15px;line-height:20px;color:#6B747B">{{ pv.brand }}</span>
+                  <h1 style="margin:0;font:{{ L.h1 }};text-wrap:pretty">{{ pv.name }}</h1>
+                  <span style="align-self:flex-start;display:flex;align-items:center;gap:6px;background:{{ pv.stock.bg }};color:{{ pv.stock.fg }};font-size:13px;line-height:18px;font-weight:500;padding:3px 8px;border-radius:4px;margin-top:4px"><span style="width:8px;height:8px;border-radius:4px;background:{{ pv.stock.fg }}"></span>{{ pv.stock.label }}</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:14px;font-weight:600">{{ pv.optName }}</span><div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ pv.chips }}" as="c"><button onClick="{{ c.pick }}" disabled="{{ c.dis }}" style="min-height:44px;padding:0 16px;border-radius:6px;border:{{ c.bd }};background:{{ c.bg }};color:{{ c.fg }};font:500 15px/20px 'Noto Sans';cursor:{{ c.cur }}">{{ c.label }}</button></sc-for></div></div>
+                <div style="display:flex;flex-direction:column;gap:4px">
+                  <div style="display:flex;align-items:baseline;gap:6px"><span style="font:700 34px/38px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums">{{ lad.priceLabel }}</span><span style="font-size:16px;color:#33424D">/ {{ lad.unit }}</span></div>
+                  <sc-if value="{{ lad.hasSave }}"><div style="display:flex;gap:10px;align-items:baseline;font-size:14px;line-height:20px"><s style="color:#6B747B">{{ lad.mrpLabel }}</s><span style="color:#1E7B4F;font-weight:500">{{ lad.saveLabel }}</span></div></sc-if>
+                </div>
+                <sc-if value="{{ lad.hasTiers }}"><div style="display:flex;flex-direction:column;gap:10px">
+                  <span style="font-size:14px;line-height:20px;font-weight:600">Price for your quantity</span>
+                  <div style="position:relative;height:58px;margin:0 12px">
+                    <div style="position:absolute;left:0;right:0;top:22px;height:1px;background:#33424D"></div>
+                    <sc-for list="{{ lad.ticks }}" as="t"><div style="position:absolute;left:{{ t.left }};top:16px;width:1px;height:13px;background:#33424D"></div><div style="position:absolute;left:{{ t.left }};top:0;transform:translateX(-50%);font-size:12px;line-height:14px;font-weight:500;color:#33424D;font-variant-numeric:tabular-nums">{{ t.label }}</div></sc-for>
+                    <div style="position:absolute;left:{{ lad.marker }};top:26px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:1px;transition:left 150ms ease-out"><div style="width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:8px solid #1E2A32"></div><span style="font-size:12px;line-height:16px;font-weight:600;white-space:nowrap">{{ lad.qLabel }}</span></div>
+                  </div>
+                  <div style="border:1px solid #DDE1E4;border-radius:6px;overflow:hidden;background:#FFFFFF">
+                    <sc-for list="{{ lad.rows }}" as="r"><div onClick="{{ r.pick }}" style="display:flex;justify-content:space-between;gap:12px;padding:11px 14px 11px 18px;border-top:{{ r.bt }};background:{{ r.bg }};box-shadow:{{ r.edge }};font-weight:{{ r.fw }};font-size:15px;line-height:22px;cursor:pointer;transition:background-color 150ms ease-out,box-shadow 150ms ease-out"><span>{{ r.label }}</span><span style="font-variant-numeric:tabular-nums">{{ r.price }}</span></div></sc-for>
+                  </div>
+                  <sc-if value="{{ lad.hasNext }}"><button onClick="{{ lad.toNext }}" style="align-self:flex-start;white-space:normal;border:0;background:none;padding:6px 0;min-height:36px;color:#1F5AA6;font:500 14px/20px 'Noto Sans';cursor:pointer;text-align:left" style-hover="color:#174785;text-decoration:underline">{{ lad.nextLabel }}</button></sc-if>
+                </div></sc-if>
+                <sc-if value="{{ lad.noTiers }}"><div style="display:flex;align-items:center;gap:8px;font-size:14px;line-height:20px;color:#33424D">{{ i20.check }}Same price for any quantity</div></sc-if>
+                <div style="display:flex;flex-direction:column;gap:14px;border-top:1px solid #DDE1E4;padding-top:16px">
+                  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                    <span style="font-size:14px;font-weight:500;width:72px">Quantity</span>
+                    <div style="display:flex;border:1px solid #A9B1B7;border-radius:6px;overflow:hidden;opacity:{{ pv.stepOp }}"><button onClick="{{ pDec }}" disabled="{{ lad.minusDis }}" aria-label="Decrease" style="width:48px;height:48px;border:0;background:#FFFFFF;color:{{ lad.minusC }};display:flex;align-items:center;justify-content:center;cursor:pointer">{{ i24.minus }}</button><input value="{{ pqStr }}" onChange="{{ pType }}" inputMode="numeric" aria-label="Quantity" disabled="{{ pv.oos }}" style="width:64px;border:0;border-left:1px solid #DDE1E4;border-right:1px solid #DDE1E4;text-align:center;font:600 18px/24px 'Noto Sans';font-variant-numeric:tabular-nums;background:#FFFFFF"><button onClick="{{ pInc }}" disabled="{{ lad.plusDis }}" aria-label="Increase" style="width:48px;height:48px;border:0;background:#FFFFFF;color:{{ lad.plusC }};display:flex;align-items:center;justify-content:center;cursor:pointer">{{ i24.plus }}</button></div>
+                    <span style="font-size:14px;color:#33424D">{{ lad.units }}</span>
+                  </div>
+                  <sc-if value="{{ lad.stockHelp }}"><span style="font-size:13px;line-height:18px;color:#33424D;margin-top:-6px">{{ lad.stockHelp }}</span></sc-if>
+                  <sc-if value="{{ pv.inStock }}"><div style="display:flex;align-items:baseline;gap:12px"><span style="font-size:14px;font-weight:500;width:72px">Total</span><span style="font:700 22px/28px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums">{{ lad.total }}</span></div></sc-if>
+                  <sc-if value="{{ d }}"><sc-if value="{{ pv.inStock }}"><button onClick="{{ pAdd }}" style="height:48px;border:0;border-radius:6px;background:#F2A900;color:#1E2A32;font:600 16px/20px 'Noto Sans';display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer" style-hover="background:#D99600" style-active="background:#B97F00">{{ i24.cart }}Add to cart</button></sc-if></sc-if>
+                  <sc-if value="{{ pv.oos }}"><div style="display:flex;flex-direction:column;gap:10px"><button disabled="{{ true }}" style="height:48px;border:0;border-radius:6px;background:#EEF0F1;color:#6B747B;font:600 16px/20px 'Noto Sans';cursor:not-allowed">Out of stock</button><span style="font-size:14px;line-height:20px;color:#33424D">Ask us on WhatsApp when this will be back.</span></div></sc-if>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:12px;border-top:1px solid #DDE1E4;padding-top:16px;font-size:14px;line-height:20px">
+                  <div style="display:flex;gap:12px"><span style="display:flex;color:#33424D">{{ i24.truck }}</span><div style="display:flex;flex-direction:column"><span><strong style="font-weight:600">Delivery to {{ areaName }}: {{ areaFee }}</strong></span><span style="color:#33424D">Free on orders over {{ areaFree }}. <button onClick="{{ openArea }}" style="border:0;background:none;padding:0;color:#1F5AA6;font:600 14px/20px 'Noto Sans';cursor:pointer">Change area</button></span></div></div>
+                  <div style="display:flex;gap:12px;align-items:center"><span style="display:flex;color:#33424D">{{ i24.cash }}</span><span>Cash on delivery available</span></div>
+                </div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:{{ L.specCols }};gap:{{ L.prodColGap }};align-items:start">
+              <section style="display:flex;flex-direction:column;gap:12px"><h2 style="margin:0;font:{{ L.h2 }}">Specifications</h2>
+                <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;overflow:hidden"><sc-for list="{{ pv.specs }}" as="sp"><div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:12px;padding:12px 16px;border-top:{{ sp.bt }};font-size:15px;line-height:22px"><span style="color:#33424D">{{ sp.k }}</span><span style="font-weight:500">{{ sp.v }}</span></div></sc-for></div>
+              </section>
+              <section style="display:flex;flex-direction:column;gap:12px"><h2 style="margin:0;font:{{ L.h2 }}">Description</h2>
+                <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:8px">
+                  <p style="margin:0;font-size:15px;line-height:24px;max-width:68ch;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:{{ descClamp }};overflow:hidden">{{ pv.desc }}</p>
+                  <button onClick="{{ toggleDesc }}" style="align-self:flex-start;border:0;background:none;padding:0;min-height:36px;color:#1F5AA6;font:600 14px/20px 'Noto Sans';cursor:pointer;display:flex;align-items:center;gap:4px">{{ descBtn }}</button>
+                </div>
+              </section>
+            </div>
+            <section style="display:flex;flex-direction:column;gap:16px"><h2 style="margin:0;font:{{ L.h2 }}">Customers also buy</h2>
+              <div class="ari-noscroll" style="display:grid;grid-auto-flow:column;grid-auto-columns:{{ L.rowCol }};gap:{{ L.gap }};overflow-x:auto;margin:0 {{ L.rowBleed }};padding:0 {{ L.rowBleedP }}">
+                <sc-for list="{{ related }}" as="c"><dc-import name="Aricon Product Card" p="{{ c }}" hint-size="100%,420px"></dc-import></sc-for>
+              </div>
+            </section>
+          </main>
+          <sc-if value="{{ m }}"><div style="position:sticky;bottom:0;z-index:10;background:#FFFFFF;box-shadow:0 -8px 24px rgba(30,42,50,0.16);padding:12px 16px;display:flex;align-items:center;gap:16px">
+            <div style="display:flex;flex-direction:column;flex:1"><span style="font:700 22px/26px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums">{{ stickyTop }}</span><span style="font-size:13px;line-height:18px;color:#33424D">{{ stickySub }}</span></div>
+            <sc-if value="{{ pv.inStock }}"><button onClick="{{ pAdd }}" style="height:48px;padding:0 24px;border:0;border-radius:6px;background:#F2A900;color:#1E2A32;font:600 16px/20px 'Noto Sans';cursor:pointer" style-active="background:#B97F00">Add to cart</button></sc-if>
+            <sc-if value="{{ pv.oos }}"><button disabled="{{ true }}" style="height:48px;padding:0 20px;border:0;border-radius:6px;background:#EEF0F1;color:#6B747B;font:600 16px/20px 'Noto Sans'">Out of stock</button></sc-if>
+          </div></sc-if>
+        </sc-if>
+
+        <sc-if value="{{ isCart }}" hint-placeholder-val="{{ false }}">
+          <main data-screen-label="Cart" style="max-width:{{ L.maxw }};margin:0 auto;padding:{{ L.listPad }};display:flex;flex-direction:column;gap:16px">
+            <h1 style="margin:0;font:{{ L.h1 }}">Your cart ({{ itemsLabel }})</h1>
+            <sc-if value="{{ cartEmpty }}"><div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:48px 24px;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center"><span style="color:#A9B1B7">{{ c56.cement }}</span><p style="margin:0;font-size:16px;line-height:24px;max-width:30ch">Your cart is empty. Browse cement, wires and pipes.</p><button onClick="{{ openCats }}" style="height:48px;padding:0 22px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;font:600 16px/20px 'Noto Sans';cursor:pointer">Browse categories</button></div></sc-if>
+            <sc-if value="{{ cartHas }}"><div style="display:grid;grid-template-columns:{{ L.cartCols }};gap:24px;align-items:start">
+              <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px">
+                <sc-for list="{{ lines }}" as="ln" hint-placeholder-count="3">
+                  <div style="padding:16px;display:grid;grid-template-columns:{{ L.lineCols }};gap:14px;border-top:{{ ln.bt }}">
+                    <button onClick="{{ ln.open }}" style="width:{{ L.lineImg }};height:{{ L.lineImg }};border-radius:6px;background:#F6F7F8;border:0;display:flex;align-items:center;justify-content:center;color:#A9B1B7;cursor:pointer">{{ ln.img }}</button>
+                    <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
+                      <button onClick="{{ ln.open }}" style="border:0;background:none;padding:0;text-align:left;white-space:normal;font:400 16px/22px 'Noto Sans';cursor:pointer;color:#1E2A32">{{ ln.name }}</button>
+                      <span style="font:700 18px/22px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums">{{ ln.upL }} <span style="font:400 14px/20px 'Noto Sans';color:#6B747B">/ {{ ln.unit }}</span></span>
+                      <sc-if value="{{ ln.applied }}"><span style="font-size:14px;line-height:20px;color:#1E7B4F;font-weight:500">{{ ln.applied }}</span></sc-if>
+                      <sc-if value="{{ ln.showNext }}"><button onClick="{{ ln.toNext }}" style="align-self:flex-start;white-space:normal;border:0;background:none;padding:0;text-align:left;font:400 14px/20px 'Noto Sans';color:#1F5AA6;cursor:pointer" style-hover="text-decoration:underline">{{ ln.next }}</button></sc-if>
+                      <sc-if value="{{ ln.issue }}"><div style="display:flex;align-items:center;gap:10px;background:#FFF3CC;border-radius:6px;padding:8px 8px 8px 12px;margin-top:4px;flex-wrap:wrap"><span style="display:flex">{{ i20.warn }}</span><span style="font-size:14px;line-height:20px;flex:1;min-width:110px">{{ ln.issueMsg }}</span><button onClick="{{ ln.fix }}" style="height:36px;padding:0 12px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;font:600 14px/20px 'Noto Sans';cursor:pointer">{{ ln.fixLabel }}</button></div></sc-if>
+                      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px;flex-wrap:wrap">
+                        <div style="display:flex;border:1px solid #A9B1B7;border-radius:6px;overflow:hidden"><button onClick="{{ ln.dec }}" aria-label="Decrease" style="width:44px;height:44px;border:0;background:#FFFFFF;color:{{ ln.minusC }};display:flex;align-items:center;justify-content:center;cursor:pointer">{{ i20.minus }}</button><input value="{{ ln.qStr }}" onChange="{{ ln.type }}" inputMode="numeric" aria-label="Quantity" style="width:52px;border:0;border-left:1px solid #DDE1E4;border-right:1px solid #DDE1E4;text-align:center;font:600 16px/20px 'Noto Sans';font-variant-numeric:tabular-nums"><button onClick="{{ ln.inc }}" aria-label="Increase" style="width:44px;height:44px;border:0;background:#FFFFFF;display:flex;align-items:center;justify-content:center;cursor:pointer">{{ i20.plus }}</button></div>
+                        <div style="display:flex;align-items:center;gap:4px"><span style="font:700 20px/24px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums">{{ ln.totalL }}</span><button onClick="{{ ln.remove }}" aria-label="Remove" style="width:44px;height:44px;border:0;background:none;color:#6B747B;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="color:#B42318">{{ i20.trash }}</button></div>
+                      </div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+              <aside style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:14px;position:{{ L.panelPos }};top:24px">
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:15px;line-height:22px"><span>Delivery to <strong style="font-weight:600">{{ areaName }}</strong></span><button onClick="{{ openArea }}" style="border:0;background:none;color:#1F5AA6;font:600 14px/20px 'Noto Sans';cursor:pointer;min-height:44px;padding:0">Change</button></div>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <span style="font-size:14px;line-height:20px">{{ freeMsgA }}<strong style="font-variant-numeric:tabular-nums">{{ freeMsgB }}</strong>{{ freeMsgC }}</span>
+                  <div style="position:relative;height:40px;margin:0 2px">
+                    <div style="position:absolute;left:0;right:0;top:8px;height:10px;background:#EEF0F1;border:1px solid #DDE1E4;border-radius:2px;overflow:hidden"><div style="width:{{ barPct }};height:100%;background:{{ barC }};transition:width 150ms ease-out"></div></div>
+                    <sc-for list="{{ barTicks }}" as="t"><div style="position:absolute;left:{{ t.left }};top:4px;width:1px;height:18px;background:#33424D"></div><sc-if value="{{ t.label }}"><span style="position:absolute;left:{{ t.left }};top:24px;transform:{{ t.tx }};font-size:12px;line-height:16px;color:#33424D;white-space:nowrap;font-variant-numeric:tabular-nums">{{ t.label }}</span></sc-if></sc-for>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid #DDE1E4;padding-top:14px;font-size:15px;line-height:22px">
+                  <div style="display:flex;justify-content:space-between"><span>Subtotal</span><span style="font-variant-numeric:tabular-nums">{{ subL }}</span></div>
+                  <div style="display:flex;justify-content:space-between"><span>Delivery</span><span style="font-variant-numeric:tabular-nums">{{ feeL }}</span></div>
+                  <div style="display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid #DDE1E4;padding-top:10px;margin-top:4px"><span style="font-weight:600">Total</span><span style="font:700 28px/32px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums">{{ totalL }}</span></div>
+                </div>
+                <sc-if value="{{ d }}"><button onClick="{{ goCheckout }}" style="height:48px;border:0;border-radius:6px;background:#F2A900;color:#1E2A32;font:600 16px/20px 'Noto Sans';cursor:pointer" style-hover="background:#D99600">Checkout</button></sc-if>
+              </aside>
+            </div></sc-if>
+          </main>
+          <sc-if value="{{ mCartBar }}"><div style="position:sticky;bottom:0;z-index:10;background:#FFFFFF;box-shadow:0 -8px 24px rgba(30,42,50,0.16);padding:12px 16px;display:flex;align-items:center;gap:16px">
+            <div style="display:flex;flex-direction:column;flex:1"><span style="font:700 22px/26px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums">{{ totalL }}</span><span style="font-size:13px;line-height:18px;color:#33424D">Total incl. delivery</span></div>
+            <button onClick="{{ goCheckout }}" style="height:48px;padding:0 28px;border:0;border-radius:6px;background:#F2A900;color:#1E2A32;font:600 16px/20px 'Noto Sans';cursor:pointer">Checkout</button>
+          </div></sc-if>
+        </sc-if>
+
+        <sc-if value="{{ isCheckout }}" hint-placeholder-val="{{ false }}">
+          <main data-screen-label="Checkout" style="max-width:{{ L.maxw }};margin:0 auto;padding:{{ L.listPad }};display:flex;flex-direction:column;gap:16px">
+            <h1 style="margin:0;font:{{ L.h1 }}">Checkout</h1>
+            <sc-if value="{{ priceChanged }}"><div style="display:flex;gap:12px;align-items:flex-start;background:#FFF3CC;border-radius:10px;padding:14px 16px"><span style="display:flex">{{ i20.info }}</span><div style="flex:1;display:flex;flex-direction:column;gap:2px;font-size:15px;line-height:22px"><strong style="font-weight:600">Prices changed since you added these items. Review the new total.</strong><span style="font-size:14px;color:#33424D">Lucky Cement PPC went from Rs 1,410 to Rs 1,430 per bag for 10+ bags.</span></div><button onClick="{{ dismissPrice }}" style="height:36px;padding:0 12px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;font:600 14px/20px 'Noto Sans';cursor:pointer">OK</button></div></sc-if>
+            <sc-for list="{{ issueLines }}" as="ln"><div style="display:flex;gap:12px;align-items:center;background:#FDECEA;border-radius:10px;padding:12px 16px;flex-wrap:wrap"><span style="display:flex;color:#B42318">{{ i20.alert }}</span><span style="flex:1;font-size:15px;line-height:22px;min-width:200px">{{ ln.short }}: only {{ ln.stock }} in stock. Update the quantity to place your order.</span><button onClick="{{ ln.fix }}" style="height:36px;padding:0 12px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;font:600 14px/20px 'Noto Sans';cursor:pointer">{{ ln.fixLabel }}</button></div></sc-for>
+            <div style="display:grid;grid-template-columns:{{ L.cartCols }};gap:24px;align-items:start">
+              <div style="display:flex;flex-direction:column;gap:16px">
+                <section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:14px">
+                  <h2 style="margin:0;font:600 18px/24px 'Noto Sans';display:flex;gap:10px;align-items:center"><span style="width:28px;height:28px;border-radius:50%;background:#1E2A32;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font:600 14px/1 'Noto Sans'">1</span>Delivery address</h2>
+                  <div style="display:grid;grid-template-columns:{{ L.addrCols }};gap:12px">
+                    <sc-for list="{{ addrCards }}" as="a"><div onClick="{{ a.pick }}" style="border:{{ a.bd }};padding:{{ a.pad }};border-radius:10px;display:flex;gap:12px;cursor:pointer;background:#FFFFFF">
+                      <div style="width:22px;height:22px;border-radius:50%;border:2px solid {{ a.ring }};display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px"><div style="width:10px;height:10px;border-radius:50%;background:{{ a.dot }}"></div></div>
+                      <div style="display:flex;flex-direction:column;gap:2px;font-size:14px;line-height:20px"><span style="font-weight:600;font-size:15px;display:flex;gap:8px;align-items:center">{{ a.label }}<sc-if value="{{ a.def }}"><span style="background:#EAF1FB;color:#1F5AA6;font-size:12px;line-height:16px;font-weight:500;padding:2px 6px;border-radius:4px">Default</span></sc-if></span><span>{{ a.name }}, {{ a.phone }}</span><span style="color:#33424D">{{ a.line }}</span></div>
+                    </div></sc-for>
+                  </div>
+                  <sc-if value="{{ noNewAddr }}"><button onClick="{{ openNewAddr }}" style="align-self:flex-start;height:44px;border:0;background:none;padding:0;color:#1F5AA6;font:600 15px/20px 'Noto Sans';display:flex;align-items:center;gap:6px;cursor:pointer">{{ i20.plus }}Add new address</button></sc-if>
+                  <sc-if value="{{ newAddr }}"><div style="border-top:1px solid #DDE1E4;padding-top:16px;display:grid;grid-template-columns:{{ L.formCols }};gap:16px">
+                    <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:500">Contact name</span><input placeholder="Imran Qureshi" style="height:48px;border:1px solid #A9B1B7;border-radius:6px;padding:0 14px;font-size:16px"></label>
+                    <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:500">Phone</span><input placeholder="0300 1234567" inputMode="tel" style="height:48px;border:1px solid #A9B1B7;border-radius:6px;padding:0 14px;font-size:16px"></label>
+                    <label style="display:flex;flex-direction:column;gap:6px;grid-column:1/-1"><span style="font-size:14px;font-weight:500">Address</span><input placeholder="House, street, block" style="height:48px;border:1px solid #A9B1B7;border-radius:6px;padding:0 14px;font-size:16px"></label>
+                    <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:500">Landmark (optional)</span><input placeholder="Near Rab Medical" style="height:48px;border:1px solid #A9B1B7;border-radius:6px;padding:0 14px;font-size:16px"></label>
+                    <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:500">Area</span><select style="height:48px;border:1px solid #A9B1B7;border-radius:6px;padding:0 12px;font-size:16px;background:#FFFFFF"><sc-for list="{{ areaOpts }}" as="o"><option disabled="{{ o.dis }}">{{ o.label }}</option></sc-for></select><span style="font-size:13px;line-height:18px;color:#6B747B">We don't deliver to Bahria Town Karachi yet.</span></label>
+                  </div></sc-if>
+                </section>
+                <section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:14px">
+                  <h2 style="margin:0;font:600 18px/24px 'Noto Sans';display:flex;gap:10px;align-items:center"><span style="width:28px;height:28px;border-radius:50%;background:#1E2A32;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font:600 14px/1 'Noto Sans'">2</span>Payment</h2>
+                  <sc-for list="{{ payCards }}" as="pc"><div onClick="{{ pc.pick }}" style="border:{{ pc.bd }};border-radius:10px;padding:{{ pc.pad }};display:flex;gap:12px;cursor:{{ pc.cur }};background:{{ pc.bg }}">
+                    <div style="width:22px;height:22px;border-radius:50%;border:2px solid {{ pc.ring }};display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px"><div style="width:10px;height:10px;border-radius:50%;background:{{ pc.dot }}"></div></div>
+                    <div style="display:flex;flex-direction:column;gap:2px;flex:1"><span style="font-weight:600;font-size:16px;line-height:22px;color:{{ pc.tc }}">{{ pc.title }}</span><span style="font-size:14px;line-height:20px;color:#33424D">{{ pc.body }}</span><sc-if value="{{ pc.reason }}"><span style="font-size:13px;line-height:18px;color:#B42318;display:flex;gap:6px;margin-top:4px;align-items:center">{{ i16.alert }}{{ pc.reason }}</span></sc-if></div>
+                  </div></sc-for>
+                  <sc-if value="{{ payBank }}"><div style="background:#F6F7F8;border-radius:10px;padding:8px 16px 14px;display:flex;flex-direction:column">
+                    <sc-for list="{{ bankRows }}" as="b"><div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #DDE1E4"><div style="flex:1;display:flex;flex-direction:column;min-width:0"><span style="font-size:13px;line-height:18px;color:#33424D">{{ b.k }}</span><span style="font-size:15px;line-height:22px;font-weight:500;font-variant-numeric:tabular-nums">{{ b.v }}</span></div><button onClick="{{ b.copy }}" style="min-height:44px;padding:0 8px;border:0;background:none;color:#1F5AA6;display:flex;align-items:center;gap:6px;font:600 14px/20px 'Noto Sans';cursor:pointer">{{ b.icon }}{{ b.label }}</button></div></sc-for>
+                    <span style="font-size:14px;line-height:20px;color:#33424D;margin-top:10px">You can upload the receipt after placing the order.</span>
+                  </div></sc-if>
+                </section>
+                <section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:14px">
+                  <h2 style="margin:0;font:600 18px/24px 'Noto Sans';display:flex;gap:10px;align-items:center"><span style="width:28px;height:28px;border-radius:50%;background:#1E2A32;color:#FFFFFF;display:flex;align-items:center;justify-content:center;font:600 14px/1 'Noto Sans'">3</span>Review</h2>
+                  <button onClick="{{ toggleItems }}" style="min-height:44px;border:1px solid #DDE1E4;border-radius:6px;background:#FFFFFF;padding:0 14px;display:flex;justify-content:space-between;align-items:center;font:500 15px/20px 'Noto Sans';cursor:pointer">{{ itemsLabel }} in this order<span style="display:flex">{{ itemsChev }}</span></button>
+                  <sc-if value="{{ itemsOpen }}"><div style="display:flex;flex-direction:column;margin-top:-6px"><sc-for list="{{ lines }}" as="ln"><div style="display:flex;justify-content:space-between;gap:12px;padding:10px 2px;border-bottom:1px solid #DDE1E4;font-size:14px;line-height:20px"><span>{{ ln.name }} × {{ ln.q }}</span><span style="font-variant-numeric:tabular-nums;white-space:nowrap">{{ ln.totalL }}</span></div></sc-for></div></sc-if>
+                  <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:500">Note for the rider (optional)</span><textarea value="{{ note }}" onChange="{{ typeNote }}" placeholder="Gate 2, ask for the site supervisor" style="min-height:80px;border:1px solid #A9B1B7;border-radius:6px;padding:12px 14px;font-size:16px;line-height:24px;resize:vertical"></textarea></label>
+                </section>
+              </div>
+              <aside style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:10px;position:{{ L.panelPos }};top:24px;font-size:15px;line-height:22px">
+                <span style="font:600 18px/24px 'Noto Sans';margin-bottom:4px">Order summary</span>
+                <div style="display:flex;justify-content:space-between"><span>Subtotal</span><span style="font-variant-numeric:tabular-nums">{{ subL }}</span></div>
+                <div style="display:flex;justify-content:space-between"><span>Delivery ({{ areaName }})</span><span style="font-variant-numeric:tabular-nums">{{ feeL }}</span></div>
+                <div style="display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid #DDE1E4;padding-top:10px;margin-top:4px"><span style="font-weight:600">Total</span><span style="font:700 28px/32px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums">{{ totalL }}</span></div>
+                <button onClick="{{ placeOrder }}" disabled="{{ placeDis }}" style="height:48px;margin-top:8px;border:0;border-radius:6px;background:{{ placeBg }};color:{{ placeFg }};font:600 16px/20px 'Noto Sans';display:flex;align-items:center;justify-content:center;gap:10px;cursor:{{ placeCur }}" style-hover="filter:brightness(0.95)">{{ placeSpin }}{{ placeLabel }}</button>
+                <sc-if value="{{ placeReason }}"><span style="font-size:13px;line-height:18px;color:#33424D">{{ placeReason }}</span></sc-if>
+              </aside>
+            </div>
+          </main>
+        </sc-if>
+
+        <sc-if value="{{ isPlaced }}" hint-placeholder-val="{{ false }}">
+          <main data-screen-label="Order placed" style="max-width:720px;margin:0 auto;padding:{{ L.placedPad }};display:flex;flex-direction:column;gap:20px">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center">
+              <div style="width:80px;height:80px;border-radius:50%;background:#1E7B4F;color:#FFFFFF;display:flex;align-items:center;justify-content:center">{{ i40check }}</div>
+              <h1 style="margin:0;font:{{ L.h1 }}">Order placed</h1>
+              <span style="font:600 20px/24px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums;letter-spacing:0.02em">ARC-2026-000123</span>
+              <span style="font-size:15px;line-height:22px;color:#33424D">Total {{ placedTotalL }}, {{ placedMethod }}</span>
+            </div>
+            <section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:14px">
+              <h2 style="margin:0;font:600 18px/24px 'Noto Sans'">What happens next</h2>
+              <sc-if value="{{ placedCod }}"><p style="margin:0;font-size:16px;line-height:24px">We'll confirm your order and call before delivery. Keep {{ placedTotalL }} ready for the rider.</p></sc-if>
+              <sc-if value="{{ placedBank }}"><div style="display:flex;flex-direction:column;gap:12px">
+                <p style="margin:0;font-size:16px;line-height:24px">Transfer {{ placedTotalL }} to the account below, then upload the receipt. We confirm the order once the payment is verified.</p>
+                <div style="background:#F6F7F8;border-radius:10px;padding:4px 16px"><sc-for list="{{ bankRows }}" as="b"><div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #DDE1E4"><div style="flex:1;display:flex;flex-direction:column;min-width:0"><span style="font-size:13px;line-height:18px;color:#33424D">{{ b.k }}</span><span style="font-size:15px;line-height:22px;font-weight:500;font-variant-numeric:tabular-nums">{{ b.v }}</span></div><button onClick="{{ b.copy }}" style="min-height:44px;padding:0 8px;border:0;background:none;color:#1F5AA6;display:flex;align-items:center;gap:6px;font:600 14px/20px 'Noto Sans';cursor:pointer">{{ b.icon }}{{ b.label }}</button></div></sc-for></div>
+                <sc-if value="{{ placedNoUp }}"><button onClick="{{ uploadPlaced }}" style="border:1px dashed #A9B1B7;border-radius:10px;background:#FFFFFF;padding:{{ L.dropPad }};display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;font:inherit;color:#1E2A32" style-hover="border-color:#1F5AA6;background:#EAF1FB"><span style="display:flex;color:#33424D">{{ upIcon }}</span><span style="font-size:15px;line-height:22px;font-weight:600">{{ dropLabel }}</span><span style="font-size:13px;line-height:18px;color:#6B747B">JPG, PNG or PDF up to 5 MB</span></button></sc-if>
+                <sc-if value="{{ placedUp }}"><div style="display:flex;gap:12px;align-items:center;border:1px solid #DDE1E4;border-radius:10px;padding:12px"><div style="width:40px;height:48px;border-radius:4px;background:#F6F7F8;border:1px solid #DDE1E4;display:flex;align-items:center;justify-content:center;color:#6B747B">{{ i20.file }}</div><div style="flex:1;display:flex;flex-direction:column"><span style="font-size:14px;font-weight:500">receipt-meezan-26sep.jpg</span><span style="font-size:13px;color:#33424D">Uploaded just now. We'll verify it within 2 working hours.</span></div><span style="background:#FFF3CC;font-size:12px;line-height:16px;font-weight:500;padding:3px 7px;border-radius:4px;white-space:nowrap">Awaiting verification</span></div></sc-if>
+              </div></sc-if>
+            </section>
+            <div style="display:flex;gap:12px;flex-direction:{{ L.btnDir }}">
+              <button onClick="{{ viewOrder }}" style="height:48px;padding:0 24px;border:0;border-radius:6px;background:#F2A900;color:#1E2A32;font:600 16px/20px 'Noto Sans';cursor:pointer;flex:1" style-hover="background:#D99600">View order</button>
+              <button onClick="{{ goHome }}" style="height:48px;padding:0 24px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;font:600 16px/20px 'Noto Sans';cursor:pointer;flex:1" style-hover="background:#F6F7F8">Continue shopping</button>
+            </div>
+            <a href="#" style="align-self:center;display:flex;align-items:center;gap:8px;font:600 15px/20px 'Noto Sans';color:#1E7B4F;text-decoration:none;min-height:44px">{{ i20.chat }}Questions? Chat with us on WhatsApp</a>
+          </main>
+        </sc-if>
+
+        <sc-if value="{{ isAuth }}" hint-placeholder-val="{{ false }}">
+          <main data-screen-label="{{ authLabel }}" style="min-height:100%;display:flex;flex-direction:column;align-items:center;padding:{{ L.authPad }};gap:24px">
+            <button onClick="{{ goHome }}" style="border:0;background:none;display:flex;align-items:baseline;gap:6px;cursor:pointer;color:#1E2A32;padding:0"><span style="font:700 30px/34px 'Barlow Semi Condensed',sans-serif;letter-spacing:0.02em">ARICON</span><span style="font:500 26px/34px 'Barlow Semi Condensed',sans-serif;color:#6B747B">Shop</span></button>
+            <div style="width:100%;max-width:420px;background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:{{ L.authCard }};display:flex;flex-direction:column;gap:18px">
+              <sc-if value="{{ isLogin }}"><div style="display:flex;flex-direction:column;gap:18px">
+                <h1 style="margin:0;font:700 28px/34px 'Barlow Semi Condensed',sans-serif">Log in</h1>
+                <sc-if value="{{ loginErr }}"><div style="display:flex;gap:10px;background:#FDECEA;border-radius:6px;padding:10px 12px;font-size:14px;line-height:20px;color:#1E2A32"><span style="display:flex;color:#B42318">{{ i20.alert }}</span>That email or phone and password don't match. Check them and try again.</div></sc-if>
+                <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:500">Email or phone</span><input defaultValue="0300 1234567" style="height:48px;border:1px solid {{ loginBd }};border-radius:6px;padding:0 14px;font-size:16px"></label>
+                <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:500;display:flex;justify-content:space-between">Password<a href="#" style="font-weight:600">Forgot password?</a></span><input type="password" defaultValue="password1" style="height:48px;border:1px solid {{ loginBd }};border-radius:6px;padding:0 14px;font-size:16px"></label>
+                <button onClick="{{ doLogin }}" style="height:48px;border:0;border-radius:6px;background:#F2A900;color:#1E2A32;font:600 16px/20px 'Noto Sans';cursor:pointer" style-hover="background:#D99600">Log in</button>
+                <span style="font-size:15px;line-height:22px;text-align:center">New to Aricon Shop? <button onClick="{{ goSignup }}" style="border:0;background:none;padding:0;color:#1F5AA6;font:600 15px/22px 'Noto Sans';cursor:pointer">Create an account</button></span>
+              </div></sc-if>
+              <sc-if value="{{ isSignup }}"><div style="display:flex;flex-direction:column;gap:18px">
+                <h1 style="margin:0;font:700 28px/34px 'Barlow Semi Condensed',sans-serif">Create your account</h1>
+                <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:500">Full name</span><input defaultValue="Imran Qureshi" style="height:48px;border:1px solid #A9B1B7;border-radius:6px;padding:0 14px;font-size:16px"></label>
+                <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:500">Email</span><input defaultValue="imran@qureshibuilders.pk" style="height:48px;border:1px solid #A9B1B7;border-radius:6px;padding:0 14px;font-size:16px"></label>
+                <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:500">Phone</span><input defaultValue="0300 1234567" inputMode="tel" style="height:48px;border:1px solid {{ signBd }};border-radius:6px;padding:0 14px;font-size:16px"><sc-if value="{{ signErr }}"><span style="font-size:13px;line-height:18px;color:#B42318;display:flex;gap:6px;align-items:flex-start">{{ i16.alert }}<span>This phone number already has an account. <button onClick="{{ goLogin }}" style="border:0;background:none;padding:0;color:#1F5AA6;font:600 13px/18px 'Noto Sans';cursor:pointer">Log in instead.</button></span></span></sc-if></label>
+                <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:500">Password</span><input type="password" defaultValue="site2026" style="height:48px;border:1px solid #A9B1B7;border-radius:6px;padding:0 14px;font-size:16px"><span style="font-size:13px;line-height:18px;color:#6B747B">At least 8 characters, with a number.</span></label>
+                <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:500">Company (optional)</span><input defaultValue="Qureshi Builders" style="height:48px;border:1px solid #A9B1B7;border-radius:6px;padding:0 14px;font-size:16px"></label>
+                <button onClick="{{ doSignup }}" style="height:48px;border:0;border-radius:6px;background:#F2A900;color:#1E2A32;font:600 16px/20px 'Noto Sans';cursor:pointer" style-hover="background:#D99600">Create account</button>
+                <span style="font-size:15px;line-height:22px;text-align:center">Already have an account? <button onClick="{{ goLogin }}" style="border:0;background:none;padding:0;color:#1F5AA6;font:600 15px/22px 'Noto Sans';cursor:pointer">Log in</button></span>
+              </div></sc-if>
+            </div>
+            <span style="font-size:13px;line-height:18px;color:#33424D">Aricon Shop is run by Aricon Engineering Consultants, Karachi.</span>
+          </main>
+        </sc-if>
+
+        <sc-if value="{{ isAccount }}" hint-placeholder-val="{{ false }}">
+          <main data-screen-label="Account" style="max-width:{{ L.maxw }};margin:0 auto;padding:{{ L.listPad }};display:grid;grid-template-columns:{{ L.acctCols }};gap:24px;align-items:start">
+            <sc-if value="{{ d }}"><nav style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:2px">
+              <sc-for list="{{ acctTabs }}" as="t"><button onClick="{{ t.go }}" style="height:44px;border:0;border-radius:6px;background:{{ t.bg }};box-shadow:{{ t.edge }};padding:0 12px;display:flex;align-items:center;gap:10px;font:{{ t.font }};color:#1E2A32;text-align:left;cursor:pointer" style-hover="background:#F6F7F8"><span style="display:flex">{{ t.icon }}</span>{{ t.label }}</button></sc-for>
+              <button onClick="{{ goLogin }}" style="height:44px;border:0;border-top:1px solid #DDE1E4;margin-top:6px;background:none;padding:0 12px;display:flex;align-items:center;gap:10px;font:500 15px/20px 'Noto Sans';color:#33424D;cursor:pointer"><span style="display:flex">{{ i20.logout }}</span>Log out</button>
+            </nav></sc-if>
+            <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+              <sc-if value="{{ m }}"><div class="ari-noscroll" style="display:flex;border-bottom:1px solid #DDE1E4;margin:0 -16px;padding:0 8px;overflow-x:auto">
+                <sc-for list="{{ acctTabs }}" as="t"><button onClick="{{ t.go }}" style="height:48px;padding:0 12px;border:0;background:none;box-shadow:{{ t.under }};font:{{ t.font }};color:#1E2A32;white-space:nowrap;cursor:pointer">{{ t.label }}</button></sc-for>
+              </div></sc-if>
+
+              <sc-if value="{{ acctOverview }}"><div style="display:flex;flex-direction:column;gap:16px">
+                <h1 style="margin:0;font:{{ L.h1 }}">Salam, Imran</h1>
+                <section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px">
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #DDE1E4"><h2 style="margin:0;font:600 18px/24px 'Noto Sans'">Recent orders</h2><button onClick="{{ tabOrders }}" style="border:0;background:none;color:#1F5AA6;font:600 14px/20px 'Noto Sans';cursor:pointer;min-height:44px">See all</button></div>
+                  <sc-for list="{{ recentOrders }}" as="o"><button onClick="{{ o.open }}" style="width:100%;white-space:normal;border:0;border-top:{{ o.bt }};background:#FFFFFF;padding:12px 16px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;text-align:left;cursor:pointer;font:inherit;color:#1E2A32" style-hover="background:#F6F7F8"><span style="font-weight:600;font-size:15px">{{ o.no }}</span><span style="font:700 18px/22px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums;text-align:right">{{ o.totalL }}</span><span style="font-size:13px;color:#33424D">{{ o.date }}, {{ o.itemsL }}</span><span style="display:flex;gap:6px;justify-content:flex-end"><span style="background:{{ o.sb.bg }};color:{{ o.sb.fg }};border:{{ o.sb.bd }};font-size:12px;line-height:16px;font-weight:500;padding:2px 6px;border-radius:4px">{{ o.sb.label }}</span></span></button></sc-for>
+                </section>
+                <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+                  <sc-for list="{{ shortcuts }}" as="t"><button onClick="{{ t.go }}" style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:16px 12px;display:flex;flex-direction:column;align-items:flex-start;gap:10px;font:600 15px/20px 'Noto Sans';color:#1E2A32;cursor:pointer" style-hover="border-color:#1E2A32"><span style="display:flex">{{ t.icon }}</span>{{ t.label }}</button></sc-for>
+                </div>
+              </div></sc-if>
+
+              <sc-if value="{{ acctOrders }}"><div style="display:flex;flex-direction:column;gap:16px">
+                <h1 style="margin:0;font:{{ L.h1 }}">Orders</h1>
+                <section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px">
+                  <sc-for list="{{ orderRows }}" as="o"><button onClick="{{ o.open }}" style="width:100%;white-space:normal;border:0;border-top:{{ o.bt }};background:#FFFFFF;padding:14px 16px;display:grid;grid-template-columns:{{ L.orderCols }};gap:6px 16px;align-items:center;text-align:left;cursor:pointer;font:inherit;color:#1E2A32" style-hover="background:#F6F7F8">
+                    <span style="display:flex;flex-direction:column"><span style="font-weight:600;font-size:15px">{{ o.no }}</span><span style="font-size:13px;color:#33424D">{{ o.date }}, {{ o.itemsL }}</span></span>
+                    <span style="font:700 18px/22px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums;text-align:right">{{ o.totalL }}</span>
+                    <span style="display:flex;gap:6px;flex-wrap:wrap;grid-column:{{ L.orderBadgeCol }}"><span style="background:{{ o.pb.bg }};color:{{ o.pb.fg }};border:{{ o.pb.bd }};font-size:12px;line-height:16px;font-weight:500;padding:2px 6px;border-radius:4px">{{ o.pb.label }}</span><span style="background:{{ o.sb.bg }};color:{{ o.sb.fg }};border:{{ o.sb.bd }};font-size:12px;line-height:16px;font-weight:500;padding:2px 6px;border-radius:4px">{{ o.sb.label }}</span></span>
+                  </button></sc-for>
+                </section>
+              </div></sc-if>
+
+              <sc-if value="{{ acctDetail }}"><div style="display:flex;flex-direction:column;gap:16px">
+                <button onClick="{{ tabOrders }}" style="align-self:flex-start;height:36px;border:0;background:none;padding:0;display:flex;align-items:center;gap:2px;font:600 14px/20px 'Noto Sans';color:#1F5AA6;cursor:pointer">{{ i16.left }}All orders</button>
+                <div style="display:flex;flex-direction:column;gap:6px"><h1 style="margin:0;font:{{ L.h1 }};font-variant-numeric:tabular-nums">{{ od.no }}</h1><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span style="background:{{ od.sb.bg }};color:{{ od.sb.fg }};border:{{ od.sb.bd }};font-size:12px;line-height:16px;font-weight:500;padding:3px 7px;border-radius:4px">{{ od.sb.label }}</span><span style="background:{{ od.pb.bg }};color:{{ od.pb.fg }};border:{{ od.pb.bd }};font-size:12px;line-height:16px;font-weight:500;padding:3px 7px;border-radius:4px">{{ od.pb.label }}</span><span style="font-size:13px;color:#33424D">Placed {{ od.date }}</span></div></div>
+                <div style="display:grid;grid-template-columns:{{ L.detailCols }};gap:16px;align-items:start">
+                  <div style="display:flex;flex-direction:column;gap:16px">
+                    <section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:20px">
+                      <sc-for list="{{ od.steps }}" as="st"><div style="display:grid;grid-template-columns:28px 1fr;gap:12px"><div style="display:flex;flex-direction:column;align-items:center"><div style="width:28px;height:28px;border-radius:50%;background:{{ st.bg }};color:{{ st.fg }};border:{{ st.bd }};display:flex;align-items:center;justify-content:center;font:600 13px/1 'Noto Sans';flex:none">{{ st.mark }}</div><div style="width:2px;flex:1;min-height:12px;background:{{ st.line }}"></div></div><div style="display:flex;flex-direction:column;padding:3px 0 14px"><span style="font-size:15px;line-height:22px;font-weight:{{ st.fw }};color:{{ st.tc }}">{{ st.label }}</span><span style="font-size:13px;line-height:18px;color:#33424D">{{ st.time }}</span></div></div></sc-for>
+                    </section>
+                    <sc-if value="{{ od.bank }}"><section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:16px 20px;display:flex;flex-direction:column;gap:12px">
+                      <h2 style="margin:0;font:600 18px/24px 'Noto Sans'">Payment: bank transfer</h2>
+                      <sc-for list="{{ od.receipts }}" as="r"><div style="display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid #DDE1E4"><div style="width:40px;height:48px;border-radius:4px;background:#F6F7F8;border:1px solid #DDE1E4;display:flex;align-items:center;justify-content:center;color:#6B747B;flex:none">{{ i20.file }}</div><div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:14px;line-height:20px;font-weight:500">{{ r.file }}</span><span style="font-size:13px;line-height:18px;color:#33424D">{{ r.when }}</span><sc-if value="{{ r.reason }}"><span style="font-size:13px;line-height:18px;color:#B42318;display:flex;gap:6px;align-items:flex-start;margin-top:2px">{{ i16.alert }}<span>{{ r.reason }}</span></span></sc-if></div><span style="background:{{ r.bg }};color:{{ r.fg }};font-size:12px;line-height:16px;font-weight:500;padding:3px 7px;border-radius:4px;white-space:nowrap">{{ r.status }}</span></div></sc-for>
+                      <sc-if value="{{ od.canUpload }}"><button onClick="{{ uploadNew }}" style="border:1px dashed #A9B1B7;border-radius:10px;background:#FFFFFF;padding:{{ L.dropPad }};display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;font:inherit;color:#1E2A32" style-hover="border-color:#1F5AA6;background:#EAF1FB"><span style="display:flex;color:#33424D">{{ upIcon }}</span><span style="font-size:15px;line-height:22px;font-weight:600">Upload a new receipt</span><span style="font-size:13px;line-height:18px;color:#6B747B">{{ dropHint }}</span></button></sc-if>
+                    </section></sc-if>
+                    <section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:8px 20px 16px">
+                      <sc-for list="{{ od.lines }}" as="ln"><div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #DDE1E4;font-size:14px;line-height:20px"><span style="display:flex;flex-direction:column"><span>{{ ln.name }}</span><span style="color:#33424D">{{ ln.q }} × {{ ln.upL }}</span></span><span style="font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:500">{{ ln.totalL }}</span></div></sc-for>
+                      <div style="display:flex;flex-direction:column;gap:6px;padding-top:10px;font-size:15px;line-height:22px"><div style="display:flex;justify-content:space-between"><span>Subtotal</span><span style="font-variant-numeric:tabular-nums">{{ od.subL }}</span></div><div style="display:flex;justify-content:space-between"><span>Delivery</span><span style="font-variant-numeric:tabular-nums">{{ od.feeL }}</span></div><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:600">Total</span><span style="font:700 24px/28px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums">{{ od.totalL }}</span></div></div>
+                    </section>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:16px">
+                    <section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:16px 20px;display:flex;flex-direction:column;gap:4px;font-size:14px;line-height:20px"><h2 style="margin:0 0 6px;font:600 16px/22px 'Noto Sans'">Delivery address</h2><span>Imran Qureshi, 0300 1234567</span><span style="color:#33424D">House 12, Block 13-D, Gulshan-e-Iqbal, Karachi</span></section>
+                    <div style="display:flex;flex-direction:column;gap:10px">
+                      <button style="height:48px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;gap:8px;font:600 16px/20px 'Noto Sans';cursor:pointer" style-hover="background:#F6F7F8">{{ i20.download }}Download invoice</button>
+                      <button onClick="{{ reorder }}" style="height:48px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;gap:8px;font:600 16px/20px 'Noto Sans';cursor:pointer" style-hover="background:#F6F7F8">{{ i20.repeat }}Reorder</button>
+                      <sc-if value="{{ od.canCancel }}"><button style="height:48px;border:0;border-radius:6px;background:none;color:#B42318;font:600 16px/20px 'Noto Sans';cursor:pointer" style-hover="background:#FDECEA">Cancel order</button></sc-if>
+                      <a href="#" style="display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;font:600 15px/20px 'Noto Sans';color:#1E7B4F;text-decoration:none">{{ i20.chat }}WhatsApp support</a>
+                    </div>
+                  </div>
+                </div>
+              </div></sc-if>
+
+              <sc-if value="{{ acctAddr }}"><div style="display:flex;flex-direction:column;gap:16px">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h1 style="margin:0;font:{{ L.h1 }}">Addresses</h1><button style="height:44px;padding:0 14px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;display:flex;align-items:center;gap:6px;font:600 15px/20px 'Noto Sans';cursor:pointer">{{ i20.plus }}Add address</button></div>
+                <div style="display:grid;grid-template-columns:{{ L.addrCols }};gap:12px">
+                  <sc-for list="{{ addrCards }}" as="a"><div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:4px;font-size:14px;line-height:20px">
+                    <span style="font-weight:600;font-size:16px;display:flex;gap:8px;align-items:center">{{ a.label }}<sc-if value="{{ a.def }}"><span style="background:#EAF1FB;color:#1F5AA6;font-size:12px;line-height:16px;font-weight:500;padding:2px 6px;border-radius:4px">Default</span></sc-if></span>
+                    <span>{{ a.name }}, {{ a.phone }}</span><span style="color:#33424D">{{ a.line }}</span>
+                    <div style="display:flex;gap:4px;margin-top:8px;margin-left:-8px;flex-wrap:wrap"><button style="height:40px;padding:0 8px;border:0;background:none;color:#1F5AA6;font:600 14px/20px 'Noto Sans';cursor:pointer">Edit</button><sc-if value="{{ a.notDef }}"><button onClick="{{ a.makeDef }}" style="height:40px;padding:0 8px;border:0;background:none;color:#1F5AA6;font:600 14px/20px 'Noto Sans';cursor:pointer">Set as default</button></sc-if><button style="height:40px;padding:0 8px;border:0;background:none;color:#B42318;font:600 14px/20px 'Noto Sans';cursor:pointer">Delete</button></div>
+                  </div></sc-for>
+                </div>
+              </div></sc-if>
+
+              <sc-if value="{{ acctProfile }}"><div style="display:flex;flex-direction:column;gap:16px">
+                <h1 style="margin:0;font:{{ L.h1 }}">Profile</h1>
+                <section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:20px;display:grid;grid-template-columns:{{ L.formCols }};gap:16px">
+                  <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:500">Full name</span><input defaultValue="Imran Qureshi" style="height:48px;border:1px solid #A9B1B7;border-radius:6px;padding:0 14px;font-size:16px"></label>
+                  <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:500">Company (optional)</span><input defaultValue="Qureshi Builders" style="height:48px;border:1px solid #A9B1B7;border-radius:6px;padding:0 14px;font-size:16px"></label>
+                  <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:500">Email</span><input defaultValue="imran@qureshibuilders.pk" style="height:48px;border:1px solid #A9B1B7;border-radius:6px;padding:0 14px;font-size:16px"></label>
+                  <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:500">Phone</span><input defaultValue="0300 1234567" style="height:48px;border:1px solid #A9B1B7;border-radius:6px;padding:0 14px;font-size:16px"></label>
+                  <button style="grid-column:1/-1;justify-self:start;height:48px;padding:0 24px;border:0;border-radius:6px;background:#F2A900;color:#1E2A32;font:600 16px/20px 'Noto Sans';cursor:pointer">Save changes</button>
+                </section>
+                <section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:20px;display:grid;grid-template-columns:{{ L.formCols }};gap:16px">
+                  <h2 style="margin:0;font:600 18px/24px 'Noto Sans';grid-column:1/-1">Change password</h2>
+                  <label style="display:flex;flex-direction:column;gap:6px;grid-column:1/-1"><span style="font-size:14px;font-weight:500">Current password</span><input type="password" style="height:48px;border:1px solid #A9B1B7;border-radius:6px;padding:0 14px;font-size:16px"></label>
+                  <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:500">New password</span><input type="password" style="height:48px;border:1px solid #A9B1B7;border-radius:6px;padding:0 14px;font-size:16px"><span style="font-size:13px;line-height:18px;color:#6B747B">At least 8 characters, with a number.</span></label>
+                  <label style="display:flex;flex-direction:column;gap:6px"><span style="font-size:14px;font-weight:500">Confirm new password</span><input type="password" style="height:48px;border:1px solid #A9B1B7;border-radius:6px;padding:0 14px;font-size:16px"></label>
+                  <button style="grid-column:1/-1;justify-self:start;height:48px;padding:0 24px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;font:600 16px/20px 'Noto Sans';cursor:pointer">Update password</button>
+                </section>
+              </div></sc-if>
+            </div>
+          </main>
+        </sc-if>
+
+        <sc-if value="{{ showFooter }}" hint-placeholder-val="{{ true }}">
+          <footer style="background:#1E2A32;color:#DDE1E4;margin-top:48px">
+            <div style="max-width:{{ L.maxw }};margin:0 auto;padding:{{ L.footPad }};display:grid;grid-template-columns:{{ L.footCols }};gap:32px;font-size:14px;line-height:20px">
+              <div style="display:flex;flex-direction:column;gap:12px"><span style="display:flex;align-items:baseline;gap:6px;color:#FFFFFF"><span style="font:700 24px/28px 'Barlow Semi Condensed',sans-serif;letter-spacing:0.02em">ARICON</span><span style="font:500 20px/28px 'Barlow Semi Condensed',sans-serif;color:#A9B1B7">Shop</span></span><span style="max-width:32ch">Aricon Shop is run by Aricon Engineering Consultants, Karachi.</span><span style="display:flex;flex-direction:column;gap:4px;margin-top:8px"><span style="color:#FFFFFF;font-weight:600">We accept</span><span>Cash on delivery</span><span>Bank transfer</span></span></div>
+              <sc-for list="{{ footCols }}" as="fc"><div style="display:flex;flex-direction:column;gap:8px"><span style="color:#FFFFFF;font-weight:600">{{ fc.title }}</span><sc-for list="{{ fc.links }}" as="lk"><a href="#" style="color:#DDE1E4;text-decoration:none;min-height:24px">{{ lk }}</a></sc-for></div></sc-for>
+              <div style="display:flex;flex-direction:column;gap:8px"><span style="color:#FFFFFF;font-weight:600">Contact</span><span>021 3456 7890</span><span>WhatsApp 0300 8274266</span><span>shop@aricon.com.pk</span><span>Office 4, Block 7, Gulshan-e-Iqbal, Karachi</span></div>
+            </div>
+            <div style="border-top:1px solid #33424D"><div style="max-width:{{ L.maxw }};margin:0 auto;padding:16px {{ L.pad }};font-size:13px;color:#A9B1B7">© 2026 Aricon Engineering Consultants. PEC Tier-1, since 2005.</div></div>
+          </footer>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{ fabShow }}"><button aria-label="Chat on WhatsApp" style="position:absolute;right:16px;bottom:{{ fabBottom }};z-index:25;height:56px;min-width:56px;padding:{{ fabPad }};border:0;border-radius:28px;background:#1E7B4F;color:#FFFFFF;display:flex;align-items:center;justify-content:center;gap:8px;font:600 15px/20px 'Noto Sans';box-shadow:0 8px 24px rgba(30,42,50,0.16);cursor:pointer">{{ i24.chat }}<sc-if value="{{ d }}"><span>Chat on WhatsApp</span></sc-if></button></sc-if>
+
+      <sc-if value="{{ toast }}"><div style="position:absolute;z-index:60;bottom:{{ toastBottom }};left:{{ toastLeft }};right:{{ toastRight }};width:{{ toastW }};background:#1E2A32;color:#FFFFFF;border-radius:6px;padding:12px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(30,42,50,0.16);animation:ari-up 200ms ease-out"><span style="color:#7FD1A4;display:flex">{{ i20.ok }}</span><span style="flex:1;font-size:14px;line-height:20px">{{ toast }}</span><button onClick="{{ goCart }}" style="border:0;background:none;color:#FFFFFF;font:600 14px/20px 'Noto Sans';text-decoration:underline;cursor:pointer;min-height:36px">View cart</button></div></sc-if>
+
+      <sc-if value="{{ drawer }}"><div style="position:absolute;inset:0;z-index:50;display:flex">
+        <div style="width:328px;max-width:88%;height:100%;background:#FFFFFF;display:flex;flex-direction:column;box-shadow:0 8px 24px rgba(30,42,50,0.16);animation:ari-up 150ms ease-out">
+          <div style="height:56px;background:#1E2A32;color:#FFFFFF;display:flex;align-items:center;justify-content:space-between;padding:0 4px 0 16px;flex:none"><span style="font:700 22px/26px 'Barlow Semi Condensed',sans-serif">All categories</span><button onClick="{{ closeDrawer }}" aria-label="Close menu" style="width:48px;height:48px;border:0;background:none;color:#FFFFFF;display:flex;align-items:center;justify-content:center;cursor:pointer">{{ i24.x }}</button></div>
+          <div style="flex:1;overflow-y:auto">
+            <sc-for list="{{ depts }}" as="dp"><div style="border-bottom:1px solid #DDE1E4">
+              <button onClick="{{ dp.toggle }}" style="width:100%;height:56px;border:0;background:#FFFFFF;padding:0 16px;display:flex;justify-content:space-between;align-items:center;font:600 20px/24px 'Barlow Semi Condensed',sans-serif;color:#1E2A32;cursor:pointer">{{ dp.name }}<span style="display:flex">{{ dp.chev }}</span></button>
+              <sc-if value="{{ dp.open }}"><div style="padding-bottom:8px"><sc-for list="{{ dp.cats }}" as="ct"><button onClick="{{ ct.go }}" style="width:100%;min-height:52px;white-space:normal;border:0;background:none;padding:0 16px;display:flex;align-items:center;gap:14px;font:400 16px/22px 'Noto Sans';color:#1E2A32;text-align:left;cursor:pointer" style-hover="background:#F6F7F8"><span style="display:flex;color:#33424D">{{ ct.icon }}</span>{{ ct.name }}</button></sc-for></div></sc-if>
+            </div></sc-for>
+            <div style="padding:8px 0"><button onClick="{{ goAccount }}" style="width:100%;height:52px;border:0;background:none;padding:0 16px;display:flex;align-items:center;gap:14px;font:500 16px/22px 'Noto Sans';cursor:pointer">{{ i24.user }}My account</button><button onClick="{{ openArea }}" style="width:100%;height:52px;border:0;background:none;padding:0 16px;display:flex;align-items:center;gap:14px;font:500 16px/22px 'Noto Sans';cursor:pointer">{{ i24.pin }}Delivery area: {{ areaName }}</button></div>
+          </div>
+        </div>
+        <div onClick="{{ closeDrawer }}" style="flex:1;background:rgba(30,42,50,0.5)"></div>
+      </div></sc-if>
+
+      <sc-if value="{{ areaOpen }}"><div onClick="{{ closeArea }}" style="position:absolute;inset:0;z-index:55;background:rgba(30,42,50,0.5);display:flex;align-items:{{ L.dlgAlign }};justify-content:center;padding:{{ L.dlgPad }}">
+        <div onClick="{{ stop }}" role="dialog" aria-label="Delivery area" style="width:100%;max-width:{{ L.dlgW }};max-height:88%;background:#FFFFFF;border-radius:{{ L.dlgR }};display:flex;flex-direction:column;box-shadow:0 8px 24px rgba(30,42,50,0.16);animation:ari-up 150ms ease-out">
+          <div style="padding:16px 16px 12px;display:flex;flex-direction:column;gap:12px;border-bottom:1px solid #DDE1E4">
+            <div style="display:flex;justify-content:space-between;align-items:center"><span style="font:600 18px/24px 'Noto Sans'">Where should we deliver?</span><button onClick="{{ closeArea }}" aria-label="Close" style="width:44px;height:44px;margin-right:-10px;border:0;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer">{{ i20.x }}</button></div>
+            <div style="display:flex;align-items:center;gap:10px;height:48px;border:1px solid #A9B1B7;border-radius:6px;padding:0 12px;color:#6B747B">{{ i20.search }}<input value="{{ areaQ }}" onChange="{{ typeArea }}" placeholder="Search areas…" aria-label="Search areas" style="flex:1;border:0;outline:none;font-size:16px;color:#1E2A32;min-width:0"></div>
+          </div>
+          <div style="overflow-y:auto">
+            <sc-for list="{{ areaRows }}" as="a"><button onClick="{{ a.pick }}" disabled="{{ a.dis }}" style="width:100%;min-height:56px;padding:8px 16px;white-space:normal;display:flex;align-items:center;gap:12px;border:0;border-bottom:1px solid #DDE1E4;background:{{ a.bg }};text-align:left;cursor:{{ a.cur }};font:inherit" style-hover="background:#F6F7F8">
+              <span style="flex:1;display:flex;flex-direction:column"><span style="font-size:16px;line-height:22px;color:{{ a.fg }};font-weight:{{ a.fw }}">{{ a.name }}</span><span style="font-size:13px;line-height:18px;color:#33424D">{{ a.meta }}</span></span>
+              <sc-if value="{{ a.sel }}"><span style="color:#1F5AA6;display:flex">{{ i20.check }}</span></sc-if>
+            </button></sc-for>
+          </div>
+        </div>
+      </div></sc-if>
+
+      <sc-if value="{{ fsheet }}"><div style="position:absolute;inset:0;z-index:55;background:#FFFFFF;display:flex;flex-direction:column;animation:ari-up 150ms ease-out">
+        <div style="height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 4px 0 16px;border-bottom:1px solid #DDE1E4;flex:none"><span style="font:600 18px/24px 'Noto Sans'">{{ filterBtn }}</span><div style="display:flex;align-items:center"><button onClick="{{ clearFilters }}" style="height:44px;border:0;background:none;color:#1F5AA6;font:600 14px/20px 'Noto Sans';cursor:pointer;padding:0 8px">Clear all</button><button onClick="{{ closeFilters }}" aria-label="Close filters" style="width:48px;height:48px;border:0;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer">{{ i24.x }}</button></div></div>
+        <div style="flex:1;overflow-y:auto;padding:0 16px">
+          <sc-for list="{{ facets }}" as="fc"><div style="border-bottom:1px solid #DDE1E4;padding:4px 0 8px">
+            <button onClick="{{ fc.toggleOpen }}" style="width:100%;min-height:52px;border:0;background:none;padding:0;display:flex;justify-content:space-between;align-items:center;font:600 16px/22px 'Noto Sans';cursor:pointer">{{ fc.name }}<span style="display:flex">{{ fc.chev }}</span></button>
+            <sc-if value="{{ fc.open }}"><div><sc-for list="{{ fc.opts }}" as="o"><label onClick="{{ o.toggle }}" style="display:flex;align-items:center;gap:12px;min-height:48px;font-size:16px;cursor:pointer"><span style="width:22px;height:22px;border-radius:4px;border:1.5px solid {{ o.bd }};background:{{ o.bg }};display:flex;align-items:center;justify-content:center;color:#FFFFFF;flex:none">{{ o.mark }}</span><span style="flex:1">{{ o.label }}</span><span style="color:#6B747B;font-size:14px">{{ o.count }}</span></label></sc-for></div></sc-if>
+          </div></sc-for>
+          <div style="padding:14px 0;border-bottom:1px solid #DDE1E4;display:flex;flex-direction:column;gap:10px"><span style="font:600 16px/22px 'Noto Sans'">Price per unit</span><div style="display:flex;gap:8px;align-items:center"><input value="{{ pmin }}" onChange="{{ typeMin }}" placeholder="Min" inputMode="numeric" style="width:100%;min-width:0;height:48px;border:1px solid #A9B1B7;border-radius:6px;padding:0 12px;font-size:16px"><span>–</span><input value="{{ pmax }}" onChange="{{ typeMax }}" placeholder="Max" inputMode="numeric" style="width:100%;min-width:0;height:48px;border:1px solid #A9B1B7;border-radius:6px;padding:0 12px;font-size:16px"></div></div>
+          <label onClick="{{ toggleStock }}" style="display:flex;align-items:center;gap:12px;min-height:56px;font-size:16px;cursor:pointer"><span style="width:22px;height:22px;border-radius:4px;border:1.5px solid {{ stockBox.bd }};background:{{ stockBox.bg }};display:flex;align-items:center;justify-content:center;color:#FFFFFF;flex:none">{{ stockBox.mark }}</span>In stock only</label>
+        </div>
+        <div style="padding:12px 16px;box-shadow:0 -8px 24px rgba(30,42,50,0.16);flex:none"><button onClick="{{ closeFilters }}" style="width:100%;height:48px;border:0;border-radius:6px;background:#F2A900;color:#1E2A32;font:600 16px/20px 'Noto Sans';cursor:pointer">{{ showN }}</button></div>
+      </div></sc-if>
+    </div></div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const KEY = 'aricon-shop-proto-v1';
+const SAMPLE_CART = [{ id: 'lucky-ppc', q: 12 }, { id: 'pc-329', q: 8 }, { id: 'clipsal-1g', q: 20 }];
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
+    this.state = Object.assign({
+      vp: 'm', route: 'home', pid: 'lucky-ppc', pq: { 'lucky-ppc': 12 }, chip: {}, cart: SAMPLE_CART.slice(), area: 'Gulshan-e-Iqbal',
+      drawer: false, dOpen: 'Civil', areaOpen: false, areaQ: '', mega: false, sq: '', sFocus: false, term: 'wire 7/29',
+      f: { brand: ['Lucky Cement'], type: [], pack: ['50 kg'] }, stock: false, pmin: '', pmax: '', sort: 'rel', fsheet: false, fOpen: { Brand: true, Type: true, 'Pack size': true, Category: true }, page: 1, loaded: false,
+      addr: 0, defAddr: 0, pay: 'bank', note: '', newAddr: false, priceChanged: false, codLimit: false, placing: false, itemsOpen: false,
+      placedPay: 'bank', placedTotal: 38160, placedUp: false, acct: 'overview', oid: 'ARC-2026-000123', newReceipt: false,
+      loginErr: false, signErr: false, toast: null, bump: false, img: 0, descOpen: false, copied: '', ww: 1280, wh: 800
+    }, saved);
+  }
+  componentDidMount() {
+    this._fit = () => this.setState({ ww: window.innerWidth, wh: window.innerHeight });
+    window.addEventListener('resize', this._fit); this._fit();
+    if (!window.AriIcons || !window.AriData) this._t = setInterval(() => { if (window.AriIcons && window.AriData) { clearInterval(this._t); this.forceUpdate(); } }, 50);
+  }
+  componentDidUpdate() {
+    const s = this.state;
+    try { localStorage.setItem(KEY, JSON.stringify({ vp: s.vp, route: s.route, pid: s.pid, acct: s.acct, oid: s.oid })); } catch (e) {}
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this._fit); clearInterval(this._t); ['_tt', '_bt', '_pt', '_ct', '_st'].forEach((k) => clearTimeout(this[k])); }
+  go(route, x) {
+    this.setState(Object.assign({ route, drawer: false, mega: false, sFocus: false, areaOpen: false, fsheet: false }, x || {}), () => { if (this.scroller) this.scroller.scrollTop = 0; });
+  }
+  toast(msg) {
+    this.setState({ toast: msg, bump: true });
+    clearTimeout(this._tt); clearTimeout(this._bt);
+    this._bt = setTimeout(() => this.setState({ bump: false }), 160);
+    this._tt = setTimeout(() => this.setState({ toast: null }), 3200);
+  }
+  add(p, q) {
+    const D = window.AriData;
+    if (p.multi) return this.go('product', { pid: p.id });
+    this.setState((s) => {
+      const cart = s.cart.slice(); const i = cart.findIndex((c) => c.id === p.id);
+      if (i >= 0) cart[i] = { id: p.id, q: cart[i].q + q }; else cart.push({ id: p.id, q });
+      return { cart };
+    });
+    this.toast('Added ' + q + ' ' + D.pl(p, q) + ' to your cart');
+  }
+  setLine(id, q) { this.setState((s) => ({ cart: s.cart.map((c) => (c.id === id ? { id, q: Math.max(1, q || 1) } : c)) })); }
+  renderVals() {
+    const I = window.AriIcons, D = window.AriData;
+    if (!I || !D) return {};
+    const s = this.state, m = s.vp === 'm', d = !m, fmt = D.fmt, P = D.byId;
+    const i24 = I.icons(React, 24), i20 = I.icons(React, 20), i16 = I.icons(React, 16), i14 = I.icons(React, 14, 2.5);
+    const c28 = I.cats(React, 28), c24 = I.cats(React, 24), c40 = I.cats(React, m ? 48 : 56), c56 = I.cats(React, 56), cCard = I.cats(React, m ? 64 : 88), cBig = I.cats(React, m ? 160 : 240), cThumb = I.cats(React, 40);
+    const go = (r, x) => () => this.go(r, x);
+    const L = m ? {
+      maxw: '100%', pad: '16px', h1: "700 28px/34px 'Barlow Semi Condensed',sans-serif", h2: "600 22px/28px 'Barlow Semi Condensed',sans-serif", disp: "700 36px/40px 'Barlow Semi Condensed',sans-serif",
+      heroCols: 'minmax(0,1fr)', heroH: 'auto', heroPad: '28px 16px 32px', heroOrder: 2, heroImgOrder: 1, heroImgH: '180px', trustGap: '24px', secPad: '24px 16px 8px', secGap: '32px', tileCols: 'repeat(2,minmax(0,1fr))', gap: '12px',
+      rowCol: '160px', rowBleed: '-16px', rowBleedP: '16px', brandCols: 'repeat(3,minmax(0,1fr))', quotePad: '24px 20px', quoteDir: 'column', quoteAlign: 'stretch',
+      listPad: '16px 16px 24px', listCols: 'minmax(0,1fr)', gridCols: 'repeat(2,minmax(0,1fr))', prodPad: '4px 16px 24px', prodGap: '28px', prodCols: 'minmax(0,1fr)', prodColGap: '20px', galBleed: '0 -16px', galBorder: '0', galR: '0', galPad: '16px',
+      panelPos: 'static', panelBg: 'transparent', panelBorder: '0', panelPad: '0', specCols: 'minmax(0,1fr)', cartCols: 'minmax(0,1fr)', lineCols: '72px minmax(0,1fr)', lineImg: '72px', addrCols: 'minmax(0,1fr)', formCols: 'minmax(0,1fr)', placedPad: '32px 16px 24px', btnDir: 'column', dropPad: '20px 16px',
+      authPad: '32px 16px', authCard: '24px 20px', acctCols: 'minmax(0,1fr)', orderCols: 'minmax(0,1fr) auto', orderBadgeCol: '1 / -1', detailCols: 'minmax(0,1fr)', footPad: '32px 16px', footCols: '1fr 1fr', dlgAlign: 'flex-end', dlgPad: '0', dlgW: '100%', dlgR: '16px 16px 0 0'
+    } : {
+      maxw: '1344px', pad: '32px', h1: "700 36px/42px 'Barlow Semi Condensed',sans-serif", h2: "600 26px/32px 'Barlow Semi Condensed',sans-serif", disp: "700 52px/56px 'Barlow Semi Condensed',sans-serif",
+      heroCols: 'minmax(0,5fr) minmax(0,7fr)', heroH: '500px', heroPad: '48px 32px', heroOrder: 1, heroImgOrder: 2, heroImgH: '500px', trustGap: '48px', secPad: '40px 32px 8px', secGap: '48px', tileCols: 'repeat(6,minmax(0,1fr))', gap: '24px',
+      rowCol: 'calc((100% - 96px) / 5)', rowBleed: '0', rowBleedP: '0', brandCols: 'repeat(12,minmax(0,1fr))', quotePad: '32px 40px', quoteDir: 'row', quoteAlign: 'center',
+      listPad: '24px 32px 32px', listCols: '280px minmax(0,1fr)', gridCols: 'repeat(4,minmax(0,1fr))', prodPad: '8px 32px 32px', prodGap: '48px', prodCols: 'minmax(0,7fr) minmax(0,5fr)', prodColGap: '48px', galBleed: '0', galBorder: '1px solid #DDE1E4', galR: '10px', galPad: '32px',
+      panelPos: 'sticky', panelBg: '#FFFFFF', panelBorder: '1px solid #DDE1E4', panelPad: '24px', specCols: 'minmax(0,1fr) minmax(0,1fr)', cartCols: 'minmax(0,8fr) minmax(0,4fr)', lineCols: '96px minmax(0,1fr)', lineImg: '96px', addrCols: 'repeat(2,minmax(0,1fr))', formCols: 'repeat(2,minmax(0,1fr))', placedPad: '48px 32px 32px', btnDir: 'row', dropPad: '28px 16px',
+      authPad: '64px 32px', authCard: '32px', acctCols: '260px minmax(0,1fr)', orderCols: 'minmax(0,1fr) 140px 300px', orderBadgeCol: 'auto', detailCols: 'minmax(0,2fr) minmax(0,1fr)', footPad: '48px 32px', footCols: '2fr 1fr 1fr 1fr 1.4fr', dlgAlign: 'center', dlgPad: '32px', dlgW: '440px', dlgR: '10px'
+    };
+    const avail = Math.max(320, s.ww - 32), availH = Math.max(480, s.wh - 56 - 32);
+    const zoom = d ? Math.min(1, avail / 1440) : Math.min(1, availH / 844);
+    const frameW = d ? '1440px' : '390px', frameH = (d ? Math.round(availH / zoom) : 844) + 'px';
+    const area = D.areas.find((a) => a.name === s.area) || D.areas[0];
+    const r = s.route;
+    // cards
+    const cv = (p) => D.cardVM(p, { cat: cCard, steps: i16.steps, cart: i20.cart, mobile: m, open: (pp) => this.go('product', { pid: pp.id }), add: (pp) => this.add(pp, 1) });
+    const byTag = (t) => D.products.filter((p) => (p.tags || []).includes(t)).slice(0, 5).map(cv);
+    // cart
+    const lines = s.cart.filter((c) => P[c.id]).map((c, i) => {
+      const p = P[c.id], q = c.q, k = D.tierIdx(p, q), up = p.tiers[k][1], nx = p.tiers[k + 1], issue = q > p.stock;
+      return { id: p.id, bt: i ? '1px solid #DDE1E4' : '0', name: p.short, short: p.short.split(',')[0], stock: p.stock, img: c40[p.icon], unit: p.unit, upL: fmt(up), up, q, qStr: String(q), totalL: fmt(up * q), total: up * q,
+        applied: k > 0 ? 'Bulk price applied (' + p.tiers[k][0] + '+).' : '', showNext: !!nx && !issue, next: nx ? 'Add ' + (nx[0] - q) + ' more to pay ' + fmt(nx[1]) + ' each.' : '', toNext: () => nx && this.setLine(p.id, nx[0]),
+        issue, issueMsg: 'Only ' + p.stock + ' in stock.', fixLabel: 'Set to ' + p.stock, fix: () => this.setLine(p.id, p.stock),
+        dec: () => this.setLine(p.id, q - 1), inc: () => this.setLine(p.id, q + 1), minusC: q <= 1 ? '#A9B1B7' : '#1E2A32', type: (e) => this.setLine(p.id, parseInt(e.target.value.replace(/\D/g, ''), 10)),
+        remove: () => this.setState((st) => ({ cart: st.cart.filter((x) => x.id !== p.id) })), open: go('product', { pid: p.id }) };
+    });
+    const sub = lines.reduce((a, l) => a + l.total, 0), fee = sub >= area.free ? 0 : area.fee, total = sub + (lines.length ? fee : 0);
+    const cartCount = lines.length;
+    const itemsLabel = cartCount + (cartCount === 1 ? ' item' : ' items');
+    const freeLeft = Math.max(0, area.free - sub);
+    const barTicks = [0, 20, 40, 60, 80, 100].map((v, i) => ({ left: v + '%', label: i === 0 ? 'Rs 0' : i === 5 ? fmt(area.free) : '', tx: i === 0 ? 'none' : 'translateX(-100%)' }));
+    const codOff = s.codLimit || total > 200000;
+    const pay = codOff && s.pay === 'cod' ? 'bank' : s.pay;
+    const issueLines = lines.filter((l) => l.issue);
+    // search suggestions
+    const q = s.sq.trim().toLowerCase();
+    const hl = (text) => { const i = text.toLowerCase().indexOf(q); return i < 0 ? { pre: text, hit: '', post: '' } : { pre: text.slice(0, i), hit: text.slice(i, i + q.length), post: text.slice(i + q.length) }; };
+    const sp = q ? D.products.filter((p) => (p.brand + ' ' + p.name).toLowerCase().includes(q)).slice(0, 4).map((p) => Object.assign(hl(p.brand + ' ' + p.name), { img: c24[p.icon], price: fmt(p.tiers[0][1]), pick: () => this.go('product', { pid: p.id, sq: '' }) })) : [];
+    const allCats = D.departments.flatMap((dp) => dp.cats.map((c) => c[0]));
+    const sc = q ? allCats.filter((c) => c.toLowerCase().includes(q)).slice(0, 3).map((c) => Object.assign(hl(c), { pick: () => this.go('category', { sq: '' }) })) : [];
+    const sb = q ? D.brands.filter((b) => b.toLowerCase().includes(q)).slice(0, 3).map((b) => Object.assign(hl(b), { pick: () => this.go('search', { term: b, sq: '' }) })) : [];
+    const sug = { products: sp, cats: sc, brands: sb, hasP: sp.length > 0, hasC: sc.length > 0, hasB: sb.length > 0, any: sp.length + sc.length + sb.length > 0, none: !!q && sp.length + sc.length + sb.length === 0 };
+    const runSearch = () => { if (s.sq.trim()) this.go('search', { term: s.sq.trim(), sq: '' }); };
+    // listing
+    const isCat = r === 'category', isSearch = r === 'search';
+    const words = s.term.toLowerCase().split(/\s+/).filter(Boolean);
+    const base = isCat ? D.products.filter((p) => p.cat === 'cement') : D.products.filter((p) => { const t = (p.brand + ' ' + p.name + ' ' + p.cat).toLowerCase(); return words.some((w) => t.includes(w)); });
+    const facetDefs = isCat
+      ? [['Brand', 'brand', [['Lucky Cement', 42], ['Maple Leaf', 38], ['DG Cement', 48]]], ['Type', 'type', [['OPC', 52], ['PPC', 44], ['SRC', 12], ['White cement', 9], ['Plaster', 11]]], ['Pack size', 'pack', [['50 kg', 96], ['40 kg', 32]]]]
+      : [['Category', 'cat', Object.entries(base.reduce((a, p) => { a[p.cat] = (a[p.cat] || 0) + 1; return a; }, {})).map(([k, n]) => [k, n])], ['Brand', 'brand', Object.entries(base.reduce((a, p) => { a[p.brand] = (a[p.brand] || 0) + 1; return a; }, {})).map(([k, n]) => [k, n])]];
+    const catNames = { cement: 'Cement & plaster', wire: 'Wires & cables', switch: 'Switches & sockets', breaker: 'Breakers & DBs', pipe: 'Pipes', paint: 'Paint & primers', tiles: 'Tiles & adhesives', waterproof: 'Waterproofing' };
+    const fsel = s.f;
+    const box = (on, part) => ({ bd: on || part ? '#1E2A32' : '#A9B1B7', bg: on || part ? '#1E2A32' : '#FFFFFF', mark: on ? i14.check : part ? i14.minus : null });
+    const toggleF = (key, v) => this.setState((st) => { const cur = st.f[key] || []; return { f: Object.assign({}, st.f, { [key]: cur.includes(v) ? cur.filter((x) => x !== v) : cur.concat([v]) }) }; });
+    const facets = facetDefs.map(([name, key, opts]) => ({ name, open: s.fOpen[name] !== false, chev: s.fOpen[name] !== false ? i20.up : i20.down, toggleOpen: () => this.setState((st) => ({ fOpen: Object.assign({}, st.fOpen, { [name]: st.fOpen[name] === false }) })),
+      opts: opts.map(([v, n]) => Object.assign({ label: key === 'cat' ? catNames[v] || v : v, count: n, toggle: (e) => { e.preventDefault(); toggleF(key, v); } }, box((fsel[key] || []).includes(v)))) }));
+    const keys = facetDefs.map((f) => f[1]);
+    const pmin = parseInt(s.pmin, 10), pmax = parseInt(s.pmax, 10);
+    let res = base.filter((p) => keys.every((k) => !(fsel[k] || []).length || fsel[k].includes(p[k])) && (!s.stock || p.stock > 0) && (!pmin || p.tiers[0][1] >= pmin) && (!pmax || p.tiers[0][1] <= pmax));
+    if (s.sort === 'low') res = res.slice().sort((a, b) => a.tiers[0][1] - b.tiers[0][1]);
+    if (s.sort === 'high') res = res.slice().sort((a, b) => b.tiers[0][1] - a.tiers[0][1]);
+    const activeChips = [];
+    keys.forEach((k) => (fsel[k] || []).forEach((v) => activeChips.push({ label: k === 'cat' ? catNames[v] || v : v, remove: () => toggleF(k, v) })));
+    if (s.stock) activeChips.push({ label: 'In stock only', remove: () => this.setState({ stock: false }) });
+    if (pmin || pmax) activeChips.push({ label: (pmin ? fmt(pmin) : 'Rs 0') + ' – ' + (pmax ? fmt(pmax) : 'any'), remove: () => this.setState({ pmin: '', pmax: '' }) });
+    const nActive = activeChips.length;
+    const filtered = nActive > 0;
+    const shown = m && !s.loaded && !filtered ? res.slice(0, 6) : res;
+    const clearFilters = () => this.setState({ f: { brand: [], type: [], pack: [], cat: [] }, stock: false, pmin: '', pmax: '' });
+    const subChips = ['OPC', 'PPC', 'SRC', 'Plaster', 'White cement'].map((t) => { const on = (fsel.type || []).includes(t); return { label: t, bd: on ? '#1F5AA6' : '#A9B1B7', bg: on ? '#EAF1FB' : '#FFFFFF', toggle: () => toggleF('type', t) }; });
+    const pages = ['1', '2', '3', '…', '7'].map((l) => ({ label: l, bd: String(s.page) === l ? '#1E2A32' : '#DDE1E4', bg: String(s.page) === l ? '#1E2A32' : '#FFFFFF', fg: String(s.page) === l ? '#FFFFFF' : '#1E2A32', go: () => l !== '…' && this.setState({ page: +l }) }));
+    // product
+    const p = P[s.pid] || P['lucky-ppc'];
+    const pqv = s.pq[p.id] || 1;
+    const setPQ = (v) => this.setState((st) => ({ pq: Object.assign({}, st.pq, { [p.id]: Math.max(1, Math.min(Math.max(1, p.stock), v || 1)) }) }));
+    const lad = D.ladderVM(p, pqv, setPQ);
+    const oos = p.stock === 0;
+    const packs = p.multi ? [['Gallon (3.6 L)', true], ['Drum (16 L)', false]] : p.packs || [[p.pack || '1 ' + p.unit, true]];
+    const selPack = s.chip[p.id] || packs[0][0];
+    const chips = packs.map(([label, ok]) => { const sel = ok && selPack === label; return { label, dis: !ok, pick: () => ok && this.setState((st) => ({ chip: Object.assign({}, st.chip, { [p.id]: label }) })), bd: !ok ? '1px dashed #A9B1B7' : sel ? '1px solid #1F5AA6' : '1px solid #A9B1B7', bg: sel ? '#EAF1FB' : '#FFFFFF', fg: ok ? '#1E2A32' : '#6B747B', cur: ok ? 'pointer' : 'not-allowed' }; });
+    const stockB = oos ? { label: 'Out of stock', bg: '#FDECEA', fg: '#B42318' } : p.stock <= 10 ? { label: 'Only ' + p.stock + ' left', bg: '#FFF3CC', fg: '#1E2A32' } : { label: 'In stock', bg: '#E7F4EC', fg: '#1E7B4F' };
+    const specs = (p.specs || [['Brand', p.brand], ['Pack', p.pack || '1 ' + p.unit], ['SKU', p.sku]]).map(([k, v], i) => ({ k, v, bt: i ? '1px solid #DDE1E4' : '0' }));
+    const desc = p.id === 'lucky-ppc' ? 'Lucky Cement PPC is a Portland pozzolana cement for plaster, block masonry and general concrete work. Its lower heat of hydration than OPC suits large pours in Karachi summers and reduces surface cracking in plaster. Supplied fresh from Lucky\u2019s Karachi distributor; each bag carries the packing date. Store bags on pallets, off the floor and away from walls, and use within 90 days of packing. For RCC slabs and columns, follow your structural engineer\u2019s mix design.' : 'Genuine ' + p.brand + ' stock, supplied through authorised distributors in Karachi. Check the specifications for size, rating and pack before ordering. For large project quantities, send us your list on WhatsApp for a quote.';
+    const gallery = ['Front', 'Back', 'Label', 'In use'].map((label, i) => ({ label: 'Product photo: ' + label.toLowerCase(), dot: s.img === i ? '#1E2A32' : '#A9B1B7', bd: s.img === i ? '2px solid #1E2A32' : '1px solid #DDE1E4', pick: () => this.setState({ img: i }) }));
+    const related = D.products.filter((x) => x.id !== p.id && x.stock > 0).sort((a, b) => (b.cat === p.cat) - (a.cat === p.cat)).slice(0, 5).map(cv);
+    const pv = { brand: p.brand, name: p.name, short: p.short, catName: catNames[p.cat] || 'Products', stock: stockB, chips, optName: p.multi ? 'Size' : 'Pack size', specs, desc, gallery, bigIcon: cBig[p.icon], thumbIcon: cThumb[p.icon], imgOp: oos ? 0.6 : 1, oos, inStock: !oos, stepOp: oos ? 0.5 : 1 };
+    // account
+    const badge = (label) => {
+      const M = { New: ['#EAF1FB', '#1F5AA6', 'transparent'], Confirmed: ['#FFFFFF', '#1E2A32', '#1E2A32'], 'On the way': ['#FFF3CC', '#1E2A32', 'transparent'], Delivered: ['#E7F4EC', '#1E7B4F', 'transparent'], Cancelled: ['#FDECEA', '#B42318', 'transparent'], Pending: ['#F6F7F8', '#33424D', '#DDE1E4'], 'Awaiting verification': ['#FFF3CC', '#1E2A32', 'transparent'], Paid: ['#E7F4EC', '#1E7B4F', 'transparent'], Rejected: ['#FDECEA', '#B42318', 'transparent'], Refunded: ['#FFFFFF', '#33424D', '#6B747B'] }[label] || ['#F6F7F8', '#33424D', '#DDE1E4'];
+      return { label, bg: M[0], fg: M[1], bd: '1px solid ' + M[2] };
+    };
+    const ORD = [
+      { no: 'ARC-2026-000123', date: '26 Sep 2026, 4:05 pm', method: 'Bank transfer', pay: s.newReceipt ? 'Awaiting verification' : 'Rejected', status: 'New', lines: [['lucky-ppc', 12], ['dadex-pprc', 10], ['clipsal-1g', 30]] },
+      { no: 'ARC-2026-000109', date: '18 Sep 2026, 10:20 am', method: 'Cash on delivery', pay: 'Paid', status: 'Delivered', lines: [['maple-opc', 30], ['pc-329', 1]] },
+      { no: 'ARC-2026-000094', date: '9 Sep 2026, 1:45 pm', method: 'Bank transfer', pay: 'Paid', status: 'Delivered', lines: [['sch-mcb16', 10], ['clipsal-1g', 20]] },
+      { no: 'ARC-2026-000071', date: '28 Aug 2026, 6:10 pm', method: 'Cash on delivery', pay: 'Pending', status: 'Cancelled', lines: [['dulux-ws', 1]] }
+    ].map((o, i) => {
+      const ls = o.lines.map(([id, n]) => { const pp = P[id], up = D.unitPrice(pp, n); return { name: pp.short, q: n, upL: fmt(up), total: up * n, totalL: fmt(up * n) }; });
+      const st = ls.reduce((a, l) => a + l.total, 0), fe = st >= 50000 ? 0 : 500;
+      return Object.assign(o, { ls, subL: fmt(st), feeL: fe ? fmt(fe) : 'Free', totalL: fmt(st + fe), itemsL: ls.length + (ls.length === 1 ? ' item' : ' items'), pb: badge(o.pay), sb: badge(o.status), bt: i ? '1px solid #DDE1E4' : '0', open: go('account', { acct: 'detail', oid: o.no }) });
+    });
+    const o = ORD.find((x) => x.no === s.oid) || ORD[0];
+    const tl = (label, time, st, n) => ({ label, time, mark: st === 'done' ? i16.check : st === 'bad' ? i16.x : n, bg: st === 'done' ? '#1E2A32' : st === 'bad' ? '#B42318' : '#FFFFFF', fg: st === 'done' || st === 'bad' ? '#FFFFFF' : st === 'now' ? '#1E2A32' : '#6B747B', bd: st === 'now' ? '2px solid #1E2A32' : st === 'todo' ? '1px solid #A9B1B7' : '0', line: st === 'done' ? '#1E2A32' : '#DDE1E4', fw: st === 'todo' ? 400 : 600, tc: st === 'bad' ? '#B42318' : st === 'todo' ? '#6B747B' : '#1E2A32' });
+    let steps = o.status === 'Delivered' ? [tl('Placed', o.date, 'done', '1'), tl('Confirmed', 'Same day', 'done', '2'), tl('On the way', 'Rider: Rashid Ali', 'done', '3'), tl('Delivered', 'Next day, 12:15 pm', 'done', '4')]
+      : o.status === 'Cancelled' ? [tl('Placed', o.date, 'done', '1'), tl('Cancelled', '28 Aug, 6:40 pm. You asked us to cancel', 'bad', '')]
+      : [tl('Placed', o.date, 'done', '1'), tl('Confirmed', s.newReceipt ? 'After we verify your receipt' : 'Waiting for a valid payment receipt', 'now', '2'), tl('On the way', '', 'todo', '3'), tl('Delivered', '', 'todo', '4')];
+    steps[steps.length - 1].line = 'transparent';
+    const rcpt = [{ file: 'IMG_2041.jpg', when: 'Uploaded 26 Sep, 4:20 pm', status: 'Rejected', bg: '#FDECEA', fg: '#B42318', reason: 'Amount on the receipt is Rs 30,000; the order total is Rs 38,160. Upload a receipt for the full amount.' }];
+    if (s.newReceipt) rcpt.push({ file: 'receipt-meezan-27sep.jpg', when: 'Uploaded just now', status: 'Pending', bg: '#F6F7F8', fg: '#33424D', reason: '' });
+    const od = { no: o.no, date: o.date, sb: o.sb, pb: o.pb, steps, lines: o.ls, subL: o.subL, feeL: o.feeL, totalL: o.totalL, bank: o.method === 'Bank transfer' && o.status === 'New', receipts: rcpt, canUpload: !s.newReceipt, canCancel: o.status === 'New' };
+    const ADDR = [{ label: 'Home', name: 'Imran Qureshi', phone: '0300 1234567', line: 'House 12, Block 13-D, Gulshan-e-Iqbal, Karachi' }, { label: 'Site: Jauhar project', name: 'Asad (site supervisor)', phone: '0312 5550142', line: 'Plot 45, Block 7, Gulistan-e-Jauhar, Karachi. Near Rab Medical' }];
+    const addrCards = ADDR.map((a, i) => { const sel = s.addr === i; return Object.assign({}, a, { def: s.defAddr === i, notDef: s.defAddr !== i, makeDef: () => this.setState({ defAddr: i }), pick: () => this.setState({ addr: i, area: i === 0 ? 'Gulshan-e-Iqbal' : 'Gulistan-e-Jauhar' }), bd: sel ? '2px solid #1E2A32' : '1px solid #DDE1E4', pad: sel ? '13px' : '14px', ring: sel ? '#1E2A32' : '#A9B1B7', dot: sel ? '#1E2A32' : 'transparent' }); });
+    const payCards = [['cod', 'Cash on delivery', 'Pay the rider when your order arrives.'], ['bank', 'Bank transfer', 'Transfer and upload your receipt.']].map(([id, title, body]) => {
+      const dis = id === 'cod' && codOff, sel = pay === id;
+      return { title, body, reason: dis ? 'Not available for orders above Rs 200,000. Pay by bank transfer instead.' : '', pick: () => !dis && this.setState({ pay: id }), bd: sel ? '2px solid #1E2A32' : '1px solid #DDE1E4', pad: sel ? '15px' : '16px', cur: dis ? 'not-allowed' : 'pointer', bg: dis ? '#F6F7F8' : '#FFFFFF', ring: sel ? '#1E2A32' : '#A9B1B7', dot: sel ? '#1E2A32' : 'transparent', tc: dis ? '#6B747B' : '#1E2A32' };
+    });
+    const bankRows = D.bank.map(([k, v]) => ({ k, v, icon: s.copied === k ? i16.check : i16.copy, label: s.copied === k ? 'Copied' : 'Copy', copy: () => { try { navigator.clipboard.writeText(v); } catch (e) {} this.setState({ copied: k }); clearTimeout(this._ct); this._ct = setTimeout(() => this.setState({ copied: '' }), 1600); } }));
+    const placeDis = s.placing || issueLines.length > 0 || !lines.length;
+    const spin = React.createElement('span', { style: { display: 'inline-flex', animation: 'ari-spin 0.8s linear infinite' } }, i20.loader);
+    const acctTabs = [['overview', 'Overview', i20.home], ['orders', 'Orders', i20.orders], ['addr', 'Addresses', i20.pin], ['profile', 'Profile', i20.user]].map(([id, label, icon]) => { const on = s.acct === id || (id === 'orders' && s.acct === 'detail'); return { label, icon, go: () => this.go('account', { acct: id }), bg: on ? '#EAF1FB' : 'transparent', edge: on ? 'inset 3px 0 0 #1F5AA6' : 'none', under: on ? 'inset 0 -3px 0 #1F5AA6' : 'none', font: on ? "600 15px/20px 'Noto Sans'" : "500 15px/20px 'Noto Sans'" }; });
+    // demos
+    const dm = (label, fn, on) => ({ label, fn, bg: on ? '#EAF1FB' : '#FFFFFF', bd: on ? '#1F5AA6' : '#A9B1B7' });
+    const demos = {
+      home: [dm('Delivery area', () => this.setState({ areaOpen: true })), m ? dm('Menu drawer', () => this.setState({ drawer: true })) : dm('Mega menu', () => this.setState({ mega: true })), dm('Search "wire"', () => this.setState({ sq: 'wire', sFocus: true })), dm('Search, no match', () => this.setState({ sq: 'xyz', sFocus: true }))],
+      category: [dm('Default filters', () => this.setState({ f: { brand: ['Lucky Cement'], type: [], pack: ['50 kg'] }, stock: false, pmin: '', pmax: '' })), dm('No filters', clearFilters), dm('Empty result', () => this.setState({ f: { brand: ['Lucky Cement'], type: ['SRC'], pack: [] } })), m ? dm('Filter sheet', () => this.setState({ fsheet: true })) : null].filter(Boolean),
+      search: [dm('Suggestions "wire"', () => this.setState({ sq: 'wire', sFocus: true })), dm('Results "wire 7/29"', () => this.setState({ term: 'wire 7/29', f: { brand: [], cat: [] } }))],
+      product: [dm('Lucky PPC, 12 bags', () => this.setState({ pid: 'lucky-ppc', pq: Object.assign({}, s.pq, { 'lucky-ppc': 12 }) }), p.id === 'lucky-ppc'), dm('Out of stock', () => this.setState({ pid: 'maple-plaster' }), p.id === 'maple-plaster'), dm('No bulk tiers', () => this.setState({ pid: 'maple-white' }), p.id === 'maple-white')],
+      cart: [dm('Sample cart', () => this.setState({ cart: SAMPLE_CART.slice() })), dm('Empty cart', () => this.setState({ cart: [] }))],
+      checkout: [dm('Prices changed', () => this.setState({ priceChanged: !s.priceChanged }), s.priceChanged), dm('COD above Rs 200,000', () => this.setState({ codLimit: !s.codLimit }), s.codLimit), dm('Sample cart', () => this.setState({ cart: SAMPLE_CART.slice() }))],
+      placed: [dm('Bank transfer', () => this.setState({ placedPay: 'bank', placedUp: false }), s.placedPay === 'bank'), dm('Cash on delivery', () => this.setState({ placedPay: 'cod' }), s.placedPay === 'cod')],
+      login: [dm('Show error', () => this.setState({ loginErr: !s.loginErr }), s.loginErr)],
+      signup: [dm('Phone already used', () => this.setState({ signErr: !s.signErr }), s.signErr)],
+      account: [dm('Order detail, rejected receipt', () => this.setState({ acct: 'detail', oid: 'ARC-2026-000123', newReceipt: false }), s.acct === 'detail')]
+    };
+    const routes = [['home', 'Home'], ['category', 'Category: Cement & plaster'], ['search', 'Search results'], ['product', 'Product page'], ['cart', 'Cart'], ['checkout', 'Checkout'], ['placed', 'Order placed'], ['login', 'Log in'], ['signup', 'Sign up'], ['account', 'Account']].map(([id, label]) => ({ id, label }));
+    const depts = D.departments.map((dp) => ({ name: dp.name, open: s.dOpen === dp.name, chev: s.dOpen === dp.name ? i20.up : i20.down, toggle: () => this.setState({ dOpen: s.dOpen === dp.name ? '' : dp.name }), cats: dp.cats.map(([name, icon]) => ({ name, icon: m ? c28[icon] : c24[icon], go: go('category') })) }));
+    const isAuth = r === 'login' || r === 'signup';
+    const withSticky = m && ((r === 'product') || (r === 'cart' && lines.length));
+    return {
+      i24, i20, i16, c56, L, m, d, frameW, frameH, scaleT: 'scale(' + zoom + ')', outerW: Math.round((d ? 1440 : 390) * zoom) + 'px', outerH: Math.round(parseInt(frameH, 10) * zoom) + 'px', frameR: m ? '28px' : '0', route: r, routes, demo: demos[r] || [],
+      tbM: m ? '#1E2A32' : '#FFFFFF', tbMc: m ? '#FFFFFF' : '#1E2A32', tbD: d ? '#1E2A32' : '#FFFFFF', tbDc: d ? '#FFFFFF' : '#1E2A32',
+      setM: () => this.setState({ vp: 'm' }), setD: () => this.setState({ vp: 'd', drawer: false, fsheet: false }), pickRoute: (e) => this.go(e.target.value),
+      scrollRef: (el) => { this.scroller = el; }, stop: (e) => e.stopPropagation(),
+      showHeader: !isAuth, showFooter: !isAuth && !(m && (r === 'checkout')),
+      isHome: r === 'home', isList: isCat || isSearch, isCat, isSearch, isProduct: r === 'product', isCart: r === 'cart', isCheckout: r === 'checkout', isPlaced: r === 'placed', isAuth, isLogin: r === 'login', isSignup: r === 'signup', isAccount: r === 'account',
+      goHome: go('home'), goCart: go('cart'), goAccount: go('account', { acct: 'overview' }), goCheckout: go('checkout'), goCement: go('category'), goLogin: go('login'), goSignup: go('signup', { signErr: false }), goBack: () => this.go('category'),
+      openCats: () => (m ? this.setState({ drawer: true }) : this.setState({ mega: true }, () => { if (this.scroller) this.scroller.scrollTop = 0; })),
+      openDrawer: () => this.setState({ drawer: true }), closeDrawer: () => this.setState({ drawer: false }), toggleMega: () => this.setState({ mega: !s.mega }), closeMega: () => this.setState({ mega: false }), megaOpen: s.mega && d, megaBg: s.mega ? '#33424D' : 'transparent',
+      depts, deptLinks: D.departments.map((dp) => ({ name: dp.name, go: () => this.setState({ mega: true }) })),
+      cartCount, bumpT: s.bump ? 'scale(1.25)' : 'scale(1)', areaName: area.name, areaFee: fmt(area.fee), areaFree: fmt(area.free),
+      openArea: () => this.setState({ areaOpen: true, drawer: false, areaQ: '' }), closeArea: () => this.setState({ areaOpen: false }), areaOpen: s.areaOpen, areaQ: s.areaQ, typeArea: (e) => this.setState({ areaQ: e.target.value }),
+      areaRows: D.areas.filter((a) => a.name.toLowerCase().includes(s.areaQ.toLowerCase())).map((a) => { const sel = a.name === s.area; return { name: a.name, meta: a.ok ? 'Delivery ' + fmt(a.fee) + '. Free above ' + fmt(a.free) : 'Not delivering yet', sel, dis: !a.ok, bg: sel ? '#EAF1FB' : '#FFFFFF', fg: a.ok ? '#1E2A32' : '#6B747B', fw: sel ? 600 : 400, cur: a.ok ? 'pointer' : 'not-allowed', pick: () => a.ok && this.setState({ area: a.name, areaOpen: false }) }; }),
+      areaOpts: D.areas.map((a) => ({ label: a.ok ? a.name : a.name + ' (not delivering yet)', dis: !a.ok })),
+      sq: s.sq, sugOpen: s.sFocus && !!q, sug, runSearch,
+      typeSearch: (e) => this.setState({ sq: e.target.value, sFocus: true }), focusSearch: () => this.setState({ sFocus: true }), blurSearch: () => { clearTimeout(this._st); this._st = setTimeout(() => this.setState({ sFocus: false }), 120); }, keySearch: (e) => { if (e.key === 'Enter') runSearch(); if (e.key === 'Escape') this.setState({ sFocus: false }); },
+      trust: [[i20.shield, 'Genuine brands only'], [i20.steps, 'Bulk prices on every product'], [i20.cash, 'Cash on delivery'], [i20.building, 'By Aricon Engineering, since 2005']].map(([icon, label]) => ({ icon, label })),
+      tiles: D.categories.map((c) => ({ name: c.name, count: c.count + ' products', icon: c40[c.icon], go: go('category') })),
+      rows: [{ title: 'Deals', cards: byTag('deal') }, { title: 'Featured for your site', cards: byTag('featured') }, { title: 'New arrivals', cards: byTag('new') }], brands: D.brands,
+      listLabel: isCat ? 'Category' : 'Search results', listTitle: isCat ? 'Cement & plaster' : "Results for '" + s.term + "'", countLabel: isCat && !filtered ? '128 products' : res.length + (res.length === 1 ? ' product' : ' products'),
+      subChips, facets, activeChips, hasActive: nActive > 0, mActive: m && nActive > 0, filterBtn: nActive ? 'Filters (' + nActive + ')' : 'Filters', showN: 'Show ' + res.length + (res.length === 1 ? ' product' : ' products'),
+      openFilters: () => this.setState({ fsheet: true }), closeFilters: () => this.setState({ fsheet: false }), fsheet: s.fsheet && m, clearFilters,
+      sort: s.sort, pickSort: (e) => this.setState({ sort: e.target.value }), pmin: s.pmin, pmax: s.pmax, typeMin: (e) => this.setState({ pmin: e.target.value.replace(/\D/g, '') }), typeMax: (e) => this.setState({ pmax: e.target.value.replace(/\D/g, '') }),
+      stockBox: box(s.stock), toggleStock: (e) => { e.preventDefault(); this.setState({ stock: !s.stock }); },
+      listCards: shown.map(cv), listEmpty: res.length === 0, showPager: d && isCat && !filtered, pages, showMore: m && !s.loaded && !filtered && res.length > 6, loadMore: () => this.setState({ loaded: true }),
+      pv, lad, pqStr: String(pqv), pDec: () => setPQ(pqv - 1), pInc: () => setPQ(pqv + 1), pType: (e) => setPQ(parseInt(e.target.value.replace(/\D/g, ''), 10)), pAdd: () => this.add(p, pqv),
+      stickyTop: oos ? lad.priceLabel + ' / ' + p.unit : lad.total, stickySub: oos ? 'Out of stock' : lad.qLabel + ' at ' + lad.priceLabel + ' each',
+      galScroll: (e) => { const el = e.currentTarget; const i = Math.round(el.scrollLeft / el.clientWidth); if (i !== s.img) this.setState({ img: i }); },
+      related, descClamp: s.descOpen ? 'unset' : 3, descBtn: s.descOpen ? 'Show less' : 'Read more', toggleDesc: () => this.setState({ descOpen: !s.descOpen }),
+      lines, itemsLabel, cartEmpty: !lines.length, cartHas: lines.length > 0, mCartBar: m && lines.length > 0, subL: fmt(sub), feeL: fee ? fmt(fee) : 'Free', totalL: fmt(total),
+      freeMsgA: freeLeft ? 'Add ' : 'Free delivery to ' + area.name + ' on this order', freeMsgB: freeLeft ? fmt(freeLeft) : '', freeMsgC: freeLeft ? ' more for free delivery' : '', barPct: Math.min(100, (sub / area.free) * 100) + '%', barC: freeLeft ? '#1F5AA6' : '#1E7B4F', barTicks,
+      priceChanged: s.priceChanged, dismissPrice: () => this.setState({ priceChanged: false }), issueLines, addrCards, noNewAddr: !s.newAddr, newAddr: s.newAddr, openNewAddr: () => this.setState({ newAddr: true }),
+      payCards, payBank: pay === 'bank', bankRows, itemsOpen: s.itemsOpen, toggleItems: () => this.setState({ itemsOpen: !s.itemsOpen }), itemsChev: s.itemsOpen ? i20.up : i20.down, note: s.note, typeNote: (e) => this.setState({ note: e.target.value }),
+      placeDis, placeBg: placeDis && !s.placing ? '#EEF0F1' : '#F2A900', placeFg: placeDis && !s.placing ? '#6B747B' : '#1E2A32', placeCur: placeDis ? 'not-allowed' : 'pointer', placeSpin: s.placing ? spin : null, placeLabel: s.placing ? 'Placing order…' : 'Place order',
+      placeReason: issueLines.length ? 'Fix the stock issue above to place your order.' : '',
+      placeOrder: () => { if (placeDis) return; this.setState({ placing: true }); clearTimeout(this._pt); this._pt = setTimeout(() => this.go('placed', { placing: false, placedPay: pay, placedTotal: total, placedUp: false, cart: [] }), 1400); },
+      i40check: I.icons(React, 44, 2.5).check, placedTotalL: fmt(s.placedTotal), placedMethod: s.placedPay === 'bank' ? 'bank transfer' : 'cash on delivery', placedCod: s.placedPay === 'cod', placedBank: s.placedPay === 'bank', placedUp: s.placedUp, placedNoUp: !s.placedUp,
+      uploadPlaced: () => this.setState({ placedUp: true }), upIcon: m ? i24.camera : i24.upload, dropLabel: m ? 'Take photo or choose file' : 'Drop your receipt here, or choose a file', dropHint: m ? 'Take photo or choose file' : 'Drop the file here, or choose a file',
+      viewOrder: go('account', { acct: 'detail', oid: 'ARC-2026-000123' }),
+      authLabel: r === 'login' ? 'Log in' : 'Sign up', loginErr: s.loginErr, loginBd: s.loginErr ? '#B42318' : '#A9B1B7', signErr: s.signErr, signBd: s.signErr ? '#B42318' : '#A9B1B7',
+      doLogin: () => (s.loginErr ? this.setState({ loginErr: false }) : this.go('account', { acct: 'overview' })), doSignup: () => this.setState({ signErr: true }),
+      acctTabs, acctOverview: s.acct === 'overview', acctOrders: s.acct === 'orders', acctDetail: s.acct === 'detail', acctAddr: s.acct === 'addr', acctProfile: s.acct === 'profile', tabOrders: go('account', { acct: 'orders' }),
+      recentOrders: ORD.slice(0, 3), orderRows: ORD, od, uploadNew: () => this.setState({ newReceipt: true }),
+      reorder: () => { this.setState({ cart: o.lines.map(([id, n]) => ({ id, q: n })) }); this.toast('Added ' + o.ls.length + ' items from ' + o.no + ' to your cart'); },
+      shortcuts: [['Orders', i24.orders, 'orders'], ['Addresses', i24.pin, 'addr'], ['Profile', i24.user, 'profile']].map(([label, icon, id]) => ({ label, icon, go: go('account', { acct: id }) })),
+      footCols: [{ title: 'Shop', links: D.departments.map((x) => x.name) }, { title: 'Help', links: ['FAQ', 'Delivery policy', 'Refund policy', 'Contact'] }, { title: 'Company', links: ['About Aricon', 'Terms', 'Privacy'] }],
+      drawer: s.drawer && m, toast: s.toast, toastBottom: withSticky ? '88px' : m ? '16px' : '24px', toastLeft: m ? '16px' : 'auto', toastRight: m ? '16px' : '96px', toastW: m ? 'auto' : '380px',
+      fabShow: !isAuth && r !== 'checkout', fabBottom: withSticky ? '92px' : m ? '16px' : '24px', fabPad: m ? '0' : '0 20px 0 16px'
+    };
+  }
+}
+</script>
+</body>
+</html>

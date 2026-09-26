@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&amp;family=Noto+Sans:wght@400;500;600;700&amp;display=swap">
+<script src="aricon-icons.js"></script>
+<script src="aricon-data.js"></script>
+<style>body{margin:0;background:#C9CED2;color:#1E2A32;font-family:'Noto Sans',sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}a{color:#1F5AA6}a:hover{color:#174785}*{box-sizing:border-box}button{white-space:nowrap}button,input,select,textarea{font-family:inherit;color:inherit}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:2px solid #1F5AA6;outline-offset:2px}input::placeholder,textarea::placeholder{color:#6B747B}.ari-noscroll{scrollbar-width:none}.ari-noscroll::-webkit-scrollbar{display:none}@keyframes ari-spin{to{transform:rotate(360deg)}}@keyframes ari-in{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}</style>
+</helmet>
+<div style="height:100vh;display:flex;flex-direction:column">
+  <div class="ari-noscroll" style="height:56px;flex:none;background:#FFFFFF;border-bottom:1px solid #A9B1B7;display:flex;align-items:center;gap:12px;padding:0 16px;overflow-x:auto;white-space:nowrap">
+    <span style="font:700 16px/20px 'Barlow Semi Condensed',sans-serif">Aricon Admin prototype</span>
+    <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#6B747B;flex:none">Signed in as<select value="{{ role }}" onChange="{{ pickRole }}" style="height:32px;border:1px solid #A9B1B7;border-radius:6px;padding:0 8px;font:500 13px/16px 'Noto Sans';background:#FFFFFF;color:#1E2A32"><option value="admin">Kashif Mirza, Admin</option><option value="om">Sana Malik, Order Manager</option><option value="cat">Faraz Ahmed, Catalog Manager</option></select></label>
+    <div style="display:flex;border:1px solid #A9B1B7;border-radius:6px;overflow:hidden;flex:none">
+      <button onClick="{{ w1440 }}" style="height:32px;padding:0 10px;border:0;background:{{ tb1 }};color:{{ tb1c }};font:600 13px/16px 'Noto Sans';cursor:pointer">1440</button>
+      <button onClick="{{ w1024 }}" style="height:32px;padding:0 10px;border:0;border-left:1px solid #A9B1B7;background:{{ tb2 }};color:{{ tb2c }};font:600 13px/16px 'Noto Sans';cursor:pointer">1024</button>
+    </div>
+    <select value="{{ route }}" onChange="{{ pickRoute }}" style="height:32px;border:1px solid #A9B1B7;border-radius:6px;padding:0 8px;font:500 13px/16px 'Noto Sans';background:#FFFFFF;flex:none">
+      <sc-for list="{{ routeOpts }}" as="r"><option value="{{ r.id }}">{{ r.label }}</option></sc-for>
+    </select>
+    <span style="font-size:12px;color:#6B747B;flex:none">States</span>
+    <div style="display:flex;gap:6px;flex:none"><sc-for list="{{ demo }}" as="x"><button onClick="{{ x.fn }}" style="height:32px;padding:0 10px;border-radius:6px;border:1px solid {{ x.bd }};background:{{ x.bg }};font:500 13px/16px 'Noto Sans';cursor:pointer">{{ x.label }}</button></sc-for></div>
+    <div style="flex:1"></div>
+    <a href="Aricon Design System.dc.html" style="font-size:13px">Design system</a><a href="Aricon Shop.dc.html" style="font-size:13px">Storefront</a>
+  </div>
+  <div style="flex:1;min-height:0;display:flex;justify-content:center;padding:16px;overflow:hidden">
+    <div style="width:{{ outerW }};height:{{ outerH }};position:relative;flex:none">
+    <div style="position:absolute;left:0;top:0;width:{{ frameW }};height:{{ frameH }};transform:{{ scaleT }};transform-origin:0 0;background:#EEF0F1;overflow:hidden;box-shadow:0 8px 24px rgba(30,42,50,0.16);display:flex;font-size:14px;line-height:20px">
+
+      <sc-if value="{{ isLogin }}"><div data-screen-label="Staff login" style="flex:1;background:#1E2A32;display:flex;align-items:center;justify-content:center;padding:32px">
+        <div style="width:400px;background:#FFFFFF;border-radius:10px;padding:32px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;align-items:baseline;gap:6px"><span style="font:700 26px/30px 'Barlow Semi Condensed',sans-serif;letter-spacing:0.02em">ARICON</span><span style="font:500 22px/30px 'Barlow Semi Condensed',sans-serif;color:#6B747B">Admin</span></div>
+          <sc-if value="{{ loginStep1 }}"><div style="display:flex;flex-direction:column;gap:16px">
+            <h1 style="margin:0;font:700 28px/34px 'Barlow Semi Condensed',sans-serif">Staff login</h1>
+            <label style="display:flex;flex-direction:column;gap:6px"><span style="font-weight:500">Email</span><input defaultValue="sana@aricon.com.pk" style="height:40px;border:1px solid #A9B1B7;border-radius:6px;padding:0 12px;font-size:15px"></label>
+            <label style="display:flex;flex-direction:column;gap:6px"><span style="font-weight:500">Password</span><input type="password" defaultValue="temporary" style="height:40px;border:1px solid #A9B1B7;border-radius:6px;padding:0 12px;font-size:15px"></label>
+            <button onClick="{{ loginNext }}" style="height:40px;border:0;border-radius:6px;background:#F2A900;color:#1E2A32;font:600 15px/20px 'Noto Sans';cursor:pointer" style-hover="background:#D99600">Log in</button>
+          </div></sc-if>
+          <sc-if value="{{ loginStep2 }}"><div style="display:flex;flex-direction:column;gap:16px">
+            <h1 style="margin:0;font:700 28px/34px 'Barlow Semi Condensed',sans-serif">Set a new password to continue.</h1>
+            <p style="margin:0;color:#33424D">You signed in with a temporary password. Choose your own before you start.</p>
+            <label style="display:flex;flex-direction:column;gap:6px"><span style="font-weight:500">New password</span><input type="password" style="height:40px;border:1px solid #A9B1B7;border-radius:6px;padding:0 12px;font-size:15px"><span style="font-size:13px;color:#6B747B">At least 10 characters, with a number.</span></label>
+            <label style="display:flex;flex-direction:column;gap:6px"><span style="font-weight:500">Confirm new password</span><input type="password" style="height:40px;border:1px solid #A9B1B7;border-radius:6px;padding:0 12px;font-size:15px"></label>
+            <button onClick="{{ loginDone }}" style="height:40px;border:0;border-radius:6px;background:#F2A900;color:#1E2A32;font:600 15px/20px 'Noto Sans';cursor:pointer">Save and continue</button>
+          </div></sc-if>
+        </div>
+      </div></sc-if>
+
+      <sc-if value="{{ inApp }}" hint-placeholder-val="{{ true }}">
+        <aside style="width:232px;flex:none;background:#1E2A32;color:#FFFFFF;display:flex;flex-direction:column">
+          <div style="height:64px;display:flex;align-items:center;gap:6px;padding:0 20px;border-bottom:1px solid #33424D"><span style="font:700 24px/28px 'Barlow Semi Condensed',sans-serif;letter-spacing:0.02em">ARICON</span><span style="font:500 20px/28px 'Barlow Semi Condensed',sans-serif;color:#A9B1B7">Admin</span></div>
+          <nav style="flex:1;padding:12px 10px;display:flex;flex-direction:column;gap:2px;overflow-y:auto">
+            <sc-for list="{{ nav }}" as="n" hint-placeholder-count="8"><button onClick="{{ n.go }}" style="height:40px;border:0;border-radius:6px;background:{{ n.bg }};box-shadow:{{ n.edge }};color:{{ n.fg }};display:flex;align-items:center;gap:12px;padding:0 12px;font:{{ n.font }};cursor:pointer;text-align:left" style-hover="background:#33424D;color:#FFFFFF"><span style="display:flex">{{ n.icon }}</span><span style="flex:1">{{ n.label }}</span><sc-if value="{{ n.count }}"><span style="min-width:22px;height:20px;padding:0 6px;border-radius:10px;background:#33424D;color:#FFFFFF;font:600 12px/20px 'Noto Sans';text-align:center">{{ n.count }}</span></sc-if></button></sc-for>
+          </nav>
+          <div style="padding:14px 16px;border-top:1px solid #33424D;display:flex;align-items:center;gap:10px"><span style="width:36px;height:36px;border-radius:50%;background:#33424D;display:flex;align-items:center;justify-content:center;font:600 13px/1 'Noto Sans'">{{ me.initials }}</span><span style="flex:1;display:flex;flex-direction:column;min-width:0"><span style="font-weight:600;font-size:14px">{{ me.name }}</span><span style="font-size:12px;line-height:16px;color:#A9B1B7">{{ me.roleLabel }}</span></span><button onClick="{{ goLogin }}" aria-label="Log out" style="width:36px;height:36px;border:0;background:none;color:#A9B1B7;display:flex;align-items:center;justify-content:center;cursor:pointer">{{ i20.logout }}</button></div>
+        </aside>
+        <div style="flex:1;min-width:0;display:flex;flex-direction:column;position:relative">
+          <header style="height:64px;flex:none;background:#FFFFFF;border-bottom:1px solid #DDE1E4;display:flex;align-items:center;gap:16px;padding:0 24px">
+            <h1 style="margin:0;font:700 26px/32px 'Barlow Semi Condensed',sans-serif;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ pageTitle }}</h1>
+            <div style="width:{{ searchW }};height:36px;border:1px solid #A9B1B7;border-radius:6px;display:flex;align-items:center;gap:8px;padding:0 10px;color:#6B747B">{{ i16.search }}<input placeholder="Order number or phone" aria-label="Search orders" onKeyDown="{{ globalSearch }}" style="flex:1;min-width:0;border:0;outline:none;font-size:14px;color:#1E2A32"></div>
+            <div style="display:flex;align-items:center;gap:8px;height:36px;padding:0 10px;border-radius:6px;cursor:pointer" style-hover="background:#F6F7F8"><span style="display:flex;flex-direction:column;align-items:flex-end"><span style="font-weight:600;font-size:13px;line-height:16px">{{ me.name }}</span><span style="font-size:12px;line-height:14px;color:#6B747B">{{ me.roleLabel }}</span></span>{{ i16.down }}</div>
+          </header>
+          <div ref="{{ scrollRef }}" style="flex:1;overflow-y:auto;overflow-x:hidden">
+            <div style="padding:24px;display:flex;flex-direction:column;gap:20px;min-height:100%">
+
+              <sc-if value="{{ denied }}"><div data-screen-label="Access denied" style="flex:1;display:flex;align-items:center;justify-content:center;padding:48px 0"><div style="max-width:420px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center"><span style="color:#B42318;display:flex">{{ i40ban }}</span><p style="margin:0;font-size:16px;line-height:24px">You don't have access to this page. Ask an admin for permission.</p><button onClick="{{ goDash }}" style="height:36px;padding:0 14px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;font:600 14px/20px 'Noto Sans';cursor:pointer">Go to dashboard</button></div></div></sc-if>
+
+              <sc-if value="{{ isDash }}"><div data-screen-label="Dashboard" style="display:flex;flex-direction:column;gap:20px">
+                <sc-if value="{{ dashFigures }}"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+                  <sc-for list="{{ figures }}" as="f"><div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:6px">
+                    <span style="color:#33424D;font-weight:500">{{ f.label }}</span>
+                    <span style="font:700 32px/36px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums">{{ f.value }}</span>
+                    <sc-if value="{{ f.spark }}"><div style="color:#F2A900;height:36px">{{ f.spark }}</div></sc-if>
+                    <sc-if value="{{ f.note }}"><span style="font-size:13px;color:#33424D">{{ f.note }}</span></sc-if>
+                    <sc-if value="{{ f.go }}"><button onClick="{{ f.go }}" style="align-self:flex-start;border:0;background:none;padding:0;color:#1F5AA6;font:600 13px/18px 'Noto Sans';cursor:pointer">{{ f.link }}</button></sc-if>
+                  </div></sc-for>
+                </div></sc-if>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:16px;align-items:start">
+                  <sc-if value="{{ dashStatus }}"><section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px">
+                    <h2 style="margin:0;padding:14px 18px;font:600 16px/22px 'Noto Sans';border-bottom:1px solid #DDE1E4">Orders by status</h2>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr))">
+                      <sc-for list="{{ statusCounts }}" as="sc"><button onClick="{{ sc.go }}" style="border:0;border-right:1px solid #DDE1E4;border-bottom:1px solid #DDE1E4;background:#FFFFFF;padding:16px 18px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;cursor:pointer" style-hover="background:#F6F7F8"><span style="background:{{ sc.b.bg }};color:{{ sc.b.fg }};border:{{ sc.b.bd }};font-size:12px;line-height:16px;font-weight:500;padding:2px 6px;border-radius:4px">{{ sc.b.label }}</span><span style="font:700 28px/32px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums">{{ sc.n }}</span></button></sc-for>
+                    </div>
+                  </section></sc-if>
+                  <sc-if value="{{ dashStock }}"><section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;overflow:hidden">
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid #DDE1E4"><h2 style="margin:0;font:600 16px/22px 'Noto Sans'">Low stock</h2><sc-if value="{{ canProducts }}"><button onClick="{{ goProducts }}" style="border:0;background:none;color:#1F5AA6;font:600 13px/18px 'Noto Sans';cursor:pointer">View products</button></sc-if></div>
+                    <table style="width:100%;border-collapse:collapse"><thead><tr style="text-align:left;background:#F6F7F8"><th style="padding:8px 18px;font-weight:600">Product</th><th style="padding:8px 14px;font-weight:600">Variant</th><th style="padding:8px 14px;font-weight:600;text-align:right">Stock</th><th style="padding:8px 18px;font-weight:600;text-align:right">Threshold</th></tr></thead>
+                      <tbody><sc-for list="{{ lowStock }}" as="ls"><tr style="border-top:1px solid #DDE1E4" style-hover="background:#F6F7F8"><td style="padding:9px 18px">{{ ls.name }}</td><td style="padding:9px 14px;color:#33424D">{{ ls.variant }}</td><td style="padding:9px 14px;text-align:right;font-weight:600;color:{{ ls.c }};font-variant-numeric:tabular-nums">{{ ls.stock }}</td><td style="padding:9px 18px;text-align:right;font-variant-numeric:tabular-nums">{{ ls.th }}</td></tr></sc-for></tbody></table>
+                  </section></sc-if>
+                </div>
+              </div></sc-if>
+
+              <sc-if value="{{ isOrders }}"><div data-screen-label="Orders" style="display:flex;flex-direction:column;gap:16px">
+                <div class="ari-noscroll" style="display:flex;gap:4px;border-bottom:1px solid #DDE1E4;overflow-x:auto">
+                  <sc-for list="{{ orderTabs }}" as="t"><button onClick="{{ t.go }}" style="height:40px;padding:0 12px;border:0;background:none;box-shadow:{{ t.under }};font:{{ t.font }};color:#1E2A32;cursor:pointer;display:flex;align-items:center;gap:6px">{{ t.label }}<sc-if value="{{ t.n }}"><span style="min-width:22px;height:20px;padding:0 6px;border-radius:10px;background:{{ t.nbg }};font:600 12px/20px 'Noto Sans';text-align:center">{{ t.n }}</span></sc-if></button></sc-for>
+                </div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+                  <div style="height:36px;width:240px;border:1px solid #A9B1B7;border-radius:6px;display:flex;align-items:center;gap:8px;padding:0 10px;background:#FFFFFF;color:#6B747B">{{ i16.search }}<input value="{{ oq }}" onChange="{{ typeOq }}" placeholder="Order, customer or phone" style="flex:1;min-width:0;border:0;outline:none;font-size:14px;color:#1E2A32"></div>
+                  <sc-for list="{{ orderFilters }}" as="of"><select value="{{ of.value }}" onChange="{{ of.set }}" aria-label="{{ of.label }}" style="height:36px;border:1px solid #A9B1B7;border-radius:6px;padding:0 8px;font:500 14px/20px 'Noto Sans';background:#FFFFFF;color:#1E2A32"><sc-for list="{{ of.opts }}" as="op"><option value="{{ op.v }}">{{ op.l }}</option></sc-for></select></sc-for>
+                  <div style="height:36px;border:1px solid #A9B1B7;border-radius:6px;display:flex;align-items:center;gap:8px;padding:0 10px;background:#FFFFFF">{{ i16.calendar }}24–26 Sep 2026</div>
+                  <div style="flex:1"></div>
+                  <sc-if value="{{ canExport }}"><button style="height:36px;padding:0 12px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;display:flex;align-items:center;gap:6px;font:600 14px/20px 'Noto Sans';cursor:pointer">{{ i16.download }}Export to Excel</button></sc-if>
+                </div>
+                <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;overflow:auto">
+                  <table style="width:100%;border-collapse:collapse;min-width:980px">
+                    <thead><tr style="text-align:left;background:#F6F7F8;position:sticky;top:0">
+                      <th style="padding:10px 14px;font-weight:600;border-bottom:1px solid #DDE1E4"><span style="display:inline-flex;gap:4px;align-items:center">Order{{ i16.down }}</span></th><th style="padding:10px 14px;font-weight:600;border-bottom:1px solid #DDE1E4">Date</th><th style="padding:10px 14px;font-weight:600;border-bottom:1px solid #DDE1E4">Customer</th><th style="padding:10px 14px;font-weight:600;border-bottom:1px solid #DDE1E4">Phone</th><th style="padding:10px 14px;font-weight:600;border-bottom:1px solid #DDE1E4">Area</th><th style="padding:10px 14px;font-weight:600;border-bottom:1px solid #DDE1E4;text-align:right">Total</th><th style="padding:10px 14px;font-weight:600;border-bottom:1px solid #DDE1E4">Payment</th><th style="padding:10px 14px;font-weight:600;border-bottom:1px solid #DDE1E4">Status</th><th style="padding:10px 14px;font-weight:600;border-bottom:1px solid #DDE1E4">Rider</th>
+                    </tr></thead>
+                    <tbody><sc-for list="{{ orderRows }}" as="o" hint-placeholder-count="8"><tr onClick="{{ o.open }}" style="border-bottom:1px solid #DDE1E4;cursor:pointer" style-hover="background:#F6F7F8">
+                      <td style="padding:10px 14px;font-weight:600;color:#1F5AA6;white-space:nowrap">{{ o.no }}</td><td style="padding:10px 14px;white-space:nowrap">{{ o.date }}</td><td style="padding:10px 14px">{{ o.cust }}</td><td style="padding:10px 14px;white-space:nowrap;font-variant-numeric:tabular-nums">{{ o.phone }}</td><td style="padding:10px 14px">{{ o.area }}</td><td style="padding:10px 14px;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap">{{ o.totalL }}</td>
+                      <td style="padding:10px 14px"><span style="display:flex;flex-direction:column;gap:2px;align-items:flex-start"><span style="background:{{ o.pb.bg }};color:{{ o.pb.fg }};border:{{ o.pb.bd }};font-size:12px;line-height:16px;font-weight:500;padding:2px 6px;border-radius:4px;white-space:nowrap">{{ o.pb.label }}</span><span style="font-size:12px;line-height:16px;color:#6B747B">{{ o.methodShort }}</span></span></td>
+                      <td style="padding:10px 14px"><span style="background:{{ o.sb.bg }};color:{{ o.sb.fg }};border:{{ o.sb.bd }};font-size:12px;line-height:16px;font-weight:500;padding:2px 6px;border-radius:4px;white-space:nowrap">{{ o.sb.label }}</span></td><td style="padding:10px 14px;color:{{ o.riderC }}">{{ o.rider }}</td>
+                    </tr></sc-for></tbody>
+                  </table>
+                  <sc-if value="{{ noOrders }}"><div style="padding:32px;text-align:center;color:#33424D">No orders match these filters.</div></sc-if>
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;color:#33424D"><span>{{ orderRange }}</span><div style="display:flex;gap:6px"><button aria-label="Previous" style="width:32px;height:32px;border:1px solid #DDE1E4;border-radius:6px;background:#FFFFFF;color:#A9B1B7;display:flex;align-items:center;justify-content:center">{{ i16.left }}</button><button aria-label="Next" style="width:32px;height:32px;border:1px solid #DDE1E4;border-radius:6px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;cursor:pointer">{{ i16.right }}</button></div></div>
+                </div>
+              </div></sc-if>
+
+              <sc-if value="{{ isOrder }}"><div data-screen-label="Order detail" style="display:flex;flex-direction:column;gap:16px">
+                <button onClick="{{ goOrders }}" style="align-self:flex-start;height:28px;border:0;background:none;padding:0;color:#1F5AA6;font:600 13px/18px 'Noto Sans';display:flex;align-items:center;gap:2px;cursor:pointer">{{ i16.left }}Orders</button>
+                <div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap">
+                  <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:280px">
+                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font:700 28px/32px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums">{{ ov.no }}</span><span style="background:{{ ov.sb.bg }};color:{{ ov.sb.fg }};border:{{ ov.sb.bd }};font-size:12px;line-height:16px;font-weight:500;padding:3px 7px;border-radius:4px;white-space:nowrap">{{ ov.sb.label }}</span><span style="background:{{ ov.pb.bg }};color:{{ ov.pb.fg }};border:{{ ov.pb.bd }};font-size:12px;line-height:16px;font-weight:500;padding:3px 7px;border-radius:4px;white-space:nowrap">{{ ov.pb.label }}</span></div>
+                    <span style="color:#33424D">Placed {{ ov.dateLong }}</span>
+                  </div>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap">
+                    <sc-for list="{{ ov.actions }}" as="a"><button onClick="{{ a.fn }}" disabled="{{ a.dis }}" title="{{ a.title }}" style="height:36px;padding:0 14px;border-radius:6px;border:{{ a.bd }};background:{{ a.bg }};color:{{ a.fg }};font:600 14px/20px 'Noto Sans';cursor:{{ a.cur }}">{{ a.label }}</button></sc-for>
+                  </div>
+                </div>
+                <sc-if value="{{ ov.hint }}"><div style="display:flex;gap:8px;align-items:center;background:#EAF1FB;border-radius:6px;padding:8px 12px;color:#1E2A32"><span style="display:flex;color:#1F5AA6">{{ i16.info }}</span>{{ ov.hint }}</div></sc-if>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start">
+                  <section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:6px">
+                    <h2 style="margin:0 0 4px;font:600 16px/22px 'Noto Sans'">Customer</h2>
+                    <span style="font-weight:600;font-size:15px">{{ ov.cust }}</span>
+                    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span style="font-variant-numeric:tabular-nums">{{ ov.phone }}</span><a href="#" style="display:flex;gap:4px;align-items:center;font-weight:600;text-decoration:none">{{ i16.phone }}Call</a><a href="#" style="display:flex;gap:4px;align-items:center;font-weight:600;color:#1E7B4F;text-decoration:none">{{ i16.chat }}WhatsApp</a></div>
+                    <span style="color:#33424D">{{ ov.address }}</span>
+                  </section>
+                  <div style="display:flex;flex-direction:column;gap:16px">
+                    <section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+                      <div style="display:flex;justify-content:space-between;align-items:baseline"><h2 style="margin:0;font:600 16px/22px 'Noto Sans'">Payment</h2><span style="color:#33424D">{{ ov.method }}, <strong style="color:#1E2A32;font-variant-numeric:tabular-nums">{{ ov.totalL }}</strong></span></div>
+                      <sc-if value="{{ ov.isBank }}"><div style="display:flex;gap:14px;align-items:flex-start">
+                        <div style="width:96px;height:120px;border:1px solid #DDE1E4;border-radius:6px;background:#F6F7F8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#6B747B;flex:none">{{ i24.image }}<span style="font-size:11px;line-height:14px">Receipt 1</span></div>
+                        <div style="display:flex;flex-direction:column;gap:8px;flex:1;min-width:0">
+                          <span style="font-weight:500">receipt-meezan-26sep.jpg</span><span style="font-size:13px;color:#33424D">Uploaded 26 Sep, 4:18 pm. Amount on receipt Rs 38,160.</span>
+                          <sc-if value="{{ ov.canVerify }}"><div style="display:flex;gap:8px;flex-wrap:wrap"><button onClick="{{ approveRcpt }}" style="height:36px;padding:0 14px;border:0;border-radius:6px;background:#F2A900;color:#1E2A32;font:600 14px/20px 'Noto Sans';cursor:pointer">Approve</button><button onClick="{{ openReject }}" style="height:36px;padding:0 14px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;font:600 14px/20px 'Noto Sans';cursor:pointer">Reject…</button></div></sc-if>
+                          <sc-if value="{{ rejectOpen }}"><div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid #DDE1E4;padding-top:10px"><label style="display:flex;flex-direction:column;gap:4px"><span style="font-weight:500">Reason (sent to the customer)</span><select style="height:36px;border:1px solid #A9B1B7;border-radius:6px;padding:0 8px;font-size:14px;background:#FFFFFF"><option>Amount doesn't match the order total</option><option>Receipt is unreadable</option><option>Wrong account</option></select></label><div style="display:flex;gap:8px"><button onClick="{{ rejectRcpt }}" style="height:36px;padding:0 14px;border:0;border-radius:6px;background:#B42318;color:#FFFFFF;font:600 14px/20px 'Noto Sans';cursor:pointer">Reject receipt</button><button onClick="{{ closeReject }}" style="height:36px;padding:0 12px;border:0;background:none;color:#1F5AA6;font:600 14px/20px 'Noto Sans';cursor:pointer">Cancel</button></div></div></sc-if>
+                          <sc-if value="{{ ov.rcptDone }}"><span style="align-self:flex-start;background:{{ ov.pb.bg }};color:{{ ov.pb.fg }};font-size:12px;line-height:16px;font-weight:500;padding:3px 7px;border-radius:4px">{{ ov.rcptDone }}</span></sc-if>
+                        </div>
+                      </div></sc-if>
+                      <sc-if value="{{ ov.isCod }}"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><span style="color:#33424D">{{ ov.codNote }}</span><sc-if value="{{ ov.canCollect }}"><button onClick="{{ markCollected }}" style="height:36px;padding:0 12px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;font:600 14px/20px 'Noto Sans';cursor:pointer">Mark cash collected</button></sc-if></div></sc-if>
+                    </section>
+                    <section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:16px 18px;display:flex;align-items:center;gap:12px">
+                      <h2 style="margin:0;font:600 16px/22px 'Noto Sans';flex:1">Delivery</h2>
+                      <label style="display:flex;align-items:center;gap:8px;color:#33424D">Rider<select value="{{ ov.rider }}" onChange="{{ pickRider }}" disabled="{{ ov.riderLocked }}" style="height:36px;min-width:180px;border:1px solid #A9B1B7;border-radius:6px;padding:0 8px;font:500 14px/20px 'Noto Sans';background:#FFFFFF;color:#1E2A32"><option value="">Select rider</option><option value="Asif Khan">Asif Khan</option><option value="Rashid Ali">Rashid Ali</option></select></label>
+                    </section>
+                  </div>
+                </div>
+                <section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;overflow:auto">
+                  <h2 style="margin:0;padding:14px 18px;font:600 16px/22px 'Noto Sans';border-bottom:1px solid #DDE1E4">Items</h2>
+                  <table style="width:100%;border-collapse:collapse;min-width:640px">
+                    <thead><tr style="text-align:left;background:#F6F7F8"><th style="padding:8px 18px;font-weight:600">SKU</th><th style="padding:8px 14px;font-weight:600">Item</th><th style="padding:8px 14px;font-weight:600;text-align:right">Qty</th><th style="padding:8px 14px;font-weight:600;text-align:right">Unit</th><th style="padding:8px 14px;font-weight:600">Tier</th><th style="padding:8px 18px;font-weight:600;text-align:right">Total</th></tr></thead>
+                    <tbody><sc-for list="{{ ov.lines }}" as="ln"><tr style="border-top:1px solid #DDE1E4"><td style="padding:10px 18px;color:#33424D">{{ ln.sku }}</td><td style="padding:10px 14px">{{ ln.name }}</td><td style="padding:10px 14px;text-align:right;font-variant-numeric:tabular-nums">{{ ln.q }}</td><td style="padding:10px 14px;text-align:right;font-variant-numeric:tabular-nums">{{ ln.up }}</td><td style="padding:10px 14px">{{ ln.tier }}</td><td style="padding:10px 18px;text-align:right;font-variant-numeric:tabular-nums">{{ ln.total }}</td></tr></sc-for></tbody>
+                  </table>
+                  <div style="display:flex;justify-content:flex-end;padding:12px 18px;border-top:1px solid #DDE1E4"><div style="display:grid;grid-template-columns:auto 120px;gap:4px 24px;text-align:right"><span style="color:#33424D">Subtotal</span><span style="font-variant-numeric:tabular-nums">{{ ov.subL }}</span><span style="color:#33424D">Delivery ({{ ov.area }})</span><span style="font-variant-numeric:tabular-nums">{{ ov.feeL }}</span><span style="font-weight:600">Total</span><span style="font:700 22px/26px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums">{{ ov.totalL }}</span></div></div>
+                </section>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start">
+                  <section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:14px 18px;display:flex;flex-direction:column">
+                    <h2 style="margin:0 0 10px;font:600 16px/22px 'Noto Sans'">Timeline</h2>
+                    <sc-for list="{{ ov.timeline }}" as="e"><div style="display:grid;grid-template-columns:130px 1fr;gap:12px;padding:8px 0;border-top:1px solid #DDE1E4"><span style="color:#33424D;font-variant-numeric:tabular-nums">{{ e.t }}</span><span><strong style="font-weight:600">{{ e.what }}</strong> <span style="color:#33424D">{{ e.who }}</span></span></div></sc-for>
+                  </section>
+                  <section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:14px 18px;display:flex;flex-direction:column;gap:8px">
+                    <h2 style="margin:0;font:600 16px/22px 'Noto Sans'">Internal note</h2>
+                    <textarea placeholder="Only staff can see this" style="min-height:96px;border:1px solid #A9B1B7;border-radius:6px;padding:10px 12px;font-size:14px;line-height:20px;resize:vertical">Customer asked for delivery before 11 am; site gate on the service road.</textarea>
+                  </section>
+                </div>
+              </div></sc-if>
+
+              <sc-if value="{{ isProducts }}"><div data-screen-label="Products" style="display:flex;flex-direction:column;gap:16px">
+                <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+                  <div style="height:36px;width:280px;border:1px solid #A9B1B7;border-radius:6px;display:flex;align-items:center;gap:8px;padding:0 10px;background:#FFFFFF;color:#6B747B">{{ i16.search }}<span>Search products or SKU</span></div>
+                  <select style="height:36px;border:1px solid #A9B1B7;border-radius:6px;padding:0 8px;font:500 14px/20px 'Noto Sans';background:#FFFFFF"><option>All categories</option><option>Cement &amp; plaster</option><option>Wires &amp; cables</option></select>
+                  <select style="height:36px;border:1px solid #A9B1B7;border-radius:6px;padding:0 8px;font:500 14px/20px 'Noto Sans';background:#FFFFFF"><option>Any stock</option><option>Low stock</option><option>Out of stock</option></select>
+                  <div style="flex:1"></div>
+                  <button onClick="{{ goImport }}" style="height:36px;padding:0 12px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;display:flex;align-items:center;gap:6px;font:600 14px/20px 'Noto Sans';cursor:pointer">{{ i16.upload }}Import</button>
+                  <button style="height:36px;padding:0 14px;border:0;border-radius:6px;background:#F2A900;color:#1E2A32;display:flex;align-items:center;gap:6px;font:600 14px/20px 'Noto Sans';cursor:pointer">{{ i16.plus }}Add product</button>
+                </div>
+                <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;overflow:auto">
+                  <table style="width:100%;border-collapse:collapse;min-width:900px">
+                    <thead><tr style="text-align:left;background:#F6F7F8"><th style="padding:10px 14px;font-weight:600;border-bottom:1px solid #DDE1E4">Product</th><th style="padding:10px 14px;font-weight:600;border-bottom:1px solid #DDE1E4">Category</th><th style="padding:10px 14px;font-weight:600;border-bottom:1px solid #DDE1E4;text-align:right">Price</th><th style="padding:10px 14px;font-weight:600;border-bottom:1px solid #DDE1E4;text-align:right">Stock</th><th style="padding:10px 14px;font-weight:600;border-bottom:1px solid #DDE1E4">Status</th><th style="width:44px;border-bottom:1px solid #DDE1E4"></th></tr></thead>
+                    <tbody><sc-for list="{{ productRows }}" as="p"><tr onClick="{{ p.open }}" style="border-bottom:1px solid #DDE1E4;cursor:pointer" style-hover="background:#F6F7F8">
+                      <td style="padding:8px 14px"><span style="display:flex;align-items:center;gap:12px"><span style="width:40px;height:40px;border-radius:4px;background:#F6F7F8;border:1px solid #DDE1E4;display:flex;align-items:center;justify-content:center;color:#A9B1B7;flex:none">{{ p.img }}</span><span style="display:flex;flex-direction:column"><span style="font-weight:500">{{ p.name }}</span><span style="font-size:12px;line-height:16px;color:#6B747B">{{ p.sku }}</span></span></span></td>
+                      <td style="padding:8px 14px">{{ p.cat }}</td><td style="padding:8px 14px;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap">{{ p.range }}</td>
+                      <td style="padding:8px 14px;text-align:right"><span style="display:inline-flex;gap:8px;align-items:center;justify-content:flex-end"><sc-if value="{{ p.badge }}"><span style="background:{{ p.badge.bg }};color:{{ p.badge.fg }};font-size:12px;line-height:16px;font-weight:500;padding:2px 6px;border-radius:4px">{{ p.badge.label }}</span></sc-if><span style="font-variant-numeric:tabular-nums">{{ p.stock }}</span></span></td>
+                      <td style="padding:8px 14px"><span style="background:#E7F4EC;color:#1E7B4F;font-size:12px;line-height:16px;font-weight:500;padding:2px 6px;border-radius:4px">Active</span></td><td style="padding:4px 10px;color:#6B747B">{{ i16.more }}</td>
+                    </tr></sc-for></tbody>
+                  </table>
+                  <div style="padding:10px 14px;color:#33424D">1–16 of 740</div>
+                </div>
+              </div></sc-if>
+
+              <sc-if value="{{ isForm }}"><div data-screen-label="Product form" style="display:grid;grid-template-columns:180px minmax(0,1fr);gap:24px;align-items:start;padding-bottom:64px">
+                <nav style="position:sticky;top:0;display:flex;flex-direction:column;gap:2px">
+                  <button onClick="{{ goProducts }}" style="height:28px;border:0;background:none;padding:0;color:#1F5AA6;font:600 13px/18px 'Noto Sans';display:flex;align-items:center;gap:2px;cursor:pointer;margin-bottom:10px">{{ i16.left }}Products</button>
+                  <sc-for list="{{ formNav }}" as="fn"><button onClick="{{ fn.go }}" style="height:36px;border:0;border-radius:6px;background:{{ fn.bg }};box-shadow:{{ fn.edge }};padding:0 12px;text-align:left;font:{{ fn.font }};color:#1E2A32;cursor:pointer" style-hover="background:#FFFFFF">{{ fn.label }}</button></sc-for>
+                </nav>
+                <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+                  <sc-if value="{{ priceLocked }}"><div style="display:flex;gap:10px;align-items:center;background:#F6F7F8;border:1px solid #DDE1E4;border-radius:6px;padding:10px 14px"><span style="display:flex">{{ i16.lock }}</span>You don't have permission to change prices. MRP, price and bulk tiers are read-only.</div></sc-if>
+                  <section id="f-basics" style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:18px 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">
+                    <h2 style="margin:0;font:600 18px/24px 'Noto Sans';grid-column:1/-1">Basics</h2>
+                    <label style="display:flex;flex-direction:column;gap:6px;grid-column:1/-1"><span style="font-weight:500">Product name</span><input defaultValue="PPC Cement" style="height:36px;border:1px solid #A9B1B7;border-radius:6px;padding:0 10px;font-size:14px"></label>
+                    <label style="display:flex;flex-direction:column;gap:6px"><span style="font-weight:500">Brand</span><select style="height:36px;border:1px solid #A9B1B7;border-radius:6px;padding:0 8px;font-size:14px;background:#FFFFFF"><option>Lucky Cement</option><option>Maple Leaf</option><option>DG Cement</option></select></label>
+                    <label style="display:flex;flex-direction:column;gap:6px"><span style="font-weight:500">Category</span><select style="height:36px;border:1px solid #A9B1B7;border-radius:6px;padding:0 8px;font-size:14px;background:#FFFFFF"><option>Civil / Cement &amp; plaster</option></select></label>
+                    <label style="display:flex;flex-direction:column;gap:6px"><span style="font-weight:500">Status</span><select style="height:36px;border:1px solid #A9B1B7;border-radius:6px;padding:0 8px;font-size:14px;background:#FFFFFF"><option>Active</option><option>Draft</option><option>Hidden</option></select></label>
+                  </section>
+                  <section id="f-images" style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+                    <h2 style="margin:0;font:600 18px/24px 'Noto Sans'">Images</h2>
+                    <div style="display:flex;gap:12px;flex-wrap:wrap">
+                      <sc-for list="{{ imgSlots }}" as="im"><div style="width:112px;height:112px;border:1px solid #DDE1E4;border-radius:10px;background:#F6F7F8;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#A9B1B7;position:relative">{{ im.icon }}<span style="font-size:11px;line-height:14px;color:#6B747B">{{ im.label }}</span></div></sc-for>
+                      <div style="width:112px;height:112px;border:1px dashed #A9B1B7;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#33424D;cursor:pointer">{{ i20.upload }}<span style="font-size:12px">Add image</span></div>
+                    </div>
+                  </section>
+                  <section id="f-variants" style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;overflow:hidden">
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px"><h2 style="margin:0;font:600 18px/24px 'Noto Sans'">Variants</h2><button style="height:36px;padding:0 12px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;display:flex;align-items:center;gap:6px;font:600 14px/20px 'Noto Sans';cursor:pointer">{{ i16.plus }}Add variant</button></div>
+                    <div style="overflow:auto">
+                    <table style="width:100%;border-collapse:collapse;min-width:820px">
+                      <thead><tr style="text-align:left;background:#F6F7F8"><th style="width:40px"></th><th style="padding:8px 10px;font-weight:600">SKU</th><th style="padding:8px 10px;font-weight:600">Pack size</th><th style="padding:8px 10px;font-weight:600">MRP (Rs)</th><th style="padding:8px 10px;font-weight:600">Price (Rs)</th><th style="padding:8px 10px;font-weight:600">Stock</th><th style="padding:8px 10px;font-weight:600">Low-stock at</th><th style="padding:8px 14px;font-weight:600">Bulk tiers</th></tr></thead>
+                      <tbody><sc-for list="{{ variants }}" as="v">
+                        <tr style="border-top:1px solid #DDE1E4;background:{{ v.rowBg }}">
+                          <td style="padding:6px 0 6px 10px"><button onClick="{{ v.toggle }}" aria-label="Show bulk tiers" style="width:28px;height:28px;border:0;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer">{{ v.chev }}</button></td>
+                          <td style="padding:6px 10px"><input defaultValue="{{ v.sku }}" style="width:110px;height:32px;border:1px solid #A9B1B7;border-radius:6px;padding:0 8px;font-size:14px"></td>
+                          <td style="padding:6px 10px"><input defaultValue="{{ v.pack }}" style="width:80px;height:32px;border:1px solid #A9B1B7;border-radius:6px;padding:0 8px;font-size:14px"></td>
+                          <td style="padding:6px 10px"><span style="position:relative;display:inline-flex" title="{{ lockTip }}"><input defaultValue="{{ v.mrp }}" readOnly="{{ priceLocked }}" style="width:96px;height:32px;border:1px solid {{ lockBd }};border-radius:6px;padding:0 {{ lockPadR }} 0 8px;font-size:14px;background:{{ lockBg }};color:{{ lockFg }};font-variant-numeric:tabular-nums"><sc-if value="{{ priceLocked }}"><span style="position:absolute;right:8px;top:8px;display:flex;color:#6B747B">{{ i16.lock }}</span></sc-if></span></td>
+                          <td style="padding:6px 10px"><span style="position:relative;display:inline-flex" title="{{ lockTip }}"><input defaultValue="{{ v.price }}" readOnly="{{ priceLocked }}" style="width:96px;height:32px;border:1px solid {{ lockBd }};border-radius:6px;padding:0 {{ lockPadR }} 0 8px;font-size:14px;background:{{ lockBg }};color:{{ lockFg }};font-variant-numeric:tabular-nums"><sc-if value="{{ priceLocked }}"><span style="position:absolute;right:8px;top:8px;display:flex;color:#6B747B">{{ i16.lock }}</span></sc-if></span></td>
+                          <td style="padding:6px 10px"><input defaultValue="{{ v.stock }}" style="width:72px;height:32px;border:1px solid #A9B1B7;border-radius:6px;padding:0 8px;font-size:14px;font-variant-numeric:tabular-nums"></td>
+                          <td style="padding:6px 10px"><input defaultValue="{{ v.th }}" style="width:64px;height:32px;border:1px solid #A9B1B7;border-radius:6px;padding:0 8px;font-size:14px"></td>
+                          <td style="padding:6px 14px;color:#33424D">{{ v.tiersL }}</td>
+                        </tr>
+                        <sc-if value="{{ v.open }}"><tr><td colSpan="8" style="padding:0 20px 18px 50px;background:#F6F7F8;border-top:1px solid #DDE1E4">
+                          <div style="display:flex;flex-direction:column;gap:10px;padding-top:14px;max-width:560px">
+                            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:600">Bulk price tiers for {{ v.pack }}</span><span style="font-size:13px;color:#33424D">Base price applies from 1 {{ v.unit }}</span></div>
+                            <div style="display:grid;grid-template-columns:140px 160px 1fr 36px;gap:8px 12px;align-items:center">
+                              <span style="font-size:13px;font-weight:500;color:#33424D">Minimum qty</span><span style="font-size:13px;font-weight:500;color:#33424D">Price per {{ v.unit }} (Rs)</span><span></span><span></span>
+                              <sc-for list="{{ tierRows }}" as="t">
+                                <input value="{{ t.min }}" onChange="{{ t.setMin }}" readOnly="{{ t.minRo }}" inputMode="numeric" aria-label="Minimum quantity" style="height:36px;border:1px solid {{ t.minBd }};border-radius:6px;padding:0 10px;font-size:14px;background:{{ t.minBg }};font-variant-numeric:tabular-nums">
+                                <span style="position:relative;display:flex" title="{{ lockTip }}"><input value="{{ t.price }}" onChange="{{ t.setPrice }}" readOnly="{{ priceLocked }}" inputMode="numeric" aria-label="Price" style="width:100%;height:36px;border:1px solid {{ t.priceBd }};border-radius:6px;padding:0 30px 0 10px;font-size:14px;background:{{ lockBg }};color:{{ lockFg }};font-variant-numeric:tabular-nums"><sc-if value="{{ priceLocked }}"><span style="position:absolute;right:9px;top:10px;display:flex;color:#6B747B">{{ i16.lock }}</span></sc-if></span>
+                                <span style="font-size:13px;line-height:18px;color:{{ t.msgC }};display:flex;gap:6px;align-items:center">{{ t.msgIcon }}{{ t.msg }}</span>
+                                <sc-if value="{{ t.canRemove }}"><button onClick="{{ t.remove }}" aria-label="Remove tier" style="width:36px;height:36px;border:0;background:none;color:#6B747B;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="color:#B42318">{{ i16.trash }}</button></sc-if><sc-if value="{{ t.noRemove }}"><span></span></sc-if>
+                              </sc-for>
+                            </div>
+                            <sc-if value="{{ priceUnlocked }}"><button onClick="{{ addTier }}" style="align-self:flex-start;height:32px;border:0;background:none;padding:0;color:#1F5AA6;font:600 14px/20px 'Noto Sans';display:flex;align-items:center;gap:4px;cursor:pointer">{{ i16.plus }}Add tier</button></sc-if>
+                          </div>
+                        </td></tr></sc-if>
+                      </sc-for></tbody>
+                    </table>
+                    </div>
+                  </section>
+                  <section id="f-specs" style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:18px 20px;display:flex;flex-direction:column;gap:10px">
+                    <h2 style="margin:0;font:600 18px/24px 'Noto Sans'">Specifications</h2>
+                    <sc-for list="{{ specRows }}" as="sp"><div style="display:grid;grid-template-columns:220px 1fr 36px;gap:10px"><input defaultValue="{{ sp.k }}" style="height:36px;border:1px solid #A9B1B7;border-radius:6px;padding:0 10px;font-size:14px"><input defaultValue="{{ sp.v }}" style="height:36px;border:1px solid #A9B1B7;border-radius:6px;padding:0 10px;font-size:14px"><button aria-label="Remove" style="width:36px;height:36px;border:0;background:none;color:#6B747B;display:flex;align-items:center;justify-content:center">{{ i16.trash }}</button></div></sc-for>
+                  </section>
+                  <section id="f-desc" style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:18px 20px;display:flex;flex-direction:column;gap:10px">
+                    <h2 style="margin:0;font:600 18px/24px 'Noto Sans'">Description</h2>
+                    <textarea style="min-height:120px;border:1px solid #A9B1B7;border-radius:6px;padding:10px 12px;font-size:14px;line-height:22px;resize:vertical">Lucky Cement PPC is a Portland pozzolana cement for plaster, block masonry and general concrete work. Its lower heat of hydration than OPC suits large pours in Karachi summers.</textarea>
+                  </section>
+                  <section id="f-seo" style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:18px 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">
+                    <h2 style="margin:0;font:600 18px/24px 'Noto Sans';grid-column:1/-1">SEO</h2>
+                    <label style="display:flex;flex-direction:column;gap:6px"><span style="font-weight:500">Page title</span><input defaultValue="Lucky Cement PPC 50 kg bag, bulk price in Karachi" style="height:36px;border:1px solid #A9B1B7;border-radius:6px;padding:0 10px;font-size:14px"></label>
+                    <label style="display:flex;flex-direction:column;gap:6px"><span style="font-weight:500">URL</span><input defaultValue="/cement/lucky-cement-ppc-50kg" style="height:36px;border:1px solid #A9B1B7;border-radius:6px;padding:0 10px;font-size:14px"></label>
+                  </section>
+                </div>
+              </div></sc-if>
+
+              <sc-if value="{{ isImport }}"><div data-screen-label="Import products" style="display:flex;flex-direction:column;gap:16px;max-width:980px">
+                <button onClick="{{ goProducts }}" style="align-self:flex-start;height:28px;border:0;background:none;padding:0;color:#1F5AA6;font:600 13px/18px 'Noto Sans';display:flex;align-items:center;gap:2px;cursor:pointer">{{ i16.left }}Products</button>
+                <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+                  <sc-for list="{{ importSteps }}" as="st"><div style="background:#FFFFFF;border:{{ st.bd }};border-radius:10px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start"><span style="width:28px;height:28px;border-radius:50%;background:{{ st.bg }};color:{{ st.fg }};border:{{ st.cb }};display:flex;align-items:center;justify-content:center;font:600 13px/1 'Noto Sans';flex:none">{{ st.mark }}</span><span style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:600;font-size:15px">{{ st.label }}</span><span style="font-size:13px;color:#33424D">{{ st.note }}</span></span></div></sc-for>
+                </div>
+                <section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+                  <div style="display:flex;justify-content:space-between;align-items:center"><span style="display:flex;align-items:center;gap:10px"><span style="display:flex;color:#33424D">{{ i20.file }}</span><span style="font-weight:600">aricon-products-sep-2026.xlsx</span><span style="color:#33424D">154 rows</span></span><span style="font-weight:600;font-variant-numeric:tabular-nums">{{ importPct }}</span></div>
+                  <div style="height:8px;background:#EEF0F1;border-radius:4px;overflow:hidden"><div style="height:100%;width:{{ importPct }};background:#1F5AA6;transition:width 200ms linear"></div></div>
+                  <sc-if value="{{ importDone }}"><div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:6px">
+                    <div style="border:1px solid #DDE1E4;border-radius:10px;padding:12px 14px"><span style="color:#33424D">Created</span><div style="font:700 28px/32px 'Barlow Semi Condensed',sans-serif">38</div></div>
+                    <div style="border:1px solid #DDE1E4;border-radius:10px;padding:12px 14px"><span style="color:#33424D">Updated</span><div style="font:700 28px/32px 'Barlow Semi Condensed',sans-serif">112</div></div>
+                    <div style="border:1px solid #DDE1E4;border-radius:10px;padding:12px 14px;background:#FDECEA;border-color:#FDECEA"><span style="color:#B42318;font-weight:500">Failed</span><div style="font:700 28px/32px 'Barlow Semi Condensed',sans-serif;color:#B42318">4</div></div>
+                  </div></sc-if>
+                </section>
+                <sc-if value="{{ importDone }}"><section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;overflow:hidden">
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid #DDE1E4"><h2 style="margin:0;font:600 16px/22px 'Noto Sans'">Rows that failed</h2><button style="height:36px;padding:0 12px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;display:flex;align-items:center;gap:6px;font:600 14px/20px 'Noto Sans';cursor:pointer">{{ i16.download }}Download errors</button></div>
+                  <table style="width:100%;border-collapse:collapse"><thead><tr style="text-align:left;background:#F6F7F8"><th style="padding:8px 18px;font-weight:600;width:80px">Row</th><th style="padding:8px 14px;font-weight:600;width:160px">SKU</th><th style="padding:8px 18px;font-weight:600">Problem</th></tr></thead><tbody>
+                    <sc-for list="{{ importErrors }}" as="er"><tr style="border-top:1px solid #DDE1E4"><td style="padding:9px 18px;font-variant-numeric:tabular-nums">{{ er.row }}</td><td style="padding:9px 14px">{{ er.sku }}</td><td style="padding:9px 18px;color:#B42318">{{ er.msg }}</td></tr></sc-for>
+                  </tbody></table>
+                </section></sc-if>
+              </div></sc-if>
+
+              <sc-if value="{{ isUsers }}"><div data-screen-label="Users" style="display:flex;flex-direction:column;gap:16px">
+                <div style="display:flex;align-items:flex-end;gap:12px;border-bottom:1px solid #DDE1E4">
+                  <sc-for list="{{ userTabs }}" as="t"><button onClick="{{ t.go }}" style="height:40px;padding:0 12px;border:0;background:none;box-shadow:{{ t.under }};font:{{ t.font }};cursor:pointer">{{ t.label }}</button></sc-for>
+                  <div style="flex:1"></div>
+                  <sc-if value="{{ staffTab }}"><button onClick="{{ addStaff }}" style="height:36px;margin-bottom:6px;padding:0 14px;border:0;border-radius:6px;background:#F2A900;color:#1E2A32;display:flex;align-items:center;gap:6px;font:600 14px/20px 'Noto Sans';cursor:pointer">{{ i16.plus }}Add staff member</button></sc-if>
+                </div>
+                <sc-if value="{{ staffTab }}"><div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;overflow:auto"><table style="width:100%;border-collapse:collapse;min-width:820px">
+                  <thead><tr style="text-align:left;background:#F6F7F8"><th style="padding:10px 14px;font-weight:600">Name</th><th style="padding:10px 14px;font-weight:600">Email</th><th style="padding:10px 14px;font-weight:600">Role</th><th style="padding:10px 14px;font-weight:600">Permissions</th><th style="padding:10px 14px;font-weight:600">Status</th><th style="padding:10px 14px;font-weight:600">Last login</th></tr></thead>
+                  <tbody><sc-for list="{{ staffRows }}" as="u"><tr onClick="{{ u.open }}" style="border-top:1px solid #DDE1E4;cursor:pointer" style-hover="background:#F6F7F8"><td style="padding:10px 14px;font-weight:600">{{ u.name }}</td><td style="padding:10px 14px">{{ u.email }}</td><td style="padding:10px 14px">{{ u.role }}</td><td style="padding:10px 14px;color:#33424D">{{ u.perms }}</td><td style="padding:10px 14px"><span style="background:{{ u.sb.bg }};color:{{ u.sb.fg }};border:{{ u.sb.bd }};font-size:12px;line-height:16px;font-weight:500;padding:2px 6px;border-radius:4px">{{ u.sb.label }}</span></td><td style="padding:10px 14px;color:#33424D">{{ u.last }}</td></tr></sc-for></tbody>
+                </table></div></sc-if>
+                <sc-if value="{{ custTab }}"><div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;overflow:auto"><table style="width:100%;border-collapse:collapse;min-width:820px">
+                  <thead><tr style="text-align:left;background:#F6F7F8"><th style="padding:10px 14px;font-weight:600">Customer</th><th style="padding:10px 14px;font-weight:600">Phone</th><th style="padding:10px 14px;font-weight:600">Company</th><th style="padding:10px 14px;font-weight:600;text-align:right">Orders</th><th style="padding:10px 14px;font-weight:600;text-align:right">Total spent</th><th style="padding:10px 14px;font-weight:600">Status</th></tr></thead>
+                  <tbody><sc-for list="{{ custRows }}" as="c"><tr onClick="{{ c.open }}" style="border-top:1px solid #DDE1E4;cursor:pointer" style-hover="background:#F6F7F8"><td style="padding:10px 14px;font-weight:600">{{ c.name }}</td><td style="padding:10px 14px;font-variant-numeric:tabular-nums">{{ c.phone }}</td><td style="padding:10px 14px">{{ c.company }}</td><td style="padding:10px 14px;text-align:right">{{ c.orders }}</td><td style="padding:10px 14px;text-align:right;font-variant-numeric:tabular-nums">{{ c.spent }}</td><td style="padding:10px 14px"><span style="background:{{ c.sb.bg }};color:{{ c.sb.fg }};border:{{ c.sb.bd }};font-size:12px;line-height:16px;font-weight:500;padding:2px 6px;border-radius:4px">{{ c.sb.label }}</span></td></tr></sc-for></tbody>
+                </table></div></sc-if>
+              </div></sc-if>
+
+              <sc-if value="{{ isCustomer }}"><div data-screen-label="Customer detail" style="display:flex;flex-direction:column;gap:16px">
+                <button onClick="{{ goCustomers }}" style="align-self:flex-start;height:28px;border:0;background:none;padding:0;color:#1F5AA6;font:600 13px/18px 'Noto Sans';display:flex;align-items:center;gap:2px;cursor:pointer">{{ i16.left }}Customers</button>
+                <sc-if value="{{ blocked }}"><div style="display:flex;gap:10px;align-items:center;background:#FDECEA;border-radius:6px;padding:10px 14px"><span style="display:flex;color:#B42318">{{ i16.ban }}</span>This customer is blocked and can't place orders.</div></sc-if>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start">
+                  <section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:6px">
+                    <div style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0;font:600 18px/24px 'Noto Sans'">Imran Qureshi</h2><button onClick="{{ toggleBlock }}" style="height:36px;padding:0 12px;border:{{ blockBd }};border-radius:6px;background:#FFFFFF;color:{{ blockFg }};font:600 14px/20px 'Noto Sans';cursor:pointer">{{ blockLabel }}</button></div>
+                    <span>Qureshi Builders</span><span style="font-variant-numeric:tabular-nums">0300 1234567</span><span>imran@qureshibuilders.pk</span><span style="color:#33424D">Customer since March 2025</span>
+                  </section>
+                  <section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+                    <h2 style="margin:0;font:600 16px/22px 'Noto Sans'">Addresses</h2>
+                    <div style="display:flex;flex-direction:column;gap:2px"><span style="font-weight:600">Home <span style="background:#EAF1FB;color:#1F5AA6;font-size:12px;line-height:16px;font-weight:500;padding:2px 6px;border-radius:4px;margin-left:6px">Default</span></span><span style="color:#33424D">House 12, Block 13-D, Gulshan-e-Iqbal, Karachi</span></div>
+                    <div style="display:flex;flex-direction:column;gap:2px;border-top:1px solid #DDE1E4;padding-top:10px"><span style="font-weight:600">Site: Jauhar project</span><span style="color:#33424D">Plot 45, Block 7, Gulistan-e-Jauhar, Karachi</span></div>
+                  </section>
+                </div>
+                <section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;overflow:hidden">
+                  <h2 style="margin:0;padding:14px 18px;font:600 16px/22px 'Noto Sans';border-bottom:1px solid #DDE1E4">Orders</h2>
+                  <table style="width:100%;border-collapse:collapse"><tbody><sc-for list="{{ custOrders }}" as="o"><tr onClick="{{ o.open }}" style="border-top:1px solid #DDE1E4;cursor:pointer" style-hover="background:#F6F7F8"><td style="padding:10px 18px;font-weight:600;color:#1F5AA6">{{ o.no }}</td><td style="padding:10px 14px">{{ o.date }}</td><td style="padding:10px 14px;text-align:right;font-variant-numeric:tabular-nums">{{ o.totalL }}</td><td style="padding:10px 14px"><span style="background:{{ o.pb.bg }};color:{{ o.pb.fg }};border:{{ o.pb.bd }};font-size:12px;line-height:16px;font-weight:500;padding:2px 6px;border-radius:4px">{{ o.pb.label }}</span></td><td style="padding:10px 18px"><span style="background:{{ o.sb.bg }};color:{{ o.sb.fg }};border:{{ o.sb.bd }};font-size:12px;line-height:16px;font-weight:500;padding:2px 6px;border-radius:4px">{{ o.sb.label }}</span></td></tr></sc-for></tbody></table>
+                </section>
+              </div></sc-if>
+
+              <sc-if value="{{ isAreas }}"><div data-screen-label="Delivery areas" style="display:flex;flex-direction:column;gap:16px">
+                <div style="display:flex;justify-content:space-between;align-items:center"><span style="color:#33424D">Edit fees in place. Changes save when you leave the field.</span><button style="height:36px;padding:0 14px;border:0;border-radius:6px;background:#F2A900;color:#1E2A32;display:flex;align-items:center;gap:6px;font:600 14px/20px 'Noto Sans';cursor:pointer">{{ i16.plus }}Add area</button></div>
+                <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;overflow:auto"><table style="width:100%;border-collapse:collapse;min-width:760px">
+                  <thead><tr style="text-align:left;background:#F6F7F8"><th style="padding:10px 14px;font-weight:600">Area</th><th style="padding:10px 14px;font-weight:600">Delivery fee (Rs)</th><th style="padding:10px 14px;font-weight:600">Free above (Rs)</th><th style="padding:10px 14px;font-weight:600">Serviceable</th><th style="padding:10px 14px;font-weight:600;text-align:right">Orders, 30 days</th></tr></thead>
+                  <tbody><sc-for list="{{ areaRows }}" as="a"><tr style="border-top:1px solid #DDE1E4;background:{{ a.bg }}"><td style="padding:8px 14px;font-weight:500">{{ a.name }}</td><td style="padding:8px 14px"><input value="{{ a.fee }}" onChange="{{ a.setFee }}" disabled="{{ a.off }}" style="width:110px;height:32px;border:1px solid #A9B1B7;border-radius:6px;padding:0 8px;font-size:14px;font-variant-numeric:tabular-nums;background:#FFFFFF"></td><td style="padding:8px 14px"><input value="{{ a.free }}" onChange="{{ a.setFree }}" disabled="{{ a.off }}" style="width:120px;height:32px;border:1px solid #A9B1B7;border-radius:6px;padding:0 8px;font-size:14px;font-variant-numeric:tabular-nums;background:#FFFFFF"></td>
+                    <td style="padding:8px 14px"><button onClick="{{ a.toggle }}" role="switch" aria-checked="{{ a.onStr }}" style="display:flex;align-items:center;gap:10px;border:0;background:none;padding:0;cursor:pointer;font:500 14px/20px 'Noto Sans'"><span style="width:40px;height:22px;border-radius:11px;background:{{ a.track }};position:relative;transition:background-color 150ms"><span style="position:absolute;top:2px;left:{{ a.knob }};width:18px;height:18px;border-radius:50%;background:#FFFFFF;transition:left 150ms"></span></span>{{ a.state }}</button></td>
+                    <td style="padding:8px 14px;text-align:right;font-variant-numeric:tabular-nums">{{ a.orders }}</td></tr></sc-for></tbody>
+                </table></div>
+              </div></sc-if>
+
+              <sc-if value="{{ isHomepage }}"><div data-screen-label="Homepage" style="display:flex;flex-direction:column;gap:16px">
+                <section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;overflow:hidden">
+                  <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid #DDE1E4"><h2 style="margin:0;font:600 16px/22px 'Noto Sans'">Banners</h2><span style="color:#33424D">Drag to reorder. The first banner shows first.</span></div>
+                  <sc-for list="{{ banners }}" as="b"><div draggable="true" onDragStart="{{ b.dragStart }}" onDragOver="{{ b.dragOver }}" onDrop="{{ b.drop }}" style="display:flex;align-items:center;gap:14px;padding:12px 18px;border-top:{{ b.bt }};background:{{ b.bg }}">
+                    <span style="display:flex;color:#6B747B;cursor:grab">{{ i20.grip }}</span>
+                    <span style="font:700 18px/22px 'Barlow Semi Condensed',sans-serif;width:20px;color:#33424D">{{ b.n }}</span>
+                    <div style="width:192px;height:60px;border-radius:6px;background:#1E2A32;color:#FFFFFF;padding:8px 10px;display:flex;align-items:flex-end;font:700 13px/15px 'Barlow Semi Condensed',sans-serif;flex:none">{{ b.title }}</div>
+                    <div style="flex:1;display:flex;flex-direction:column;min-width:0"><span style="font-weight:600">{{ b.title }}</span><span style="color:#33424D">Links to {{ b.link }}</span></div>
+                    <button onClick="{{ b.toggle }}" role="switch" style="display:flex;align-items:center;gap:8px;border:0;background:none;cursor:pointer;font:500 14px/20px 'Noto Sans'"><span style="width:40px;height:22px;border-radius:11px;background:{{ b.track }};position:relative"><span style="position:absolute;top:2px;left:{{ b.knob }};width:18px;height:18px;border-radius:50%;background:#FFFFFF;transition:left 150ms"></span></span>{{ b.state }}</button>
+                    <button style="height:32px;padding:0 10px;border:0;background:none;color:#1F5AA6;font:600 14px/20px 'Noto Sans';cursor:pointer">Edit</button>
+                  </div></sc-for>
+                </section>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:16px;align-items:start">
+                  <sc-for list="{{ pickers }}" as="pk"><section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:14px 18px;display:flex;flex-direction:column;gap:12px">
+                    <div style="display:flex;justify-content:space-between;align-items:baseline"><h2 style="margin:0;font:600 16px/22px 'Noto Sans'">{{ pk.title }}</h2><span style="color:#33424D">{{ pk.count }}</span></div>
+                    <div style="display:flex;flex-direction:column"><sc-for list="{{ pk.items }}" as="it"><div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid #DDE1E4"><span style="display:flex;color:#A9B1B7">{{ i16.grip }}</span><span style="width:32px;height:32px;border-radius:4px;background:#F6F7F8;display:flex;align-items:center;justify-content:center;color:#A9B1B7">{{ it.img }}</span><span style="flex:1">{{ it.name }}</span><button onClick="{{ it.remove }}" aria-label="Remove" style="width:32px;height:32px;border:0;background:none;color:#6B747B;display:flex;align-items:center;justify-content:center;cursor:pointer">{{ i16.x }}</button></div></sc-for></div>
+                    <select value="" onChange="{{ pk.add }}" style="height:36px;border:1px dashed #A9B1B7;border-radius:6px;padding:0 8px;font:500 14px/20px 'Noto Sans';background:#FFFFFF;color:#1F5AA6"><option value="">Add a product…</option><sc-for list="{{ pk.options }}" as="op"><option value="{{ op.id }}">{{ op.name }}</option></sc-for></select>
+                  </section></sc-for>
+                </div>
+              </div></sc-if>
+
+              <sc-if value="{{ isReports }}"><div data-screen-label="Reports" style="display:flex;flex-direction:column;gap:16px">
+                <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+                  <sc-for list="{{ presets }}" as="pr"><button onClick="{{ pr.go }}" style="height:36px;padding:0 12px;border-radius:6px;border:1px solid {{ pr.bd }};background:{{ pr.bg }};font:500 14px/20px 'Noto Sans';cursor:pointer">{{ pr.label }}</button></sc-for>
+                  <div style="flex:1"></div>
+                  <button style="height:36px;padding:0 12px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;display:flex;align-items:center;gap:6px;font:600 14px/20px 'Noto Sans';cursor:pointer">{{ i16.download }}Export to Excel</button>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px">
+                  <sc-for list="{{ repFigures }}" as="f"><div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:14px 18px;display:flex;flex-direction:column;gap:4px"><span style="color:#33424D;font-weight:500">{{ f.label }}</span><span style="font:700 28px/32px 'Barlow Semi Condensed',sans-serif;font-variant-numeric:tabular-nums">{{ f.value }}</span></div></sc-for>
+                </div>
+                <section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:14px 18px 10px;display:flex;flex-direction:column;gap:8px"><h2 style="margin:0;font:600 16px/22px 'Noto Sans'">Revenue, {{ presetLabel }}</h2><div style="width:100%">{{ revChart }}</div></section>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:16px;align-items:start">
+                  <section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;overflow:hidden"><h2 style="margin:0;padding:14px 18px;font:600 16px/22px 'Noto Sans';border-bottom:1px solid #DDE1E4">Top products</h2><table style="width:100%;border-collapse:collapse"><thead><tr style="text-align:left;background:#F6F7F8"><th style="padding:8px 18px;font-weight:600">Product</th><th style="padding:8px 14px;font-weight:600;text-align:right">Units</th><th style="padding:8px 18px;font-weight:600;text-align:right">Revenue</th></tr></thead><tbody><sc-for list="{{ topProducts }}" as="tp"><tr style="border-top:1px solid #DDE1E4"><td style="padding:9px 18px">{{ tp.name }}</td><td style="padding:9px 14px;text-align:right;font-variant-numeric:tabular-nums">{{ tp.units }}</td><td style="padding:9px 18px;text-align:right;font-variant-numeric:tabular-nums">{{ tp.rev }}</td></tr></sc-for></tbody></table></section>
+                  <section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;overflow:hidden"><h2 style="margin:0;padding:14px 18px;font:600 16px/22px 'Noto Sans';border-bottom:1px solid #DDE1E4">Cash on delivery by rider</h2><table style="width:100%;border-collapse:collapse"><thead><tr style="text-align:left;background:#F6F7F8"><th style="padding:8px 18px;font-weight:600">Rider</th><th style="padding:8px 14px;font-weight:600;text-align:right">Collected</th><th style="padding:8px 18px;font-weight:600;text-align:right">To collect</th></tr></thead><tbody><sc-for list="{{ codRows }}" as="cr"><tr style="border-top:1px solid #DDE1E4"><td style="padding:9px 18px">{{ cr.rider }}</td><td style="padding:9px 14px;text-align:right;font-variant-numeric:tabular-nums">{{ cr.done }}</td><td style="padding:9px 18px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ cr.due }}</td></tr></sc-for></tbody></table></section>
+                </div>
+              </div></sc-if>
+
+              <sc-if value="{{ isSettings }}"><div data-screen-label="Settings" style="display:flex;flex-direction:column;gap:16px;max-width:880px;padding-bottom:64px">
+                <section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:18px 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">
+                  <h2 style="margin:0;font:600 18px/24px 'Noto Sans';grid-column:1/-1">Store details</h2>
+                  <label style="display:flex;flex-direction:column;gap:6px"><span style="font-weight:500">Support phone</span><input defaultValue="021 3456 7890" style="height:36px;border:1px solid #A9B1B7;border-radius:6px;padding:0 10px;font-size:14px"></label>
+                  <label style="display:flex;flex-direction:column;gap:6px"><span style="font-weight:500">WhatsApp number</span><input defaultValue="0300 8274266" style="height:36px;border:1px solid #A9B1B7;border-radius:6px;padding:0 10px;font-size:14px"></label>
+                  <label style="display:flex;flex-direction:column;gap:6px;grid-column:1/-1"><span style="font-weight:500">Support email</span><input defaultValue="shop@aricon.com.pk" style="height:36px;border:1px solid #A9B1B7;border-radius:6px;padding:0 10px;font-size:14px"></label>
+                </section>
+                <section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:18px 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">
+                  <h2 style="margin:0;font:600 18px/24px 'Noto Sans';grid-column:1/-1">Orders and payments</h2>
+                  <label style="display:flex;flex-direction:column;gap:6px"><span style="font-weight:500">Cash on delivery limit (Rs)</span><input defaultValue="200,000" style="height:36px;border:1px solid #A9B1B7;border-radius:6px;padding:0 10px;font-size:14px"><span style="font-size:13px;color:#6B747B">Orders above this total must be paid by bank transfer.</span></label>
+                  <label style="display:flex;flex-direction:column;gap:6px"><span style="font-weight:500">Minimum order (Rs)</span><input defaultValue="2,000" style="height:36px;border:1px solid #A9B1B7;border-radius:6px;padding:0 10px;font-size:14px"></label>
+                </section>
+                <section style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+                  <h2 style="margin:0;font:600 18px/24px 'Noto Sans'">Bank accounts</h2>
+                  <sc-for list="{{ bankAccts }}" as="ba"><div style="border:1px solid #DDE1E4;border-radius:10px;padding:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;position:relative">
+                    <div style="grid-column:1/-1;display:flex;justify-content:space-between;align-items:center"><span style="font-weight:600">Account {{ ba.n }}</span><button onClick="{{ ba.remove }}" disabled="{{ ba.only }}" style="height:32px;border:0;background:none;color:{{ ba.rmC }};font:600 14px/20px 'Noto Sans';cursor:pointer;display:flex;align-items:center;gap:4px">{{ i16.trash }}Remove</button></div>
+                    <label style="display:flex;flex-direction:column;gap:6px"><span style="font-weight:500">Bank</span><input defaultValue="{{ ba.bank }}" style="height:36px;border:1px solid #A9B1B7;border-radius:6px;padding:0 10px;font-size:14px"></label>
+                    <label style="display:flex;flex-direction:column;gap:6px"><span style="font-weight:500">Account title</span><input defaultValue="{{ ba.title }}" style="height:36px;border:1px solid #A9B1B7;border-radius:6px;padding:0 10px;font-size:14px"></label>
+                    <label style="display:flex;flex-direction:column;gap:6px"><span style="font-weight:500">Account number</span><input defaultValue="{{ ba.no }}" style="height:36px;border:1px solid #A9B1B7;border-radius:6px;padding:0 10px;font-size:14px"></label>
+                    <label style="display:flex;flex-direction:column;gap:6px"><span style="font-weight:500">IBAN</span><input defaultValue="{{ ba.iban }}" style="height:36px;border:1px solid #A9B1B7;border-radius:6px;padding:0 10px;font-size:14px"></label>
+                  </div></sc-for>
+                  <button onClick="{{ addBank }}" style="align-self:flex-start;height:36px;padding:0 12px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;display:flex;align-items:center;gap:6px;font:600 14px/20px 'Noto Sans';cursor:pointer">{{ i16.plus }}Add bank account</button>
+                </section>
+              </div></sc-if>
+
+              <sc-if value="{{ isAudit }}"><div data-screen-label="Audit log" style="display:flex;flex-direction:column;gap:16px">
+                <div style="display:flex;gap:10px;flex-wrap:wrap"><select style="height:36px;border:1px solid #A9B1B7;border-radius:6px;padding:0 8px;font:500 14px/20px 'Noto Sans';background:#FFFFFF"><option>All staff</option><option>Kashif Mirza</option><option>Sana Malik</option><option>Faraz Ahmed</option></select><select style="height:36px;border:1px solid #A9B1B7;border-radius:6px;padding:0 8px;font:500 14px/20px 'Noto Sans';background:#FFFFFF"><option>All actions</option><option>Prices</option><option>Orders</option><option>Permissions</option></select></div>
+                <div style="background:#FFFFFF;border:1px solid #DDE1E4;border-radius:10px;overflow:hidden">
+                  <sc-for list="{{ auditRows }}" as="au"><div style="border-top:{{ au.bt }}">
+                    <button onClick="{{ au.toggle }}" style="width:100%;border:0;background:{{ au.bg }};padding:10px 14px;display:grid;grid-template-columns:24px 150px 140px minmax(0,1fr);gap:12px;align-items:center;text-align:left;font:400 14px/20px 'Noto Sans';color:#1E2A32;cursor:pointer;white-space:normal" style-hover="background:#F6F7F8"><span style="display:flex">{{ au.chev }}</span><span style="color:#33424D;font-variant-numeric:tabular-nums">{{ au.t }}</span><span style="font-weight:600">{{ au.who }}</span><span>{{ au.what }}</span></button>
+                    <sc-if value="{{ au.open }}"><div style="padding:4px 14px 14px 50px;background:#F6F7F8"><table style="border-collapse:collapse;background:#FFFFFF;border:1px solid #DDE1E4;border-radius:6px;min-width:520px"><thead><tr style="text-align:left"><th style="padding:8px 14px;font-weight:600;border-bottom:1px solid #DDE1E4">Field</th><th style="padding:8px 14px;font-weight:600;border-bottom:1px solid #DDE1E4">Before</th><th style="padding:8px 14px;font-weight:600;border-bottom:1px solid #DDE1E4">After</th></tr></thead><tbody><sc-for list="{{ au.diff }}" as="df"><tr><td style="padding:8px 14px">{{ df.f }}</td><td style="padding:8px 14px;color:#B42318"><s>{{ df.a }}</s></td><td style="padding:8px 14px;color:#1E7B4F;font-weight:500">{{ df.b }}</td></tr></sc-for></tbody></table></div></sc-if>
+                  </div></sc-for>
+                </div>
+              </div></sc-if>
+            </div>
+          </div>
+          <sc-if value="{{ saveBar }}"><div style="position:absolute;left:0;right:0;bottom:0;height:60px;background:#FFFFFF;box-shadow:0 -8px 24px rgba(30,42,50,0.16);display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:0 24px;z-index:5"><span style="flex:1;color:{{ saveMsgC }};display:flex;gap:6px;align-items:center">{{ saveMsgIcon }}{{ saveMsg }}</span><button style="height:36px;padding:0 14px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;font:600 14px/20px 'Noto Sans';cursor:pointer">Discard</button><button onClick="{{ saveChanges }}" disabled="{{ saveDis }}" style="height:36px;padding:0 16px;border:0;border-radius:6px;background:{{ saveBg }};color:{{ saveFg }};font:600 14px/20px 'Noto Sans';cursor:pointer">Save changes</button></div></sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sheetOpen }}"><div onClick="{{ closeSheet }}" style="position:absolute;inset:0;z-index:40;background:rgba(30,42,50,0.5);display:flex;justify-content:flex-end">
+        <div onClick="{{ stop }}" role="dialog" aria-label="Edit staff member" style="width:560px;height:100%;background:#FFFFFF;display:flex;flex-direction:column;box-shadow:0 8px 24px rgba(30,42,50,0.16);animation:ari-in 150ms ease-out">
+          <div style="height:64px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid #DDE1E4"><span style="font:600 18px/24px 'Noto Sans'">{{ sheetTitle }}</span><button onClick="{{ closeSheet }}" aria-label="Close" style="width:36px;height:36px;border:0;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer">{{ i20.x }}</button></div>
+          <div style="flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px">
+            <div style="display:grid;grid-template-columns:110px 1fr;gap:12px 16px;align-items:center">
+              <span style="font-weight:500">Name</span><input defaultValue="{{ su.name }}" style="height:36px;border:1px solid #A9B1B7;border-radius:6px;padding:0 10px;font-size:14px">
+              <span style="font-weight:500">Email</span><sc-if value="{{ su.isNew }}"><input placeholder="name@aricon.com.pk" style="height:36px;border:1px solid #A9B1B7;border-radius:6px;padding:0 10px;font-size:14px"></sc-if><sc-if value="{{ su.isOld }}"><span>{{ su.email }} <span style="color:#6B747B">(can't be changed)</span></span></sc-if>
+              <span style="font-weight:500">Phone</span><input defaultValue="{{ su.phone }}" style="height:36px;border:1px solid #A9B1B7;border-radius:6px;padding:0 10px;font-size:14px">
+              <span style="font-weight:500">Role</span>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <div style="display:flex;gap:20px"><sc-for list="{{ roleRadios }}" as="rr"><label onClick="{{ rr.pick }}" style="display:flex;align-items:center;gap:8px;cursor:{{ rr.cur }};color:{{ rr.fg }}"><span style="width:18px;height:18px;border-radius:50%;border:2px solid {{ rr.ring }};display:flex;align-items:center;justify-content:center"><span style="width:8px;height:8px;border-radius:50%;background:{{ rr.dot }}"></span></span>{{ rr.label }}</label></sc-for></div>
+                <sc-if value="{{ lastAdmin }}"><span style="font-size:13px;line-height:18px;color:#B42318;display:flex;gap:6px;align-items:center">{{ i16.alert }}You can't remove the last admin.</span></sc-if>
+              </div>
+              <span style="font-weight:500">Status</span><select style="height:36px;width:160px;border:1px solid #A9B1B7;border-radius:6px;padding:0 8px;font-size:14px;background:#FFFFFF"><option>Active</option><option>Suspended</option></select>
+            </div>
+            <sc-if value="{{ suAdmin }}"><div style="display:flex;gap:10px;align-items:flex-start;background:#EAF1FB;border-radius:6px;padding:12px 14px"><span style="display:flex;color:#1F5AA6">{{ i16.info }}</span>Admins have full access, including staff and settings.</div></sc-if>
+            <sc-if value="{{ suStaff }}"><div style="display:flex;flex-direction:column;gap:12px;border-top:1px solid #DDE1E4;padding-top:16px">
+              <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font:600 16px/22px 'Noto Sans'">Permissions</span><span style="color:#33424D">{{ permCount }} selected</span></div>
+              <label style="display:flex;align-items:center;gap:10px"><span style="color:#33424D">Start from a preset</span><select value="{{ preset }}" onChange="{{ pickPreset }}" style="height:36px;border:1px solid #A9B1B7;border-radius:6px;padding:0 8px;font-size:14px;background:#FFFFFF"><option value="om">Order Manager</option><option value="cat">Catalog Manager</option><option value="custom">Custom</option><option value="none">None</option></select></label>
+              <sc-for list="{{ permGroups }}" as="pg"><div style="border:1px solid #DDE1E4;border-radius:6px">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#F6F7F8;border-bottom:1px solid #DDE1E4"><button onClick="{{ pg.toggleOpen }}" style="border:0;background:none;padding:0;display:flex;align-items:center;gap:6px;font:600 14px/20px 'Noto Sans';cursor:pointer">{{ pg.chev }}{{ pg.name }}<span style="font-weight:400;color:#33424D">{{ pg.countL }}</span></button><label onClick="{{ pg.toggleAll }}" style="display:flex;align-items:center;gap:8px;cursor:pointer"><span style="width:18px;height:18px;border-radius:4px;border:1.5px solid {{ pg.box.bd }};background:{{ pg.box.bg }};display:flex;align-items:center;justify-content:center;color:#FFFFFF">{{ pg.box.mark }}</span>Select all</label></div>
+                <sc-if value="{{ pg.open }}"><div><sc-for list="{{ pg.items }}" as="pi"><label onClick="{{ pi.toggle }}" style="display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer" style-hover="background:#F6F7F8"><span style="width:18px;height:18px;border-radius:4px;border:1.5px solid {{ pi.box.bd }};background:{{ pi.box.bg }};display:flex;align-items:center;justify-content:center;color:#FFFFFF;flex:none">{{ pi.box.mark }}</span><span style="flex:1">{{ pi.label }}</span><sc-if value="{{ pi.sensitive }}"><span style="background:#FDECEA;color:#B42318;font-size:12px;line-height:16px;font-weight:500;padding:2px 6px;border-radius:4px">Sensitive</span></sc-if></label></sc-for></div></sc-if>
+              </div></sc-for>
+            </div></sc-if>
+            <sc-if value="{{ su.isOld }}"><div style="border-top:1px solid #DDE1E4;padding-top:16px;display:flex;justify-content:space-between;align-items:center"><span style="color:#33424D">Forgot their password?</span><button onClick="{{ resetPw }}" style="height:36px;padding:0 12px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;display:flex;align-items:center;gap:6px;font:600 14px/20px 'Noto Sans';cursor:pointer">{{ i16.key }}Reset password</button></div></sc-if>
+          </div>
+          <div style="height:64px;flex:none;display:flex;justify-content:flex-end;align-items:center;gap:8px;padding:0 20px;border-top:1px solid #DDE1E4"><button onClick="{{ closeSheet }}" style="height:36px;padding:0 14px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;font:600 14px/20px 'Noto Sans';cursor:pointer">Cancel</button><button onClick="{{ saveStaff }}" style="height:36px;padding:0 14px;border:0;border-radius:6px;background:#F2A900;color:#1E2A32;font:600 14px/20px 'Noto Sans';cursor:pointer">{{ sheetSave }}</button></div>
+        </div>
+      </div></sc-if>
+
+      <sc-if value="{{ pwOpen }}"><div style="position:absolute;inset:0;z-index:50;background:rgba(30,42,50,0.5);display:flex;align-items:center;justify-content:center">
+        <div role="dialog" aria-label="Temporary password" style="width:460px;background:#FFFFFF;border-radius:10px;box-shadow:0 8px 24px rgba(30,42,50,0.16);padding:24px;display:flex;flex-direction:column;gap:16px">
+          <span style="font:600 18px/24px 'Noto Sans'">Temporary password for {{ su.name }}</span>
+          <div style="display:flex;align-items:center;gap:12px;border:1px solid #DDE1E4;border-radius:6px;padding:14px 16px;background:#F6F7F8"><span style="flex:1;font:600 30px/36px 'Noto Sans';letter-spacing:0.06em;font-variant-numeric:tabular-nums">Hq7R-k4mW-2Tzp</span><button onClick="{{ copyPw }}" style="height:36px;padding:0 12px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;display:flex;align-items:center;gap:6px;font:600 14px/20px 'Noto Sans';cursor:pointer">{{ pwIcon }}{{ pwLabel }}</button></div>
+          <p style="margin:0;line-height:22px">Share this securely. They must change it at first login.</p>
+          <p style="margin:0;font-size:13px;color:#33424D">We won't show this password again.</p>
+          <button onClick="{{ closePw }}" style="align-self:flex-end;height:36px;padding:0 16px;border:0;border-radius:6px;background:#F2A900;color:#1E2A32;font:600 14px/20px 'Noto Sans';cursor:pointer">Done</button>
+        </div>
+      </div></sc-if>
+
+      <sc-if value="{{ confirmOpen }}"><div style="position:absolute;inset:0;z-index:50;background:rgba(30,42,50,0.5);display:flex;align-items:center;justify-content:center">
+        <div role="dialog" style="width:440px;background:#FFFFFF;border-radius:10px;box-shadow:0 8px 24px rgba(30,42,50,0.16);padding:24px;display:flex;flex-direction:column;gap:14px">
+          <span style="font:600 18px/24px 'Noto Sans'">{{ confirm.title }}</span>
+          <p style="margin:0;line-height:22px;color:#33424D">{{ confirm.body }}</p>
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:6px"><button onClick="{{ closeConfirm }}" style="height:36px;padding:0 14px;border:1px solid #1E2A32;border-radius:6px;background:#FFFFFF;font:600 14px/20px 'Noto Sans';cursor:pointer">Keep order</button><button onClick="{{ confirm.ok }}" style="height:36px;padding:0 14px;border:0;border-radius:6px;background:#B42318;color:#FFFFFF;font:600 14px/20px 'Noto Sans';cursor:pointer">{{ confirm.okLabel }}</button></div>
+        </div>
+      </div></sc-if>
+
+      <sc-if value="{{ toast }}"><div style="position:absolute;right:24px;bottom:84px;z-index:60;width:360px;background:#1E2A32;color:#FFFFFF;border-radius:6px;padding:12px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(30,42,50,0.16)"><span style="color:#7FD1A4;display:flex">{{ i20.ok }}</span><span style="flex:1">{{ toast }}</span></div></sc-if>
+    </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const KEY = 'aricon-admin-proto-v1';
+const ORDERS = [
+  ['ARC-2026-000123', '26 Sep, 4:05 pm', 'Imran Qureshi', '0300 1234567', 'Gulshan-e-Iqbal', 'Bank transfer', 'Awaiting verification', 'New', '', [['lucky-ppc', 12], ['dadex-pprc', 10], ['clipsal-1g', 30]]],
+  ['ARC-2026-000122', '26 Sep, 2:48 pm', 'Qureshi Builders', '0300 1234567', 'PECHS', 'Bank transfer', 'Paid', 'Confirmed', 'Asif Khan', [['lucky-ppc', 100], ['clipsal-1g', 10]]],
+  ['ARC-2026-000121', '26 Sep, 11:02 am', 'Bilal Siddiqui', '0321 4432190', 'DHA', 'Cash on delivery', 'Pending', 'On the way', 'Rashid Ali', [['sch-mcb16', 10]]],
+  ['ARC-2026-000120', '26 Sep, 9:40 am', 'Nadia Hasan', '0333 2087765', 'Clifton', 'Cash on delivery', 'Pending', 'New', '', [['master-6060', 6]]],
+  ['ARC-2026-000119', '25 Sep, 7:55 pm', 'Hamza Construction', '0300 9981234', 'North Nazimabad', 'Cash on delivery', 'Pending', 'Confirmed', 'Asif Khan', [['maple-opc', 120], ['fc-729', 1]]],
+  ['ARC-2026-000118', '25 Sep, 6:30 pm', 'Ayesha Raza', '0345 1209876', 'Clifton', 'Bank transfer', 'Paid', 'Delivered', 'Rashid Ali', [['dulux-ws', 3]]],
+  ['ARC-2026-000117', '25 Sep, 3:14 pm', 'Kamran Sheikh', '0301 5566778', 'North Nazimabad', 'Bank transfer', 'Refunded', 'Returned', 'Asif Khan', [['clipsal-1g', 16]]],
+  ['ARC-2026-000116', '25 Sep, 1:02 pm', 'Farhan Electric', '0322 7788990', 'Gulistan-e-Jauhar', 'Bank transfer', 'Awaiting verification', 'New', '', [['pc-329', 6], ['sch-mcb16', 6]]],
+  ['ARC-2026-000115', '25 Sep, 10:18 am', 'Saima Baig', '0312 3344556', 'PECHS', 'Cash on delivery', 'Paid', 'Delivered', 'Rashid Ali', [['sika-wp', 1]]],
+  ['ARC-2026-000114', '24 Sep, 5:45 pm', 'Usman Tiles & Sanitary', '0300 2233445', 'DHA', 'Bank transfer', 'Rejected', 'New', '', [['master-6060', 22]]],
+  ['ARC-2026-000113', '24 Sep, 12:30 pm', 'Rizwan Ahmed', '0331 6677889', 'Gulshan-e-Iqbal', 'Cash on delivery', 'Pending', 'Cancelled', '', [['fc-729', 1]]]
+];
+const PERMS = [
+  ['Dashboard', [['dash.sales', 'View sales figures', true], ['dash.counts', 'View order counts']]],
+  ['Orders', [['o.view', 'View orders and invoices'], ['o.flow', 'Confirm, dispatch and deliver orders'], ['o.cancel', 'Cancel and return orders', true], ['o.riders', 'Assign riders'], ['o.cod', 'Mark cash on delivery collected'], ['o.receipts', 'Approve or reject bank receipts'], ['o.export', 'Export orders to Excel']]],
+  ['Products', [['p.view', 'View products'], ['p.edit', 'Create and edit products'], ['p.price', 'Change prices and bulk tiers', true], ['p.import', 'Import products']]],
+  ['Catalog', [['c.manage', 'Manage categories and brands']]],
+  ['Customers', [['cu.view', 'View customers'], ['cu.block', 'Block and unblock customers', true]]],
+  ['Delivery', [['d.areas', 'Manage delivery areas and fees'], ['d.riders', 'Manage riders']]],
+  ['Content', [['ct.home', 'Edit homepage and banners'], ['ct.pages', 'Edit info pages']]],
+  ['Reports', [['r.view', 'View reports'], ['r.export', 'Export reports', true]]],
+  ['Stock', [['s.adjust', 'Adjust stock'], ['s.low', 'View low-stock alerts']]]
+];
+const PRESETS = { om: ['dash.counts', 'o.view', 'o.flow', 'o.riders', 'o.cod', 'o.receipts', 'cu.view', 'd.riders', 's.low'], cat: ['dash.counts', 'p.view', 'p.edit', 'p.import', 'c.manage', 'ct.home', 's.adjust', 's.low'] };
+const ALL = PERMS.flatMap((g) => g[1].map((x) => x[0]));
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
+    this.state = Object.assign({
+      role: 'admin', w: 1440, route: 'dash', otab: 'All', oq: '', fPay: '', fMethod: '', fArea: '', fRider: '', oid: 'ARC-2026-000123', ov: {}, rejectOpen: false,
+      openVar: 0, tiers: [[10, 1430], [50, 1410], [100, 1395]], fsec: 'variants', importPct: 100, utab: 'staff', sheet: null, suRole: 'staff', perms: PRESETS.om.slice(), preset: 'om', gOpen: { Orders: true, Products: true },
+      pwOpen: false, pwCopied: false, confirm: null, blocked: false, areas: null, banners: [0, 1, 2], bOff: {}, feat: ['lucky-ppc', 'pc-329', 'dadex-pprc', 'master-6060'], deals: ['clipsal-1g', 'sch-mcb16', 'dulux-ws'], preset2: '30', auditOpen: { 1: true }, banks: 2, loginStep: 1, toast: null, ww: 1280, wh: 800
+    }, saved);
+  }
+  componentDidMount() {
+    this._fit = () => this.setState({ ww: window.innerWidth, wh: window.innerHeight });
+    window.addEventListener('resize', this._fit); this._fit();
+    if (!window.AriIcons || !window.AriData) this._t = setInterval(() => { if (window.AriIcons && window.AriData) { clearInterval(this._t); this.forceUpdate(); } }, 50);
+  }
+  componentDidUpdate() { const s = this.state; try { localStorage.setItem(KEY, JSON.stringify({ role: s.role, w: s.w, route: s.route, oid: s.oid })); } catch (e) {} }
+  componentWillUnmount() { window.removeEventListener('resize', this._fit); clearInterval(this._t); clearInterval(this._imp); clearTimeout(this._tt); }
+  go(route, x) { this.setState(Object.assign({ route, sheet: null, rejectOpen: false }, x || {}), () => { if (this.scroller) this.scroller.scrollTop = 0; }); }
+  toast(msg) { this.setState({ toast: msg }); clearTimeout(this._tt); this._tt = setTimeout(() => this.setState({ toast: null }), 2600); }
+  renderVals() {
+    const I = window.AriIcons, D = window.AriData;
+    if (!I || !D) return {};
+    const s = this.state, fmt = D.fmt, P = D.byId;
+    const i24 = I.icons(React, 24), i20 = I.icons(React, 20, 1.75), i16 = I.icons(React, 16), i14 = I.icons(React, 14, 2.5), c24 = I.cats(React, 24), c20 = I.cats(React, 22), c48 = I.cats(React, 44);
+    const go = (r, x) => () => this.go(r, x);
+    const role = s.role, isAdmin = role === 'admin', isOM = role === 'om', isCat = role === 'cat';
+    const can = (k) => isAdmin || (PRESETS[role] || []).includes(k);
+    const W = s.w, availW = Math.max(320, s.ww - 32), availH = Math.max(480, s.wh - 56 - 32), zoom = Math.min(1, availW / W), fh = Math.round(availH / zoom);
+    const badge = (label) => { const M = { New: ['#EAF1FB', '#1F5AA6', 'transparent'], Confirmed: ['#FFFFFF', '#1E2A32', '#1E2A32'], 'On the way': ['#FFF3CC', '#1E2A32', 'transparent'], Delivered: ['#E7F4EC', '#1E7B4F', 'transparent'], Cancelled: ['#FDECEA', '#B42318', 'transparent'], Returned: ['#FDECEA', '#B42318', 'transparent'], Pending: ['#F6F7F8', '#33424D', '#DDE1E4'], 'Awaiting verification': ['#FFF3CC', '#1E2A32', 'transparent'], Paid: ['#E7F4EC', '#1E7B4F', 'transparent'], Rejected: ['#FDECEA', '#B42318', 'transparent'], Refunded: ['#FFFFFF', '#33424D', '#6B747B'], Active: ['#E7F4EC', '#1E7B4F', 'transparent'], Invited: ['#EAF1FB', '#1F5AA6', 'transparent'], Blocked: ['#FDECEA', '#B42318', 'transparent'] }[label] || ['#F6F7F8', '#33424D', '#DDE1E4']; return { label, bg: M[0], fg: M[1], bd: '1px solid ' + M[2] }; };
+    const feeFor = (area, sub) => { const a = D.areas.find((x) => x.name === area) || D.areas[0]; return sub >= a.free ? 0 : a.fee; };
+    const orders = ORDERS.map(([no, date, cust, phone, area, method, pay, status, rider, lines]) => {
+      const o = Object.assign({ no, date, cust, phone, area, method, pay, status, rider }, s.ov[no] || {});
+      const ls = lines.map(([id, q]) => { const p = P[id], k = D.tierIdx(p, q), up = p.tiers[k][1]; return { sku: p.sku, name: p.short, q, up: up.toLocaleString('en-US'), tier: k > 0 ? p.tiers[k][0] + '+' : 'Base', total: (up * q).toLocaleString('en-US'), t: up * q }; });
+      const sub = ls.reduce((a, l) => a + l.t, 0), fee = feeFor(area, sub);
+      return Object.assign(o, { ls, sub, fee, total: sub + fee, totalL: fmt(sub + fee), pb: badge(o.pay), sb: badge(o.status), methodShort: method === 'Bank transfer' ? 'Bank transfer' : 'COD', riderC: o.rider ? '#1E2A32' : '#6B747B', riderL: o.rider || 'Not assigned', open: go('order', { oid: no }) });
+    });
+    orders.forEach((o) => { o.rider = o.riderL; });
+    const cnt = (st) => orders.filter((o) => st.includes(o.status)).length;
+    const route = s.route;
+    const navDefs = [['dash', 'Dashboard', i20.dash, true], ['orders', 'Orders', i20.orders, can('o.view'), cnt(['New'])], ['products', 'Products', i20.box, can('p.view')], ['users', 'Users', i20.users, isAdmin || can('cu.view')], ['areas', 'Delivery areas', i20.pin, can('d.areas')], ['homepage', 'Homepage', i20.home, can('ct.home')], ['reports', 'Reports', i20.chart, can('r.view')], ['settings', 'Settings', i20.settings, isAdmin], ['audit', 'Audit log', i20.history, isAdmin]];
+    const section = { order: 'orders', form: 'products', import: 'products', customer: 'users' }[route] || route;
+    const allowed = { dash: true, orders: can('o.view'), order: can('o.view'), products: can('p.view'), form: can('p.view'), import: can('p.import'), users: isAdmin || can('cu.view'), customer: isAdmin || can('cu.view'), areas: can('d.areas'), homepage: can('ct.home'), reports: can('r.view'), settings: isAdmin, audit: isAdmin, login: true };
+    const denied = !allowed[route];
+    const nav = navDefs.filter((n) => n[3]).map(([id, label, icon, , count]) => { const on = section === id; return { label, icon, count: count || 0, go: go(id), bg: on ? '#33424D' : 'transparent', edge: on ? 'inset 4px 0 0 #F2A900' : 'none', fg: on ? '#FFFFFF' : '#DDE1E4', font: on ? "600 14px/20px 'Noto Sans'" : "500 14px/20px 'Noto Sans'" }; });
+    const me = isAdmin ? { name: 'Kashif Mirza', initials: 'KM', roleLabel: 'Admin' } : isOM ? { name: 'Sana Malik', initials: 'SM', roleLabel: 'Staff, Order Manager' } : { name: 'Faraz Ahmed', initials: 'FA', roleLabel: 'Staff, Catalog Manager' };
+    const titles = { dash: 'Dashboard', orders: 'Orders', order: 'Order detail', products: 'Products', form: 'Lucky Cement PPC', import: 'Import products', users: 'Users', customer: 'Imran Qureshi', areas: 'Delivery areas', homepage: 'Homepage', reports: 'Reports', settings: 'Settings', audit: 'Audit log' };
+    // dashboard
+    const spark = (pts, w, h, color) => { const mx = Math.max(...pts), mn = Math.min(...pts); const d = pts.map((v, i) => (i / (pts.length - 1)) * w + ',' + (h - 4 - ((v - mn) / (mx - mn || 1)) * (h - 8))).join(' '); return React.createElement('svg', { width: '100%', height: h, viewBox: '0 0 ' + w + ' ' + h, preserveAspectRatio: 'none', style: { display: 'block' } }, React.createElement('polyline', { points: d, fill: 'none', stroke: color, strokeWidth: 2, vectorEffect: 'non-scaling-stroke', strokeLinejoin: 'round' })); };
+    const codDue = orders.filter((o) => o.method === 'Cash on delivery' && o.pay === 'Pending' && !['Cancelled', 'Returned'].includes(o.status)).reduce((a, o) => a + o.total, 0);
+    const rcptN = orders.filter((o) => o.pay === 'Awaiting verification').length;
+    const figures = [
+      can('dash.counts') && { label: "Today's orders", value: '18', note: '4 more than yesterday' },
+      can('dash.sales') && { label: "Today's revenue", value: 'Rs 412,380' },
+      can('dash.sales') && { label: 'Last 7 days revenue', value: 'Rs 2,684,900', spark: spark([310, 285, 402, 371, 356, 548, 412], 200, 36, '#F2A900') },
+      can('o.receipts') && { label: 'Receipts to verify', value: String(rcptN), link: 'Review receipts', go: go('orders', { otab: 'All', fPay: 'Awaiting verification' }) },
+      can('o.cod') && { label: 'Cash to collect', value: fmt(codDue), note: 'From riders on open COD orders' }
+    ].filter(Boolean);
+    const statusCounts = [['New', 12], ['Confirmed', 8], ['On the way', 5], ['Delivered', 9], ['Cancelled', 1]].map(([st, n]) => ({ b: badge(st === 'Delivered' ? 'Delivered' : st), n, go: go('orders', { otab: st === 'Cancelled' ? 'Cancelled & returned' : st, fPay: '' }) }));
+    const lowStock = [['Pakistan Cables wire 3/29', '90 m coil', 6, 10], ['DG Cement SRC', '50 kg bag', 4, 20], ['Maple Leaf wall plaster', '40 kg bag', 0, 20], ['Lucky Cement PPC', '40 kg bag', 0, 20], ['Sika waterproofing coating', '20 kg pail', 18, 20]].map(([name, variant, stock, th]) => ({ name, variant, stock, th, c: stock === 0 ? '#B42318' : '#1E2A32' }));
+    // orders list
+    const tabDefs = [['New', ['New'], 12], ['Confirmed', ['Confirmed'], 8], ['On the way', ['On the way'], 5], ['Delivered', ['Delivered']], ['Cancelled & returned', ['Cancelled', 'Returned']], ['All', null]];
+    const tabDef = tabDefs.find((t) => t[0] === s.otab) || tabDefs[5];
+    const oq = s.oq.trim().toLowerCase();
+    const rows = orders.filter((o) => (!tabDef[1] || tabDef[1].includes(o.status)) && (!s.fPay || o.pay === s.fPay) && (!s.fMethod || o.method === s.fMethod) && (!s.fArea || o.area === s.fArea) && (!s.fRider || o.rider === s.fRider) && (!oq || (o.no + o.cust + o.phone.replace(/\s/g, '')).toLowerCase().includes(oq.replace(/\s/g, ''))));
+    const opt = (list, all) => [{ v: '', l: all }].concat(list.map((x) => ({ v: x, l: x })));
+    const setF = (k) => (e) => this.setState({ [k]: e.target.value });
+    const orderFilters = [
+      { label: 'Payment status', value: s.fPay, set: setF('fPay'), opts: opt(['Pending', 'Awaiting verification', 'Paid', 'Rejected', 'Refunded'], 'Any payment status') },
+      { label: 'Method', value: s.fMethod, set: setF('fMethod'), opts: opt(['Cash on delivery', 'Bank transfer'], 'Any method') },
+      { label: 'Area', value: s.fArea, set: setF('fArea'), opts: opt(D.areas.filter((a) => a.ok).map((a) => a.name), 'All areas') },
+      { label: 'Rider', value: s.fRider, set: setF('fRider'), opts: opt(['Asif Khan', 'Rashid Ali', 'Not assigned'], 'Any rider') }
+    ];
+    const orderTabs = tabDefs.map(([label, , n]) => { const on = s.otab === label; return { label, n: n || 0, nbg: on ? '#FFF3CC' : '#EEF0F1', go: () => this.setState({ otab: label }), under: on ? 'inset 0 -3px 0 #1E2A32' : 'none', font: on ? "600 14px/20px 'Noto Sans'" : "500 14px/20px 'Noto Sans'" }; });
+    // order detail
+    const o = orders.find((x) => x.no === s.oid) || orders[0];
+    const setOv = (patch, msg) => { this.setState((st) => ({ ov: Object.assign({}, st.ov, { [o.no]: Object.assign({}, st.ov[o.no] || {}, patch) }), rejectOpen: false, confirm: null })); if (msg) this.toast(msg); };
+    const btn = (label, fn, kind, extra) => Object.assign({ label, fn, dis: false, title: '', cur: 'pointer', bd: kind === 'primary' ? '1px solid #F2A900' : kind === 'danger' ? '1px solid #B42318' : '1px solid #1E2A32', bg: kind === 'primary' ? '#F2A900' : '#FFFFFF', fg: kind === 'danger' ? '#B42318' : '#1E2A32' }, extra || {});
+    const acts = [];
+    if (o.status === 'New' && can('o.flow')) acts.push(btn('Confirm order', () => setOv({ status: 'Confirmed' }, o.no + ' confirmed'), 'primary'));
+    if (o.status === 'Confirmed' && can('o.flow')) acts.push(btn('Mark dispatched', () => setOv({ status: 'On the way' }, o.no + ' is on the way'), 'primary', o.riderL === 'Not assigned' ? { dis: true, title: 'Assign a rider first', bg: '#EEF0F1', bd: '1px solid #EEF0F1', fg: '#6B747B', cur: 'not-allowed' } : {}));
+    if (o.status === 'On the way' && can('o.flow')) acts.push(btn('Mark delivered', () => setOv({ status: 'Delivered' }, o.no + ' delivered'), 'primary'));
+    acts.push(btn('Invoice', () => this.toast('Invoice downloaded'), 'sec'));
+    if (['New', 'Confirmed'].includes(o.status) && can('o.cancel')) acts.push(btn('Cancel order', () => this.setState({ confirm: { title: 'Cancel order ' + o.no + '?', body: 'The customer gets an SMS and WhatsApp message. Stock for ' + o.ls.length + ' items goes back to inventory. This can\u2019t be undone.', okLabel: 'Cancel order', ok: () => setOv({ status: 'Cancelled' }, o.no + ' cancelled') } }), 'danger'));
+    if (o.status === 'Delivered' && can('o.cancel')) acts.push(btn('Mark returned', () => setOv({ status: 'Returned' }, o.no + ' marked returned'), 'danger'));
+    const tlBase = [{ t: o.date, what: 'Placed', who: 'by customer on the website' }];
+    if (o.pay === 'Awaiting verification' || o.pay === 'Paid' || o.pay === 'Rejected') if (o.method === 'Bank transfer') tlBase.push({ t: o.date.replace(/\d+:\d+ (am|pm)/, (m) => m), what: 'Receipt uploaded', who: 'by customer' });
+    if (o.pay === 'Paid' && o.method === 'Bank transfer') tlBase.push({ t: '26 Sep, 4:40 pm', what: 'Receipt approved', who: 'by Sana Malik' });
+    if (o.pay === 'Rejected') tlBase.push({ t: '26 Sep, 4:40 pm', what: 'Receipt rejected', who: 'by Sana Malik' });
+    if (['Confirmed', 'On the way', 'Delivered', 'Returned'].includes(o.status)) tlBase.push({ t: '26 Sep, 5:20 pm', what: 'Confirmed', who: 'by Sana Malik' });
+    if (o.riderL !== 'Not assigned') tlBase.push({ t: '26 Sep, 5:25 pm', what: 'Rider assigned', who: o.riderL });
+    if (['On the way', 'Delivered', 'Returned'].includes(o.status)) tlBase.push({ t: '27 Sep, 9:30 am', what: 'On the way', who: 'with ' + o.riderL });
+    if (['Delivered', 'Returned'].includes(o.status)) tlBase.push({ t: '27 Sep, 12:15 pm', what: 'Delivered', who: 'by ' + o.riderL });
+    if (o.status === 'Cancelled') tlBase.push({ t: '26 Sep, 6:02 pm', what: 'Cancelled', who: 'by Kashif Mirza' });
+    if (o.status === 'Returned') tlBase.push({ t: '28 Sep, 3:00 pm', what: 'Returned', who: 'by Kashif Mirza' });
+    const isBank = o.method === 'Bank transfer';
+    const ovm = { no: o.no, sb: o.sb, pb: o.pb, dateLong: o.date.replace(',', ' 2026,'), cust: o.cust, phone: o.phone, address: o.no === 'ARC-2026-000123' ? 'House 12, Block 13-D, Gulshan-e-Iqbal, Karachi' : 'Delivery address in ' + o.area + ', Karachi', method: o.method, totalL: o.totalL, isBank, isCod: !isBank,
+      canVerify: isBank && o.pay === 'Awaiting verification' && can('o.receipts') && !s.rejectOpen, rcptDone: isBank && o.pay !== 'Awaiting verification' ? o.pay : '',
+      codNote: o.pay === 'Paid' ? 'Cash collected by ' + o.riderL + '.' : 'Rider collects ' + o.totalL + ' on delivery.', canCollect: !isBank && o.pay === 'Pending' && ['On the way', 'Delivered'].includes(o.status) && can('o.cod'),
+      rider: o.riderL === 'Not assigned' ? '' : o.riderL, riderLocked: !can('o.riders') || ['Delivered', 'Cancelled', 'Returned'].includes(o.status),
+      lines: o.ls, subL: fmt(o.sub), feeL: o.fee ? fmt(o.fee) : 'Free', area: o.area, timeline: tlBase, actions: acts,
+      hint: isOM && ['New', 'Confirmed'].includes(o.status) ? 'Cancelling orders needs the "Cancel and return orders" permission. Ask an admin if this order should be cancelled.' : '' };
+    // products
+    const productRows = D.products.map((p) => ({ name: p.short, sku: p.sku, img: c24[p.icon], cat: p.cat === 'cement' ? 'Cement & plaster' : { wire: 'Wires & cables', switch: 'Switches & sockets', breaker: 'Breakers & DBs', pipe: 'Pipes', paint: 'Paint & primers', tiles: 'Tiles & adhesives', waterproof: 'Waterproofing' }[p.cat], range: p.tiers.length > 1 ? fmt(p.tiers[p.tiers.length - 1][1]) + ' – ' + p.tiers[0][1].toLocaleString('en-US') : fmt(p.tiers[0][1]), stock: p.stock, badge: p.stock === 0 ? { label: 'Out of stock', bg: '#FDECEA', fg: '#B42318' } : p.stock <= 10 ? { label: 'Low', bg: '#FFF3CC', fg: '#1E2A32' } : null, open: go('form') }));
+    const priceLocked = !can('p.price');
+    const variantsData = [{ sku: 'LC-PPC50', pack: '50 kg', mrp: '1,500', price: '1,450', stock: 240, th: 20, unit: 'bag', nT: s.tiers.length }, { sku: 'LC-PPC40', pack: '40 kg', mrp: '1,220', price: '1,180', stock: 0, th: 20, unit: 'bag', nT: 1 }];
+    const variants = variantsData.map((v, i) => Object.assign(v, { open: s.openVar === i, chev: s.openVar === i ? i16.down : i16.right, toggle: () => this.setState({ openVar: s.openVar === i ? -1 : i }), tiersL: v.nT + (v.nT === 1 ? ' tier' : ' tiers'), rowBg: s.openVar === i ? '#F6F7F8' : '#FFFFFF' }));
+    let prevMin = 1, prevPrice = 1450, tierErr = false;
+    const tierRows = (s.openVar === 1 ? [[20, 1160]] : s.tiers).map(([mn, pr], i) => {
+      const bad = pr >= prevPrice, badMin = mn <= prevMin; prevMin = mn; prevPrice = pr; if (bad || badMin) tierErr = true;
+      const msg = badMin ? 'Must be more than the tier above' : bad ? 'Each tier must be cheaper than the one before' : 'Saves ' + fmt(1450 - pr) + ' per bag';
+      const setT = (idx, val) => this.setState((st) => ({ tiers: st.tiers.map((t, j) => (j === i ? (idx === 0 ? [val, t[1]] : [t[0], val]) : t)) }));
+      return { min: String(mn), price: String(pr), minRo: priceLocked, minBd: badMin ? '#B42318' : priceLocked ? '#DDE1E4' : '#A9B1B7', minBg: priceLocked ? '#F6F7F8' : '#FFFFFF', priceBd: bad ? '#B42318' : priceLocked ? '#DDE1E4' : '#A9B1B7', msg, msgC: bad || badMin ? '#B42318' : '#1E7B4F', msgIcon: bad || badMin ? i16.alert : null,
+        setMin: (e) => setT(0, parseInt(e.target.value.replace(/\D/g, ''), 10) || 0), setPrice: (e) => setT(1, parseInt(e.target.value.replace(/\D/g, ''), 10) || 0), canRemove: !priceLocked, noRemove: priceLocked, remove: () => this.setState((st) => ({ tiers: st.tiers.filter((_, j) => j !== i) })) };
+    });
+    const formNav = [['basics', 'Basics'], ['images', 'Images'], ['variants', 'Variants'], ['specs', 'Specifications'], ['desc', 'Description'], ['seo', 'SEO']].map(([id, label]) => { const on = s.fsec === id; return { label, bg: on ? '#FFFFFF' : 'transparent', edge: on ? 'inset 3px 0 0 #1E2A32' : 'none', font: on ? "600 14px/20px 'Noto Sans'" : "500 14px/20px 'Noto Sans'", go: () => { this.setState({ fsec: id }); const el = this.scroller && this.scroller.querySelector('#f-' + id); if (el && this.scroller) this.scroller.scrollTop = el.offsetTop - 24; } }; });
+    const pct = s.importPct;
+    const importSteps = [['Download template', 'aricon-products-template.xlsx'], ['Upload file', 'aricon-products-sep-2026.xlsx'], ['Review results', pct >= 100 ? '150 of 154 rows imported' : 'Importing…']].map(([label, note], i) => { const done = i < 2 || pct >= 100, now = i === 2 && pct < 100; return { label, note, mark: done ? i14.check : String(i + 1), bg: done ? '#1E2A32' : '#FFFFFF', fg: done ? '#FFFFFF' : '#1E2A32', cb: now ? '2px solid #1E2A32' : '0', bd: now ? '2px solid #1E2A32' : '1px solid #DDE1E4' }; });
+    // users
+    const staff = [
+      { id: 'km', name: 'Kashif Mirza', email: 'kashif@aricon.com.pk', phone: '0300 2468013', role: 'admin', status: 'Active', last: 'Today, 9:12 am' },
+      { id: 'sm', name: 'Sana Malik', email: 'sana@aricon.com.pk', phone: '0321 7654321', role: 'staff', preset: 'Order Manager', status: 'Active', last: 'Today, 8:47 am' },
+      { id: 'fa', name: 'Faraz Ahmed', email: 'faraz@aricon.com.pk', phone: '0333 1122334', role: 'staff', preset: 'Catalog Manager', status: 'Active', last: 'Yesterday, 6:05 pm' },
+      { id: 'hs', name: 'Hina Shah', email: 'hina@aricon.com.pk', phone: '0345 9988776', role: 'staff', preset: 'Custom (4)', status: 'Invited', last: 'Not yet' }
+    ];
+    const staffRows = staff.map((u) => ({ name: u.name, email: u.email, role: u.role === 'admin' ? 'Admin' : 'Staff', perms: u.role === 'admin' ? 'Full access' : u.preset, sb: badge(u.status), last: u.last, open: () => this.setState({ sheet: u.id, suRole: u.role, perms: u.id === 'fa' ? PRESETS.cat.slice() : u.id === 'hs' ? ['o.view', 'cu.view', 'r.view', 's.low'] : PRESETS.om.slice(), preset: u.id === 'fa' ? 'cat' : u.id === 'hs' ? 'custom' : 'om' }) }));
+    const su = s.sheet === 'new' ? { name: '', email: '', phone: '', isNew: true, isOld: false } : Object.assign({ isNew: false, isOld: true }, staff.find((u) => u.id === s.sheet) || staff[1]);
+    const lastAdmin = s.sheet === 'km';
+    const roleRadios = [['staff', 'Staff'], ['admin', 'Admin']].map(([id, label]) => { const on = s.suRole === id, dis = lastAdmin && id === 'staff'; return { label, pick: (e) => { e.preventDefault(); if (!dis) this.setState({ suRole: id }); }, ring: on ? '#1E2A32' : '#A9B1B7', dot: on ? '#1E2A32' : 'transparent', cur: dis ? 'not-allowed' : 'pointer', fg: dis ? '#6B747B' : '#1E2A32' }; });
+    const pbox = (on, part) => ({ bd: on || part ? '#1E2A32' : '#A9B1B7', bg: on || part ? '#1E2A32' : '#FFFFFF', mark: on ? i14.check : part ? i14.minus : null });
+    const setPerms = (perms) => this.setState({ perms, preset: 'custom' });
+    const permGroups = PERMS.map(([name, items]) => {
+      const keys = items.map((x) => x[0]), n = keys.filter((k) => s.perms.includes(k)).length, open = s.gOpen[name] !== undefined ? s.gOpen[name] : n > 0;
+      return { name, open, chev: open ? i16.down : i16.right, countL: n + ' of ' + keys.length, toggleOpen: () => this.setState((st) => ({ gOpen: Object.assign({}, st.gOpen, { [name]: !open }) })), box: pbox(n === keys.length, n > 0 && n < keys.length),
+        toggleAll: (e) => { e.preventDefault(); setPerms(n === keys.length ? s.perms.filter((k) => !keys.includes(k)) : Array.from(new Set(s.perms.concat(keys)))); },
+        items: items.map(([k, label, sens]) => ({ label, sensitive: !!sens, box: pbox(s.perms.includes(k)), toggle: (e) => { e.preventDefault(); setPerms(s.perms.includes(k) ? s.perms.filter((x) => x !== k) : s.perms.concat([k])); } })) };
+    });
+    const custRows = [['Imran Qureshi', '0300 1234567', 'Qureshi Builders', 14, 'Rs 1,284,600', 'Active'], ['Hamza Construction', '0300 9981234', 'Hamza Construction', 9, 'Rs 2,410,300', 'Active'], ['Ayesha Raza', '0345 1209876', '', 3, 'Rs 61,900', 'Active'], ['Farhan Electric', '0322 7788990', 'Farhan Electric Works', 22, 'Rs 986,450', 'Active'], ['Rizwan Ahmed', '0331 6677889', '', 1, 'Rs 0', 'Blocked']].map(([name, phone, company, n, spent, st], i) => ({ name, phone, company: company || '—', orders: n, spent, sb: badge(i === 0 && s.blocked ? 'Blocked' : st), open: go('customer') }));
+    const custOrders = orders.filter((x) => x.cust === 'Imran Qureshi' || x.cust === 'Qureshi Builders');
+    // areas
+    const areaState = s.areas || D.areas.map((a, i) => ({ name: a.name, fee: String(a.fee || ''), free: a.free ? a.free.toLocaleString('en-US') : '', ok: a.ok, orders: [148, 96, 71, 88, 64, 102, 0][i] }));
+    const setArea = (i, patch) => this.setState({ areas: areaState.map((a, j) => (j === i ? Object.assign({}, a, patch) : a)) });
+    const areaRows = areaState.map((a, i) => ({ name: a.name, fee: a.fee, free: a.free, off: !a.ok, orders: a.orders, bg: a.ok ? '#FFFFFF' : '#F6F7F8', setFee: (e) => setArea(i, { fee: e.target.value }), setFree: (e) => setArea(i, { free: e.target.value }), toggle: () => setArea(i, { ok: !a.ok }), onStr: String(a.ok), track: a.ok ? '#1E7B4F' : '#A9B1B7', knob: a.ok ? '20px' : '2px', state: a.ok ? 'Delivering' : 'Not delivering yet' }));
+    // homepage
+    const BAN = [['Cement, wiring and pipes, delivered to your site.', 'Cement & plaster'], ['Bulk prices on Pakistan Cables', 'Wires & cables'], ['Dadex PPRC for new plumbing', 'Pipes']];
+    const banners = s.banners.map((bi, i) => { const on = !s.bOff[bi]; return { n: i + 1, title: BAN[bi][0], link: BAN[bi][1], bt: i ? '1px solid #DDE1E4' : '0', bg: this._drag === i ? '#F6F7F8' : '#FFFFFF', track: on ? '#1E7B4F' : '#A9B1B7', knob: on ? '20px' : '2px', state: on ? 'Live' : 'Hidden', toggle: () => this.setState((st) => ({ bOff: Object.assign({}, st.bOff, { [bi]: on }) })),
+      dragStart: (e) => { this._drag = i; e.dataTransfer.effectAllowed = 'move'; }, dragOver: (e) => e.preventDefault(), drop: (e) => { e.preventDefault(); const from = this._drag; this._drag = null; if (from == null || from === i) return; const arr = s.banners.slice(); const [x] = arr.splice(from, 1); arr.splice(i, 0, x); this.setState({ banners: arr }); } }; });
+    const picker = (title, key) => ({ title, count: s[key].length + ' products', items: s[key].map((id) => ({ name: P[id].short, img: c20[P[id].icon], remove: () => this.setState({ [key]: s[key].filter((x) => x !== id) }) })), options: D.products.filter((p) => !s[key].includes(p.id)).map((p) => ({ id: p.id, name: p.short })), add: (e) => { const v = e.target.value; if (v) this.setState({ [key]: s[key].concat([v]) }); } });
+    // reports
+    const presets = [['today', 'Today'], ['7', 'Last 7 days'], ['30', 'Last 30 days'], ['month', 'This month'], ['custom', 'Custom range']].map(([id, label]) => ({ label, go: () => this.setState({ preset2: id }), bd: s.preset2 === id ? '#1F5AA6' : '#A9B1B7', bg: s.preset2 === id ? '#EAF1FB' : '#FFFFFF' }));
+    const presetLabel = { today: 'today', '7': 'last 7 days', '30': 'last 30 days', month: 'September 2026', custom: '1–26 Sep 2026' }[s.preset2];
+    const nPts = s.preset2 === 'today' ? 12 : s.preset2 === '7' ? 7 : 30;
+    const series = Array.from({ length: nPts }, (_, i) => Math.round(260 + 120 * Math.sin(i * 0.7) + 90 * Math.sin(i * 0.23 + 1) + i * 4 + ((i * 37) % 60)));
+    const revChart = (() => {
+      const w = 1000, h = 260, pl = 56, pb = 28, pt = 10, mx = Math.ceil(Math.max(...series) / 100) * 100; const E = React.createElement; const x = (i) => pl + (i / (nPts - 1)) * (w - pl - 10), y = (v) => pt + (1 - v / mx) * (h - pt - pb);
+      const grid = [0, 0.25, 0.5, 0.75, 1].map((f, i) => E('g', { key: 'g' + i }, E('line', { x1: pl, x2: w - 10, y1: y(mx * f), y2: y(mx * f), stroke: '#DDE1E4' }), E('text', { x: pl - 8, y: y(mx * f) + 4, textAnchor: 'end', fontSize: 12, fill: '#1E2A32', fontFamily: 'Noto Sans' }, 'Rs ' + Math.round(mx * f) + 'k')));
+      const lbls = series.map((_, i) => (i % Math.ceil(nPts / 8) === 0 ? E('text', { key: 'l' + i, x: x(i), y: h - 8, textAnchor: 'middle', fontSize: 12, fill: '#1E2A32', fontFamily: 'Noto Sans' }, s.preset2 === 'today' ? (8 + i) + ':00' : (s.preset2 === '7' ? 20 + i : ((i % 30) + 1)) + (s.preset2 === '7' ? ' Sep' : '')) : null));
+      return E('svg', { viewBox: '0 0 ' + w + ' ' + h, width: '100%', style: { display: 'block' } }, grid, lbls, E('polyline', { points: series.map((v, i) => x(i) + ',' + y(v)).join(' '), fill: 'none', stroke: '#F2A900', strokeWidth: 3, strokeLinejoin: 'round' }), series.map((v, i) => E('circle', { key: 'c' + i, cx: x(i), cy: y(v), r: 3, fill: '#FFFFFF', stroke: '#D99600', strokeWidth: 2 })));
+    })();
+    const total = series.reduce((a, b) => a + b, 0) * 1000;
+    const repFigures = [['Revenue', fmt(total)], ['Orders', String(Math.round(total / 41000))], ['Average order', 'Rs 41,000'], ['COD collected', fmt(total * 0.42)]].map(([label, value]) => ({ label, value }));
+    const topProducts = [['Lucky Cement PPC, 50 kg bag', '2,840 bags', 'Rs 4,032,800'], ['Maple Leaf OPC Cement, 50 kg bag', '1,610 bags', 'Rs 2,318,400'], ['Pakistan Cables wire 3/29, 90 m coil', '142 coils', 'Rs 1,298,700'], ['Master Tiles floor tile 60×60 cm', '260 boxes', 'Rs 1,092,000'], ['Dadex PPRC pipe, 1 in, 4 m', '720 lengths', 'Rs 868,800']].map(([name, units, rev]) => ({ name, units, rev }));
+    const codRows = [['Asif Khan', 'Rs 684,200', fmt(codDue * 0.6)], ['Rashid Ali', 'Rs 512,900', fmt(codDue * 0.4)]].map(([rider, done, due]) => ({ rider, done, due }));
+    const BANKS = [['Meezan Bank', 'Aricon Engineering Consultants', '0101 0104 5678 90', 'PK36 MEZN 0001 0101 0456 7890'], ['HBL', 'Aricon Engineering Consultants', '1234 7900 1122 03', 'PK12 HABB 0012 3479 0011 2203'], ['', '', '', '']];
+    const bankAccts = Array.from({ length: s.banks }, (_, i) => { const b = BANKS[Math.min(i, 2)]; return { n: i + 1, bank: b[0], title: b[1], no: b[2], iban: b[3], only: s.banks === 1, rmC: s.banks === 1 ? '#A9B1B7' : '#B42318', remove: () => this.setState({ banks: Math.max(1, s.banks - 1) }) }; });
+    const AUD = [
+      ['26 Sep, 5:20 pm', 'Sana Malik', 'Confirmed order ARC-2026-000119', [['Status', 'New', 'Confirmed']]],
+      ['26 Sep, 3:02 pm', 'Kashif Mirza', 'Changed bulk tiers on Lucky Cement PPC, 50 kg bag', [['Tier 10+ price', 'Rs 1,410', 'Rs 1,430'], ['Tier 100+ price', 'Rs 1,380', 'Rs 1,395']]],
+      ['26 Sep, 11:40 am', 'Kashif Mirza', 'Changed permissions for Faraz Ahmed', [['Change prices and bulk tiers', 'Allowed', 'Not allowed']]],
+      ['26 Sep, 10:15 am', 'Faraz Ahmed', 'Adjusted stock on Lucky Cement PPC, 50 kg bag', [['Stock', '260', '240'], ['Reason', '', 'Damaged in storage']]],
+      ['25 Sep, 6:48 pm', 'Sana Malik', 'Approved bank receipt for ARC-2026-000122', [['Payment status', 'Awaiting verification', 'Paid']]],
+      ['25 Sep, 9:05 am', 'Kashif Mirza', 'Updated delivery area DHA', [['Delivery fee', 'Rs 600', 'Rs 700']]]
+    ];
+    const auditRows = AUD.map(([t, who, what, diff], i) => { const open = !!s.auditOpen[i]; return { t, who, what, open, chev: open ? i16.down : i16.right, bt: i ? '1px solid #DDE1E4' : '0', bg: open ? '#F6F7F8' : '#FFFFFF', toggle: () => this.setState((st) => ({ auditOpen: Object.assign({}, st.auditOpen, { [i]: !open }) })), diff: diff.map(([f, a, b]) => ({ f, a: a || '—', b })) }; });
+    // demos
+    const dm = (label, fn, on) => ({ label, fn, bg: on ? '#EAF1FB' : '#FFFFFF', bd: on ? '#1F5AA6' : '#A9B1B7' });
+    const demos = {
+      dash: [dm('Admin view', () => this.setState({ role: 'admin' }), isAdmin), dm('Order Manager view', () => this.setState({ role: 'om' }), isOM)],
+      orders: [dm('Receipts to verify', () => this.setState({ otab: 'All', fPay: 'Awaiting verification' }), s.fPay === 'Awaiting verification'), dm('Clear filters', () => this.setState({ fPay: '', fMethod: '', fArea: '', fRider: '', oq: '' }))],
+      order: [dm('As Admin', () => this.setState({ role: 'admin' }), isAdmin), dm('As Order Manager', () => this.setState({ role: 'om' }), isOM), dm('Reset order', () => this.setState({ ov: {} }))],
+      form: [dm('Tier error', () => this.setState({ openVar: 0, tiers: [[10, 1430], [50, 1440], [100, 1395]] })), dm('Valid tiers', () => this.setState({ tiers: [[10, 1430], [50, 1410], [100, 1395]] })), dm('Locked (no price permission)', () => this.setState({ role: isCat ? 'admin' : 'cat' }), isCat)],
+      import: [dm('Run import again', () => { clearInterval(this._imp); this.setState({ importPct: 0 }); this._imp = setInterval(() => this.setState((st) => { const v = Math.min(100, st.importPct + 7); if (v >= 100) clearInterval(this._imp); return { importPct: v }; }), 120); })],
+      users: [dm('Edit Sana (Order Manager)', staffRows[1].open), dm('Admin role state', () => this.setState({ sheet: 'sm', suRole: 'admin' })), dm('Last admin guard', staffRows[0].open), dm('Temporary password', () => this.setState({ sheet: 'sm', pwOpen: true }))],
+      customer: [dm(s.blocked ? 'Unblock' : 'Blocked state', () => this.setState({ blocked: !s.blocked }), s.blocked)],
+      dash2: []
+    };
+    if (denied) demos[route] = [];
+    const routeOpts = [['login', 'Staff login'], ['dash', 'Dashboard'], ['orders', 'Orders'], ['order', 'Order detail'], ['products', 'Products'], ['form', 'Product form'], ['import', 'Import'], ['users', 'Users'], ['customer', 'Customer detail'], ['areas', 'Delivery areas'], ['homepage', 'Homepage'], ['reports', 'Reports'], ['settings', 'Settings'], ['audit', 'Audit log']].map(([id, label]) => ({ id, label }));
+    const saveBar = !denied && (route === 'form' || route === 'settings');
+    const saveErr = route === 'form' && tierErr && !priceLocked;
+    const sheetOpen = !!s.sheet;
+    return {
+      i24, i20, i16, i40ban: I.icons(React, 44, 1.75).ban, role, route, routeOpts, demo: demos[route] || [],
+      pickRole: (e) => this.setState({ role: e.target.value }), pickRoute: (e) => this.go(e.target.value, e.target.value === 'login' ? { loginStep: 1 } : {}),
+      w1440: () => this.setState({ w: 1440 }), w1024: () => this.setState({ w: 1024 }), tb1: W === 1440 ? '#1E2A32' : '#FFFFFF', tb1c: W === 1440 ? '#FFFFFF' : '#1E2A32', tb2: W === 1024 ? '#1E2A32' : '#FFFFFF', tb2c: W === 1024 ? '#FFFFFF' : '#1E2A32',
+      frameW: W + 'px', frameH: fh + 'px', scaleT: 'scale(' + zoom + ')', outerW: Math.round(W * zoom) + 'px', outerH: Math.round(fh * zoom) + 'px', searchW: W < 1200 ? '220px' : '320px',
+      scrollRef: (el) => { this.scroller = el; }, stop: (e) => e.stopPropagation(),
+      isLogin: route === 'login', inApp: route !== 'login', loginStep1: s.loginStep === 1, loginStep2: s.loginStep === 2, loginNext: () => this.setState({ loginStep: 2 }), loginDone: () => this.go('dash', { loginStep: 1 }), goLogin: () => this.go('login', { loginStep: 1 }),
+      nav, me, pageTitle: denied ? 'Access denied' : route === 'order' ? o.no : titles[route], denied, goDash: go('dash'),
+      globalSearch: (e) => { if (e.key === 'Enter') { const v = e.target.value.trim(); if (v) this.go('orders', { otab: 'All', oq: v }); } },
+      isDash: !denied && route === 'dash', dashFigures: figures.length > 0, figures, dashStatus: can('o.view'), statusCounts, dashStock: can('s.low'), lowStock, canProducts: can('p.view'), goProducts: go('products'),
+      isOrders: !denied && route === 'orders', orderTabs, orderFilters, oq: s.oq, typeOq: (e) => this.setState({ oq: e.target.value }), orderRows: rows, noOrders: rows.length === 0, orderRange: rows.length ? '1–' + rows.length + ' of ' + (s.otab === 'All' && !s.fPay && !oq ? 356 : rows.length) : '0 results', canExport: can('o.export'), goOrders: go('orders'),
+      isOrder: !denied && route === 'order', ov: ovm, rejectOpen: s.rejectOpen, openReject: () => this.setState({ rejectOpen: true }), closeReject: () => this.setState({ rejectOpen: false }),
+      approveRcpt: () => setOv({ pay: 'Paid' }, 'Receipt approved. ' + o.no + ' marked paid'), rejectRcpt: () => setOv({ pay: 'Rejected' }, 'Receipt rejected. The customer has been told why'), markCollected: () => setOv({ pay: 'Paid' }, 'Cash collected for ' + o.no),
+      pickRider: (e) => setOv({ rider: e.target.value }, e.target.value ? e.target.value + ' assigned' : ''),
+      isProducts: !denied && route === 'products', productRows, goImport: go('import'),
+      isForm: !denied && route === 'form', formNav, priceLocked, priceUnlocked: !priceLocked, variants, tierRows, addTier: () => this.setState((st) => { const l = st.tiers[st.tiers.length - 1] || [1, 1450]; return { tiers: st.tiers.concat([[l[0] * 2, l[1] - 15]]) }; }),
+      lockTip: priceLocked ? "You don't have permission to change prices." : '', lockBd: priceLocked ? '#DDE1E4' : '#A9B1B7', lockBg: priceLocked ? '#F6F7F8' : '#FFFFFF', lockFg: priceLocked ? '#33424D' : '#1E2A32', lockPadR: priceLocked ? '28px' : '8px',
+      imgSlots: ['Front', 'Back', 'Label'].map((label) => ({ label, icon: c48.cement })), specRows: D.byId['lucky-ppc'].specs.map(([k, v]) => ({ k, v })),
+      isImport: !denied && route === 'import', importSteps, importPct: pct + '%', importDone: pct >= 100, importErrors: [['17', 'ML-PLS40', 'Price is missing'], ['42', 'PC-729-90', 'Tier 10+ price must be cheaper than tier 5+'], ['88', '—', 'SKU is missing'], ['131', 'DX-PPRC2-4', 'Category "Pipe" doesn\u2019t exist. Use "Pipes"']].map(([row, sku, msg]) => ({ row, sku, msg })),
+      isUsers: !denied && route === 'users', userTabs: [['staff', 'Staff & admins'], ['cust', 'Customers']].filter(([id]) => isAdmin || id === 'cust').map(([id, label]) => { const on = (isAdmin ? s.utab : 'cust') === id; return { label, go: () => this.setState({ utab: id }), under: on ? 'inset 0 -3px 0 #1E2A32' : 'none', font: on ? "600 14px/20px 'Noto Sans'" : "500 14px/20px 'Noto Sans'" }; }),
+      staffTab: isAdmin && s.utab === 'staff', custTab: !isAdmin || s.utab === 'cust', staffRows, custRows, addStaff: () => this.setState({ sheet: 'new', suRole: 'staff', perms: PRESETS.om.slice(), preset: 'om' }),
+      sheetOpen, closeSheet: () => this.setState({ sheet: null }), sheetTitle: s.sheet === 'new' ? 'Add staff member' : 'Edit staff member', sheetSave: s.sheet === 'new' ? 'Create and get password' : 'Save changes', su, roleRadios, lastAdmin, suAdmin: s.suRole === 'admin', suStaff: s.suRole !== 'admin',
+      permCount: s.perms.length, preset: s.preset, pickPreset: (e) => { const v = e.target.value; this.setState({ preset: v, perms: v === 'none' ? [] : PRESETS[v] ? PRESETS[v].slice() : s.perms }); }, permGroups,
+      saveStaff: () => { if (s.sheet === 'new') this.setState({ pwOpen: true }); else { this.setState({ sheet: null }); this.toast('Changes saved for ' + su.name); } }, resetPw: () => this.setState({ pwOpen: true }),
+      pwOpen: s.pwOpen, closePw: () => this.setState({ pwOpen: false, pwCopied: false, sheet: s.sheet === 'new' ? null : s.sheet }), copyPw: () => { try { navigator.clipboard.writeText('Hq7R-k4mW-2Tzp'); } catch (e) {} this.setState({ pwCopied: true }); }, pwIcon: s.pwCopied ? i16.check : i16.copy, pwLabel: s.pwCopied ? 'Copied' : 'Copy',
+      confirmOpen: !!s.confirm, confirm: s.confirm || {}, closeConfirm: () => this.setState({ confirm: null }),
+      isCustomer: !denied && route === 'customer', goCustomers: go('users', { utab: 'cust' }), blocked: s.blocked, custOrders, toggleBlock: () => { if (!can('cu.block')) return; this.setState({ blocked: !s.blocked }); this.toast(s.blocked ? 'Imran Qureshi unblocked' : 'Imran Qureshi blocked'); }, blockLabel: s.blocked ? 'Unblock' : 'Block', blockBd: s.blocked ? '1px solid #1E2A32' : '1px solid #B42318', blockFg: s.blocked ? '#1E2A32' : '#B42318',
+      isAreas: !denied && route === 'areas', areaRows,
+      isHomepage: !denied && route === 'homepage', banners, pickers: [picker('Featured for your site', 'feat'), picker('Deals', 'deals')],
+      isReports: !denied && route === 'reports', presets, presetLabel, revChart, repFigures, topProducts, codRows,
+      isSettings: !denied && route === 'settings', bankAccts, addBank: () => this.setState({ banks: s.banks + 1 }),
+      isAudit: !denied && route === 'audit', auditRows,
+      saveBar, saveMsg: saveErr ? 'Fix the bulk tier errors before saving.' : route === 'form' ? 'Last saved 26 Sep, 3:02 pm by Kashif Mirza' : 'Unsaved changes', saveMsgC: saveErr ? '#B42318' : '#33424D', saveMsgIcon: saveErr ? i16.alert : null, saveDis: saveErr, saveBg: saveErr ? '#EEF0F1' : '#F2A900', saveFg: saveErr ? '#6B747B' : '#1E2A32', saveChanges: () => !saveErr && this.toast('Changes saved'),
+      toast: s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>
