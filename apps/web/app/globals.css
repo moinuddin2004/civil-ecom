@@ -1,0 +1,326 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+/*
+ * Aricon design tokens: SPEC §15 and DESIGN.md §4, with the v2 finish from the approved mockups
+ * ("UI mockups clarification/Aricon Design System v2"): radius 10 for controls and 16 for panels,
+ * pill badges, a light card border (#E4E7EA) with a soft shadow, and a #F3F4F6 page canvas.
+ *
+ * Tailwind's default colours, fonts, sizes, radii and shadows are removed on purpose, so only
+ * these tokens can be used.
+ */
+@theme {
+  --color-*: initial;
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  /* Core */
+  --color-ink: #1e2a32; /* Rebar: text, header, dark surfaces */
+  --color-surface: #ffffff; /* cards, panels, inputs */
+  --color-concrete: #eef0f1; /* cool grey fills, skeletons, disabled buttons */
+  --color-amber: #f2a900; /* primary actions and the active bulk tier only; text on it is ink */
+  --color-blueprint: #1f5aa6; /* links, secondary actions, focus ring */
+  --color-cement: #6b747b; /* secondary text and icons, on white only */
+
+  /* Extended */
+  --color-ink-700: #33424d; /* secondary text on concrete backgrounds */
+  --color-concrete-50: #f6f7f8; /* zebra rows, hover, image wells */
+  --color-concrete-100: #f3f4f6; /* v2 page canvas */
+  --color-concrete-150: #e4e7ea; /* v2 card and panel border */
+  --color-concrete-200: #dde1e4; /* dividers, table borders */
+  --color-concrete-400: #a9b1b7; /* disabled text, input borders */
+  --color-amber-100: #fff3cc; /* active tier row, warnings */
+  --color-amber-600: #d99600; /* primary hover */
+  --color-amber-700: #b97f00; /* primary pressed */
+  --color-blueprint-50: #eaf1fb; /* info, selected chip */
+  --color-blueprint-700: #174785; /* link hover */
+  --color-success: #1e7b4f; /* in stock, paid, delivered */
+  --color-success-50: #e7f4ec;
+  --color-success-300: #7fd1a4; /* success icon on ink (toasts) */
+  --color-danger: #b42318; /* errors, out of stock, cancelled */
+  --color-danger-50: #fdecea;
+  --color-danger-800: #9c1e14; /* destructive hover */
+  --color-danger-900: #841910; /* destructive pressed */
+
+  /* Type: Barlow Semi Condensed for headings and prices, Noto Sans for everything else */
+  --font-*: initial;
+  --font-sans: var(--font-noto), 'Noto Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-barlow), 'Barlow Semi Condensed', ui-sans-serif, system-ui, sans-serif;
+
+  /* Scale 12 / 14 / 16 / 18 / 22 / 28 / 36, plus 52 for the desktop display line */
+  --text-*: initial;
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.5rem;
+  --text-xl: 1.375rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.75rem;
+  --text-2xl--line-height: 2.125rem;
+  --text-3xl: 2.25rem;
+  --text-3xl--line-height: 2.625rem;
+  --text-4xl: 3.25rem;
+  --text-4xl--line-height: 3.5rem;
+
+  --tracking-display: -0.02em;
+  --tracking-heading: -0.01em;
+  --tracking-wordmark: 0.02em;
+
+  /* v2 radii: 4 thumbnails, 10 controls, 12 inside cards, 16 panels, 20/28 hero and footer */
+  --radius-*: initial;
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-3xl: 28px;
+
+  /* Depth */
+  --shadow-*: initial;
+  --shadow-card: 0 1px 2px rgb(30 42 50 / 0.05), 0 6px 20px rgb(30 42 50 / 0.05);
+  --shadow-card-hover: 0 14px 32px rgb(30 42 50 / 0.12);
+  --shadow-button: 0 1px 2px rgb(30 42 50 / 0.12), inset 0 -2px 0 rgb(0 0 0 / 0.1);
+  --shadow-float: 0 8px 24px rgb(30 42 50 / 0.16);
+  --shadow-float-up: 0 -8px 24px rgb(30 42 50 / 0.16);
+  --shadow-lifted: 0 16px 40px rgb(30 42 50 / 0.25);
+
+  /* Breakpoints: 390 design base, 768 tablet, 1024 small desktop, 1440 desktop */
+  --breakpoint-*: initial;
+  --breakpoint-sm: 30rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --breakpoint-xl: 90rem;
+
+  --container-content: 80rem; /* 1280 px content width */
+}
+
+/* Semantic aliases used by shadcn/ui components */
+:root {
+  --background: #f3f4f6;
+  --foreground: #1e2a32;
+  --card: #ffffff;
+  --card-foreground: #1e2a32;
+  --popover: #ffffff;
+  --popover-foreground: #1e2a32;
+  --primary: #f2a900;
+  --primary-foreground: #1e2a32;
+  --secondary: #ffffff;
+  --secondary-foreground: #1e2a32;
+  --muted: #f6f7f8;
+  --muted-foreground: #33424d;
+  --accent: #f6f7f8;
+  --accent-foreground: #1e2a32;
+  --destructive: #b42318;
+  --destructive-foreground: #ffffff;
+  --border: #dde1e4;
+  --input: #a9b1b7;
+  --ring: #1f5aa6;
+
+  --sidebar: #1e2a32;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #f2a900;
+  --sidebar-primary-foreground: #1e2a32;
+  --sidebar-accent: #33424d;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #33424d;
+  --sidebar-ring: #1f5aa6;
+
+  /* Admin charts: amber line on white, then blueprint (DESIGN.md §9.6) */
+  --chart-1: #f2a900;
+  --chart-2: #1f5aa6;
+  --chart-3: #1e7b4f;
+  --chart-4: #6b747b;
+  --chart-5: #b42318;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+}
+
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--color-border);
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Always-visible keyboard focus: 2 px blueprint with 2 px offset */
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+
+  ::placeholder {
+    color: var(--color-cement);
+    opacity: 1;
+  }
+
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']) {
+    cursor: pointer;
+  }
+}
+
+/* Motion only follows a person's action, and never when they ask for less */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Typography roles (DESIGN.md §4.2) */
+@utility type-display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+  letter-spacing: var(--tracking-display);
+  text-wrap: balance;
+  @media (width >= 48rem) {
+    font-size: 3.25rem;
+    line-height: 3.5rem;
+  }
+}
+
+@utility type-h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.75rem;
+  line-height: 2.125rem;
+  letter-spacing: var(--tracking-heading);
+  @media (width >= 48rem) {
+    font-size: 2.25rem;
+    line-height: 2.625rem;
+  }
+}
+
+@utility type-h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.375rem;
+  line-height: 1.75rem;
+  letter-spacing: var(--tracking-heading);
+  @media (width >= 48rem) {
+    font-size: 1.625rem;
+    line-height: 2rem;
+  }
+}
+
+@utility type-h3 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 1.125rem;
+  line-height: 1.5rem;
+}
+
+/* Prices always use tabular numbers */
+@utility type-price-lg {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 2.125rem;
+  line-height: 2.375rem;
+  font-variant-numeric: tabular-nums;
+}
+
+@utility type-price {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.375rem;
+  line-height: 1.625rem;
+  letter-spacing: var(--tracking-heading);
+  font-variant-numeric: tabular-nums;
+}
+
+@utility link {
+  color: var(--color-blueprint);
+  text-underline-offset: 2px;
+  &:hover {
+    color: var(--color-blueprint-700);
+    text-decoration-line: underline;
+  }
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Spinner: 0.8 s linear turn (v2 motion table). Own keyframes so it never depends on `animate-spin`. */
+@theme {
+  --animate-spinner: aricon-spin 0.8s linear infinite;
+
+  @keyframes aricon-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+
+/*
+ * Toast offsets (components/ui/toaster.tsx). On phones the toast sits 16 px above the bottom edge,
+ * or 88 px when a mobile sticky bar (product page, cart) is on screen; the bar carries
+ * `data-mobile-sticky-bar`.
+ */
+:root {
+  --toast-mobile-bottom: 16px;
+}
+
+:root:has([data-mobile-sticky-bar]) {
+  --toast-mobile-bottom: 88px;
+}

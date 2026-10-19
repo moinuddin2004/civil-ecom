@@ -1,0 +1,597 @@
+### Aricon API — example requests (SPEC §17). Works with the VS Code "REST Client" extension or
+### JetBrains HTTP Client. Cookies from responses are kept between requests, so log in first.
+### Swagger UI with every endpoint and schema: http://localhost:4000/api/docs (development only).
+
+@api = http://localhost:4000/api
+@origin = http://localhost:3000
+
+### Health (literal body from SPEC §7.2; 503 when the database is down)
+GET {{api}}/health
+
+### ── Customer auth ──────────────────────────────────────────────────────────────────────────────
+
+### Sign up (always a CUSTOMER; sets aricon_at + aricon_rt cookies)
+POST {{api}}/auth/signup
+Origin: {{origin}}
+Content-Type: application/json
+
+{
+  "name": "Ahmed Raza",
+  "email": "ahmed@example.com",
+  "phone": "0300 1234567",
+  "password": "Cement2026",
+  "companyName": "Raza Builders"
+}
+
+### Log in with email or mobile number (any format)
+POST {{api}}/auth/login
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "identifier": "0300 1234567", "password": "Cement2026" }
+
+### The signed-in customer
+GET {{api}}/auth/me
+
+### New access token (rotates the refresh token)
+POST {{api}}/auth/refresh
+Origin: {{origin}}
+
+### Log out (always 204)
+POST {{api}}/auth/logout
+Origin: {{origin}}
+
+### Forgot password (same answer whether or not the email exists; the link is logged in development)
+POST {{api}}/auth/forgot-password
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "email": "ahmed@example.com" }
+
+### Reset password with the token from the link
+POST {{api}}/auth/reset-password
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "token": "paste-the-43-character-token-here-xxxxxxxxx", "password": "NewCement2027" }
+
+### ── Catalog (public, active data only) ────────────────────────────────────────────────────────
+### Paste real ids/slugs from the responses into these variables.
+@productSlug = lucky-opc-cement
+@categorySlug = cement-plaster
+@productId = 000000000000000000000000
+@variantId = 000000000000000000000000
+@areaId = 000000000000000000000000
+@addressId = 000000000000000000000000
+@orderNumber = ARC-2026-000001
+
+### Homepage: banners, category tiles, featured, deals, new arrivals, brands
+GET {{api}}/home
+
+### Category tree with active-product counts
+GET {{api}}/categories
+
+### One category with sub-categories and breadcrumbs
+GET {{api}}/categories/{{categorySlug}}
+
+### Active brands
+GET {{api}}/brands
+
+### Listing with filters, sorting and facets (each facet ignores its own filter)
+GET {{api}}/products?category={{categorySlug}}&brand=lucky-cement,dg-cement&packSize=50%20kg&minPrice=400&maxPrice=2000&inStock=true&sort=price_asc&page=1&pageSize=20
+
+### Search listing (full text on name and brand)
+GET {{api}}/products?q=cement&sort=relevance
+
+### Product page (active variants only)
+GET {{api}}/products/{{productSlug}}
+
+### Related products (hand-picked, else same category; max 8)
+GET {{api}}/products/{{productSlug}}/related
+
+### Search-as-you-type (≥ 2 characters)
+GET {{api}}/search/suggest?q=luc
+
+### ── Store ──────────────────────────────────────────────────────────────────────────────────────
+
+### Delivery areas with the fee each one charges
+GET {{api}}/delivery-areas
+
+### Contact details, payment methods, COD limit, bank accounts
+GET {{api}}/settings/public
+
+### Content page by URL slug (about, faq, contact, refund-policy, delivery-policy, privacy-policy, terms)
+GET {{api}}/pages/refund-policy
+
+### ── Cart ───────────────────────────────────────────────────────────────────────────────────────
+
+### Guest cart quote (no login): prices a localStorage cart, with a delivery estimate
+POST {{api}}/cart/quote
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "items": [{ "productId": "{{productId}}", "variantId": "{{variantId}}", "qty": 12 }], "areaId": "{{areaId}}" }
+
+### The customer's cart (log in first)
+GET {{api}}/cart?areaId={{areaId}}
+
+### Set a line's quantity (0 removes it)
+PUT {{api}}/cart/items?areaId={{areaId}}
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "variantId": "{{variantId}}", "qty": 10 }
+
+### Remove a line
+DELETE {{api}}/cart/items/{{variantId}}
+Origin: {{origin}}
+
+### Merge the guest cart after login (quantities added, capped at stock)
+POST {{api}}/cart/merge
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "items": [{ "productId": "{{productId}}", "variantId": "{{variantId}}", "qty": 5 }] }
+
+### ── Account (customer) ─────────────────────────────────────────────────────────────────────────
+
+### Update profile (companyName: null clears it)
+PATCH {{api}}/account/profile
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "name": "Ahmed Raza", "phone": "0300 1234567", "companyName": "Raza Builders" }
+
+### Change password (other devices are signed out)
+POST {{api}}/account/change-password
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "currentPassword": "Cement2026", "newPassword": "Plaster2027" }
+
+### Saved addresses
+GET {{api}}/account/addresses
+
+### Add an address (max 10; the first becomes the default). Answers with the whole list.
+POST {{api}}/account/addresses
+Origin: {{origin}}
+Content-Type: application/json
+
+{
+  "label": "Site – Gulshan",
+  "contactName": "Ahmed Raza",
+  "phone": "0300 1234567",
+  "line1": "Plot 12, Block 5",
+  "landmark": "Near Maskan Chowrangi",
+  "areaId": "{{areaId}}"
+}
+
+### Replace an address
+PATCH {{api}}/account/addresses/{{addressId}}
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "label": "Home", "contactName": "Ahmed Raza", "phone": "0300 1234567", "line1": "House 7, Street 3", "areaId": "{{areaId}}", "isDefault": true }
+
+### Make an address the default
+POST {{api}}/account/addresses/{{addressId}}/default
+Origin: {{origin}}
+
+### Delete an address
+DELETE {{api}}/account/addresses/{{addressId}}
+Origin: {{origin}}
+
+### ── Orders (customer) ──────────────────────────────────────────────────────────────────────────
+
+### Place an order from the cart. Use a NEW UUID v4 per checkout; resending the same key returns the
+### same order (200). expectedTotal = the total shown at checkout (else 409 PRICE_CHANGED).
+POST {{api}}/orders
+Origin: {{origin}}
+Content-Type: application/json
+Idempotency-Key: 3b241101-e2bb-4255-8caf-4136c566a962
+
+{ "addressId": "{{addressId}}", "paymentMethod": "COD", "customerNote": "Call at the gate.", "expectedTotal": 5480 }
+
+### Your orders, newest first
+GET {{api}}/orders?page=1&pageSize=20
+
+### One of your orders
+GET {{api}}/orders/{{orderNumber}}
+
+### Cancel while the order is new (stock is returned)
+POST {{api}}/orders/{{orderNumber}}/cancel
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "reason": "Ordered the wrong size." }
+
+### Put a past order's items back in the cart
+POST {{api}}/orders/{{orderNumber}}/reorder
+Origin: {{origin}}
+
+### Upload a bank-transfer receipt (JPG/PNG/WebP/PDF up to 5 MB; 10/hour). Put a file next to this one.
+POST {{api}}/orders/{{orderNumber}}/receipts
+Origin: {{origin}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="receipt.pdf"
+Content-Type: application/pdf
+
+< ./receipt.pdf
+--boundary--
+
+### Invoice PDF for one of your orders
+GET {{api}}/orders/{{orderNumber}}/invoice
+
+### ── Company website inquiries ──────────────────────────────────────────────────────────────────
+
+### Cross-origin from RFP_CORS_ORIGINS only; emailed to settings.rfpEmail, not stored. 5/hour.
+POST {{api}}/public/rfp
+Origin: https://aricon.com.pk
+Content-Type: application/json
+
+{
+  "company": "Raza Builders",
+  "contactPerson": "Ahmed Raza",
+  "email": "ahmed@razabuilders.pk",
+  "phone": "0300 1234567",
+  "service": "Structural design",
+  "brief": "Four-storey commercial building; need design and supervision.",
+  "website": ""
+}
+
+### ── Staff auth ─────────────────────────────────────────────────────────────────────────────────
+### Create the first admin: pnpm --filter api seed:admin -- --email admin@aricon.com.pk --password 'Admin2026x'
+
+### Staff login (sets aricon_admin_at + aricon_admin_rt)
+POST {{api}}/admin/auth/login
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "email": "admin@aricon.com.pk", "password": "Admin2026x" }
+
+### Signed-in staff member with effective permissions
+GET {{api}}/admin/auth/me
+
+### Change own password (clears a forced change; signs out other logins)
+POST {{api}}/admin/auth/change-password
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "currentPassword": "Admin2026x", "newPassword": "Admin2027y" }
+
+### Staff refresh (12-hour absolute limit)
+POST {{api}}/admin/auth/refresh
+Origin: {{origin}}
+
+### Staff logout
+POST {{api}}/admin/auth/logout
+Origin: {{origin}}
+
+### ═══ Admin API (log in as staff above first; every route needs a permission or ADMIN) ═════════
+@adminProductId = 000000000000000000000000
+@adminVariantId = 000000000000000000000000
+@adminOrderId = 000000000000000000000000
+@receiptId = 000000000000000000000000
+@staffId = 000000000000000000000000
+@customerId = 000000000000000000000000
+@riderId = 000000000000000000000000
+@categoryId = 000000000000000000000000
+@brandId = 000000000000000000000000
+
+### Dashboard (only the widgets you may see)
+GET {{api}}/admin/dashboard
+
+### Permission catalog, presets and dependencies (any staff)
+GET {{api}}/admin/permissions
+
+### ── Orders ──
+### List with filters; `statusCounts` gives the tab counts
+GET {{api}}/admin/orders?status=NEW,CONFIRMED&paymentMethod=COD&from=2026-09-01&to=2026-09-30&q=0300&sort=createdAt:desc&page=1&pageSize=20
+
+### One order
+GET {{api}}/admin/orders/{{adminOrderId}}
+
+### Move along the status table (CANCELLED/RETURNED need orders.cancel and a reason)
+POST {{api}}/admin/orders/{{adminOrderId}}/status
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "to": "CONFIRMED", "note": "Called the customer" }
+
+### Assign a rider (needed before DISPATCHED)
+POST {{api}}/admin/orders/{{adminOrderId}}/rider
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "riderId": "{{riderId}}" }
+
+### Record COD cash (a different amount needs a note)
+POST {{api}}/admin/orders/{{adminOrderId}}/cod-collected
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "amount": 5480 }
+
+### A 10-minute link to a receipt file
+GET {{api}}/admin/orders/{{adminOrderId}}/receipts/{{receiptId}}/url
+
+### Invoice PDF
+GET {{api}}/admin/orders/{{adminOrderId}}/invoice
+
+### The filtered orders as Excel (same filters as the list)
+GET {{api}}/admin/orders/export?status=NEW,CONFIRMED&from=2026-09-01&to=2026-09-30
+
+### Approve / reject a bank-transfer receipt
+POST {{api}}/admin/orders/{{adminOrderId}}/receipts/{{receiptId}}/approve
+Origin: {{origin}}
+
+###
+POST {{api}}/admin/orders/{{adminOrderId}}/receipts/{{receiptId}}/reject
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "reason": "The amount on the receipt does not match the order total." }
+
+### Staff-only note
+PATCH {{api}}/admin/orders/{{adminOrderId}}/internal-note
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "internalNote": "Gate code 4411" }
+
+### ── Products and stock ──
+GET {{api}}/admin/products?q=cement&status=all&lowStock=true&sort=updatedAt:desc
+
+### Upload a product photo (stored 300/800/1600 px). Leave productId out for a new product: the
+### answer's productId is then sent as "id" when creating it.
+POST {{api}}/admin/uploads/product-image
+Origin: {{origin}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="productId"
+
+{{adminProductId}}
+--boundary
+Content-Disposition: form-data; name="file"; filename="photo.jpg"
+Content-Type: image/jpeg
+
+< ./photo.jpg
+--boundary--
+
+### Excel: products (template columns), the import template, an import and its progress
+GET {{api}}/admin/products/export?status=all
+
+###
+GET {{api}}/admin/products/import-template
+
+###
+POST {{api}}/admin/products/import
+Origin: {{origin}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="products.xlsx"
+Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+
+< ./products.xlsx
+--boundary--
+
+###
+GET {{api}}/admin/import-jobs/{{importJobId}}
+
+###
+GET {{api}}/admin/products/{{adminProductId}}
+
+### Create (initial stock needs products.edit_stock)
+POST {{api}}/admin/products
+Origin: {{origin}}
+Content-Type: application/json
+
+{
+  "name": "Lucky OPC Cement",
+  "brandId": "{{brandId}}",
+  "categoryId": "{{categoryId}}",
+  "type": "OPC",
+  "unit": "bag",
+  "status": "hidden",
+  "variants": [
+    {
+      "sku": "LUCKY-OPC-50",
+      "label": "50 kg bag",
+      "options": { "packSize": "50 kg" },
+      "mrp": 450,
+      "price": 425,
+      "bulkTiers": [{ "minQty": 10, "price": 415 }, { "minQty": 30, "price": 405 }, { "minQty": 50, "price": 395 }],
+      "stock": 100
+    }
+  ]
+}
+
+### Edit details and variants (price fields need products.edit_price; `stock` is refused)
+PATCH {{api}}/admin/products/{{adminProductId}}
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "name": "Lucky OPC Cement 53 Grade", "variants": [{ "id": "{{adminVariantId}}", "label": "50 kg bag (OPC 53)" }] }
+
+### Add a variant (products.edit + products.edit_price)
+POST {{api}}/admin/products/{{adminProductId}}/variants
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "sku": "LUCKY-OPC-25", "label": "25 kg bag", "options": { "packSize": "25 kg" }, "mrp": 240, "price": 225 }
+
+### Edit one variant
+PATCH {{api}}/admin/products/{{adminProductId}}/variants/{{adminVariantId}}
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "price": 420 }
+
+### Adjust stock (the only manual way; never below 0)
+POST {{api}}/admin/products/{{adminProductId}}/stock-adjustments
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "variantId": "{{adminVariantId}}", "change": -3, "reason": "Damaged bags returned to supplier" }
+
+### Show / hide / archive
+POST {{api}}/admin/products/{{adminProductId}}/status
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "status": "active" }
+
+### Stock history
+GET {{api}}/admin/stock-movements?productId={{adminProductId}}&reason=ADJUST&from=2026-09-01
+
+### ── Catalog ──
+GET {{api}}/admin/categories
+
+###
+POST {{api}}/admin/categories
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "name": "Cement & plaster", "showOnHome": true }
+
+### Move, rename or hide (hiding needs no active products)
+PATCH {{api}}/admin/categories/{{categoryId}}
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "status": "hidden" }
+
+###
+GET {{api}}/admin/brands
+
+###
+POST {{api}}/admin/brands
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "name": "Lucky Cement" }
+
+### A rename updates the brand name on its products
+PATCH {{api}}/admin/brands/{{brandId}}
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "name": "Lucky Cement Ltd" }
+
+### ── Customers ──
+GET {{api}}/admin/customers?q=0300&status=active
+
+###
+GET {{api}}/admin/customers/export?status=active
+
+###
+GET {{api}}/admin/customers/{{customerId}}
+
+### Block (signs them out everywhere) / unblock
+POST {{api}}/admin/customers/{{customerId}}/block
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "note": "Repeated fake orders" }
+
+###
+POST {{api}}/admin/customers/{{customerId}}/unblock
+Origin: {{origin}}
+Content-Type: application/json
+
+{}
+
+### ── Delivery ──
+GET {{api}}/admin/delivery-areas
+
+###
+POST {{api}}/admin/delivery-areas
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "name": "Gulshan-e-Iqbal", "deliveryFee": 500, "freeDeliveryAbove": 50000 }
+
+###
+GET {{api}}/admin/riders
+
+###
+POST {{api}}/admin/riders
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "name": "Imran Ali", "phone": "0312 1234567" }
+
+### ── Homepage ──
+GET {{api}}/admin/homepage
+
+###
+PUT {{api}}/admin/homepage
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "banners": [], "featuredProductIds": [], "dealProductIds": [] }
+
+### ── Reports ──
+GET {{api}}/admin/reports/sales?from=2026-09-01&to=2026-09-30&groupBy=day
+
+###
+GET {{api}}/admin/reports/top-products?from=2026-09-01&to=2026-09-30&limit=20
+
+###
+GET {{api}}/admin/reports/cod?from=2026-09-01&to=2026-09-30
+
+### Each report as Excel: sales | top-products | cod
+GET {{api}}/admin/reports/sales/export?from=2026-09-01&to=2026-09-30
+
+### ── ADMIN only: staff, settings, audit log ──
+GET {{api}}/admin/staff
+
+### Add staff — the temporary password is shown once in the response
+POST {{api}}/admin/staff
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "name": "Sana Malik", "email": "sana@aricon.com.pk", "role": "STAFF", "permissions": ["orders.view", "orders.update_status"] }
+
+### Change role / permissions / status (dependencies are added; last-admin and self rules apply)
+PATCH {{api}}/admin/staff/{{staffId}}
+Origin: {{origin}}
+Content-Type: application/json
+
+{ "permissions": ["orders.cancel"] }
+
+### New temporary password (signs them out)
+POST {{api}}/admin/staff/{{staffId}}/reset-password
+Origin: {{origin}}
+
+###
+GET {{api}}/admin/settings
+
+### Replace the settings (the whole document)
+PUT {{api}}/admin/settings
+Origin: {{origin}}
+Content-Type: application/json
+
+{
+  "storeName": "Aricon Shop",
+  "phone": "021 3456 7890",
+  "whatsapp": "0300 1234567",
+  "email": "shop@aricon.com.pk",
+  "address": "Shahrah-e-Faisal, Karachi",
+  "orderNotificationEmails": ["orders@aricon.com.pk"],
+  "rfpEmail": "projects@aricon.com.pk",
+  "paymentMethods": { "cod": true, "bankTransfer": true },
+  "codMaxOrderAmount": 200000,
+  "defaultDeliveryFee": 500,
+  "bankAccounts": [{ "bankName": "Meezan Bank", "accountTitle": "Aricon (Pvt) Ltd", "accountNumber": "0101-0104567890", "iban": "PK36MEZN0001010104567890" }],
+  "bankTransferInstructions": "Upload the receipt from your order page.",
+  "lowStockDefault": 5,
+  "pages": { "about": "", "faq": "", "contact": "", "refundPolicy": "", "deliveryPolicy": "", "privacyPolicy": "", "terms": "" }
+}
+
+### Audit log
+GET {{api}}/admin/audit-logs?entity=product&action=product.price_changed&from=2026-09-01

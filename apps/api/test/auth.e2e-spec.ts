@@ -1,0 +1,357 @@
+import { AUTH_COOKIES, PERMISSION_KEYS, PERMISSION_PRESETS } from '@aricon/shared';
+import { Controller, Get } from '@nestjs/common';
+import { getModelToken } from '@nestjs/mongoose';
+import type { Model } from 'mongoose';
+import request from 'supertest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { RefreshToken } from '../src/models/refresh-token.model.js';
+import { User } from '../src/models/user.model.js';
+import { AuthUserCache } from '../src/modules/auth/auth-user-cache.service.js';
+import { RequireAdmin, RequirePermission, StaffOnly } from '../src/modules/auth/auth.decorators.js';
+import { FORGOT_PASSWORD_MESSAGE } from '../src/modules/auth/customer-auth.controller.js';
+import { INVALID_CREDENTIALS_MESSAGE } from '../src/modules/auth/credentials.service.js';
+import { NotificationsService } from '../src/modules/notifications/notifications.service.js';
+import { hashToken } from '../src/modules/auth/password-hasher.service.js';
+import { REUSE_GRACE_MS } from '../src/modules/auth/token.service.js';
+import { createStaff, ORIGIN, PASSWORD, setCookies, uniqueContact } from './utils/auth.js';
+import { createTestApp, type TestApp } from './utils/test-app.js';
+
+/** Stand-ins for admin endpoints, to test the guard's policies end to end. */
+@Controller('admin/probe')
+class AdminProbeController {
+  @Get('any')
+  @StaffOnly()
+  any() {
+    return { ok: true };
+  }
+
+  @Get('products')
+  @RequirePermission('products.view')
+  products() {
+    return { ok: true };
+  }
+
+  @Get('settings')
+  @RequireAdmin()
+  settings() {
+    return { ok: true };
+  }
+}
+
+/** A route someone forgot to give a policy: must be refused (secure by default). */
+@Controller('forgotten')
+class NoPolicyController {
+  @Get()
+  get() {
+    return { ok: true };
+  }
+}
+
+const C = AUTH_COOKIES.customer;
+const A = AUTH_COOKIES.admin;
+
+describe('Authentication and authorization', () => {
+  let testApp: TestApp;
+  let server: Parameters<typeof request>[0];
+
+  beforeAll(async () => {
+    testApp = await createTestApp({ controllers: [AdminProbeController, NoPolicyController] });
+    server = testApp.app.getHttpServer() as Parameters<typeof request>[0];
+  });
+
+  afterAll(async () => {
+    await testApp?.close();
+  });
+
+  function signup(overrides: Record<string, unknown> = {}) {
+    const contact = uniqueContact();
+    const body = { name: 'Ahmed Raza', email: contact.email, phone: contact.phone, password: PASSWORD, ...overrides };
+    return { body, send: () => request(server).post('/api/auth/signup').set('Origin', ORIGIN).send(body) };
+  }
+
+  /** Signs a staff member in and returns an agent carrying their cookies. */
+  async function staffAgent(options: Parameters<typeof createStaff>[1] = {}) {
+    const staff = await createStaff(testApp.app, options);
+    const agent = request.agent(server);
+    const res = await agent
+      .post('/api/admin/auth/login')
+      .set('Origin', ORIGIN)
+      .send({ email: staff.email, password: staff.password })
+      .expect(200);
+    return { agent, staff, res };
+  }
+
+  describe('customer sign-up', () => {
+    it('creates a customer, signs them in with httpOnly cookies and never returns the password', async () => {
+      const { body, send } = signup({ email: 'Mixed.Case@Example.com', phone: '0301 234 5678' });
+      const res = await send().expect(201);
+
+      expect(res.body.data).toEqual({
+        id: expect.any(String),
+        name: body.name,
+        email: 'mixed.case@example.com',
+        phone: '+923012345678',
+        companyName: null,
+        role: 'CUSTOMER',
+      });
+      expect(JSON.stringify(res.body)).not.toContain(PASSWORD);
+
+      const cookies = setCookies(res);
+      expect(cookies.get(C.access)?.header).toMatch(/HttpOnly/i);
+      expect(cookies.get(C.access)?.header).toMatch(/SameSite=Lax/i);
+      expect(cookies.get(C.refresh)?.header).toMatch(/HttpOnly/i);
+      expect(cookies.get(C.refresh)?.header).toMatch(/SameSite=Strict/i);
+    });
+
+    it('refuses to let a public request choose a role', async () => {
+      const res = await signup({ role: 'ADMIN' }).send().expect(400);
+      expect(res.body.error.details).toContainEqual({ path: 'role', message: "This field isn't allowed." });
+    });
+
+    it('rejects a taken email (any case) and a taken phone (any format)', async () => {
+      const first = signup();
+      await first.send().expect(201);
+
+      const sameEmail = await signup({ email: first.body.email.toUpperCase() }).send().expect(409);
+      expect(sameEmail.body.error.code).toBe('EMAIL_TAKEN');
+
+      const localFormat = `0${first.body.phone.slice(3)}`;
+      const samePhone = await signup({ phone: localFormat }).send().expect(409);
+      expect(samePhone.body.error.code).toBe('PHONE_TAKEN');
+    });
+
+    it('explains password and phone problems field by field', async () => {
+      const res = await signup({ password: 'short', phone: '12345' }).send().expect(400);
+      const paths = (res.body.error.details as { path: string }[]).map((issue) => issue.path);
+      expect(paths).toContain('password');
+      expect(paths).toContain('phone');
+    });
+  });
+
+  describe('customer login and session', () => {
+    it('signs in with email or a mobile number in any format, and /me answers', async () => {
+      const { body, send } = signup();
+      await send().expect(201);
+
+      const byEmail = request.agent(server);
+      await byEmail.post('/api/auth/login').set('Origin', ORIGIN).send({ identifier: body.email, password: PASSWORD }).expect(200);
+      const me = await byEmail.get('/api/auth/me').expect(200);
+      expect(me.body.data.email).toBe(body.email);
+
+      const local = `0${body.phone.slice(3, 6)} ${body.phone.slice(6)}`;
+      await request(server).post('/api/auth/login').set('Origin', ORIGIN).send({ identifier: local, password: PASSWORD }).expect(200);
+    });
+
+    it('gives the same answer for a wrong password and an unknown account', async () => {
+      const { body, send } = signup();
+      await send().expect(201);
+      const wrong = await request(server)
+        .post('/api/auth/login')
+        .send({ identifier: body.email, password: 'Wrong12345' })
+        .expect(401);
+      const unknown = await request(server)
+        .post('/api/auth/login')
+        .send({ identifier: 'nobody@example.com', password: 'Wrong12345' })
+        .expect(401);
+      expect(wrong.body).toEqual(unknown.body);
+      expect(wrong.body.error.message).toBe(INVALID_CREDENTIALS_MESSAGE);
+    });
+
+    it('requires a session for /me', async () => {
+      const res = await request(server).get('/api/auth/me').expect(401);
+      expect(res.body.error.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('accepts the access token as a Bearer header (non-browser clients)', async () => {
+      const res = await signup().send().expect(201);
+      const access = setCookies(res).get(C.access)?.value;
+      await request(server).get('/api/auth/me').set('Authorization', `Bearer ${access}`).expect(200);
+    });
+
+    it('refreshes with rotation; a parallel refresh survives, a late replay kills the family', async () => {
+      const agent = request.agent(server);
+      const { body } = signup();
+      const created = await agent.post('/api/auth/signup').set('Origin', ORIGIN).send(body).expect(201);
+      const oldRefresh = setCookies(created).get(C.refresh)?.value ?? '';
+
+      const refreshed = await agent.post('/api/auth/refresh').set('Origin', ORIGIN).expect(200);
+      expect(refreshed.body.data.email).toBe(body.email);
+      expect(setCookies(refreshed).get(C.refresh)?.value).not.toBe(oldRefresh);
+      await agent.get('/api/auth/me').expect(200);
+
+      // A page and its prefetch refreshing at the same moment: the second one gets its own pair.
+      const replay = () => request(server).post('/api/auth/refresh').set('Origin', ORIGIN).set('Cookie', `${C.refresh}=${oldRefresh}`);
+      await replay().expect(200);
+
+      // The same replay after the grace period is theft: refused, cookie cleared, every login of the
+      // family ended.
+      await testApp.app
+        .get<Model<RefreshToken>>(getModelToken(RefreshToken.name))
+        .updateOne({ tokenHash: hashToken(oldRefresh) }, { $set: { rotatedAt: new Date(Date.now() - REUSE_GRACE_MS - 1_000) } })
+        .exec();
+      const late = await replay().expect(401);
+      expect(setCookies(late).get(C.refresh)?.value).toBe('');
+      await agent.post('/api/auth/refresh').set('Origin', ORIGIN).expect(401);
+    });
+
+    it('logs out: cookies are cleared and the refresh token is revoked', async () => {
+      const agent = request.agent(server);
+      const created = await agent.post('/api/auth/signup').set('Origin', ORIGIN).send(signup().body).expect(201);
+      const refresh = setCookies(created).get(C.refresh)?.value;
+
+      const out = await agent.post('/api/auth/logout').set('Origin', ORIGIN).expect(204);
+      expect(setCookies(out).get(C.access)?.value).toBe('');
+      await request(server)
+        .post('/api/auth/refresh')
+        .set('Origin', ORIGIN)
+        .set('Cookie', `${C.refresh}=${refresh}`)
+        .expect(401);
+    });
+
+    it('locks a blocked customer out immediately, session and login alike', async () => {
+      const agent = request.agent(server);
+      const { body } = signup();
+      const created = await agent.post('/api/auth/signup').set('Origin', ORIGIN).send(body).expect(201);
+
+      const users = testApp.app.get<Model<User>>(getModelToken(User.name));
+      await users.updateOne({ email: body.email }, { $set: { status: 'blocked' } });
+      // What the block endpoint will do: drop the cached view so the next request sees it.
+      testApp.app.get(AuthUserCache).invalidate(String(created.body.data.id));
+
+      const me = await agent.get('/api/auth/me').expect(403);
+      expect(me.body.error.code).toBe('ACCOUNT_BLOCKED');
+      const login = await request(server).post('/api/auth/login').send({ identifier: body.email, password: PASSWORD }).expect(403);
+      expect(login.body.error.code).toBe('ACCOUNT_BLOCKED');
+    });
+  });
+
+  describe('forgot and reset password', () => {
+    it('answers the same whether or not the email exists, and only emails real customers', async () => {
+      const notify = vi.spyOn(testApp.app.get(NotificationsService), 'notify');
+      notify.mockClear();
+      const res = await request(server)
+        .post('/api/auth/forgot-password')
+        .send({ email: 'nobody@example.com' })
+        .expect(200);
+      expect(res.body.data.message).toBe(FORGOT_PASSWORD_MESSAGE);
+      expect(notify).not.toHaveBeenCalled();
+    });
+
+    it('resets with a single-use link and signs the customer out everywhere', async () => {
+      const notify = vi.spyOn(testApp.app.get(NotificationsService), 'notify');
+      const { body } = signup();
+      const created = await request(server).post('/api/auth/signup').set('Origin', ORIGIN).send(body).expect(201);
+      const oldRefresh = setCookies(created).get(C.refresh)?.value;
+
+      notify.mockClear();
+      await request(server).post('/api/auth/forgot-password').send({ email: body.email }).expect(200);
+      const call = notify.mock.calls.find(([event]) => event === 'auth.password_reset');
+      const resetUrl = (call?.[1] as { resetUrl: string } | undefined)?.resetUrl ?? '';
+      const token = new URL(resetUrl).searchParams.get('token');
+      expect(token).toMatch(/^[A-Za-z0-9_-]{43}$/);
+
+      await request(server).post('/api/auth/reset-password').send({ token, password: 'NewCement2027' }).expect(204);
+
+      await request(server).post('/api/auth/login').send({ identifier: body.email, password: PASSWORD }).expect(401);
+      await request(server).post('/api/auth/login').send({ identifier: body.email, password: 'NewCement2027' }).expect(200);
+
+      const again = await request(server).post('/api/auth/reset-password').send({ token, password: 'Another2028' }).expect(400);
+      expect(again.body.error.code).toBe('VALIDATION_ERROR');
+
+      await request(server)
+        .post('/api/auth/refresh')
+        .set('Origin', ORIGIN)
+        .set('Cookie', `${C.refresh}=${oldRefresh}`)
+        .expect(401);
+    });
+  });
+
+  describe('staff login', () => {
+    it('returns the admin with every permission', async () => {
+      const { res } = await staffAgent({ role: 'ADMIN' });
+      expect(res.body.data.user.role).toBe('ADMIN');
+      expect(res.body.data.permissions).toEqual([...PERMISSION_KEYS]);
+      expect(setCookies(res).get(A.access)).toBeDefined();
+      expect(setCookies(res).get(C.access)).toBeUndefined();
+    });
+
+    it('keeps customers and staff out of each other’s logins', async () => {
+      const { body } = signup();
+      await request(server).post('/api/auth/signup').set('Origin', ORIGIN).send(body).expect(201);
+      const customerOnAdmin = await request(server)
+        .post('/api/admin/auth/login')
+        .send({ email: body.email, password: PASSWORD })
+        .expect(401);
+      expect(customerOnAdmin.body.error.message).toBe(INVALID_CREDENTIALS_MESSAGE);
+
+      const staff = await createStaff(testApp.app);
+      await request(server).post('/api/auth/login').send({ identifier: staff.email, password: PASSWORD }).expect(401);
+    });
+
+    it('never accepts a customer token on the admin API, even under the admin cookie name', async () => {
+      const created = await signup().send().expect(201);
+      const customerAccess = setCookies(created).get(C.access)?.value;
+      await request(server).get('/api/admin/auth/me').set('Cookie', `${C.access}=${customerAccess}`).expect(401);
+      await request(server).get('/api/admin/auth/me').set('Cookie', `${A.access}=${customerAccess}`).expect(401);
+    });
+  });
+
+  describe('permissions (SPEC §4)', () => {
+    it('lets an Order Manager do order work but not product or admin-only work', async () => {
+      const { agent } = await staffAgent({ permissions: [...PERMISSION_PRESETS.orderManager.permissions] });
+      await agent.get('/api/admin/probe/any').expect(200);
+      const products = await agent.get('/api/admin/probe/products').expect(403);
+      expect(products.body.error.code).toBe('FORBIDDEN');
+      await agent.get('/api/admin/probe/settings').expect(403);
+    });
+
+    it('lets a Catalog Manager see products', async () => {
+      const { agent } = await staffAgent({ permissions: [...PERMISSION_PRESETS.catalogManager.permissions] });
+      await agent.get('/api/admin/probe/products').expect(200);
+    });
+
+    it('lets an admin everywhere', async () => {
+      const { agent } = await staffAgent({ role: 'ADMIN' });
+      await agent.get('/api/admin/probe/products').expect(200);
+      await agent.get('/api/admin/probe/settings').expect(200);
+    });
+
+    it('refuses a route that declares no policy', async () => {
+      const { agent } = await staffAgent({ role: 'ADMIN' });
+      await agent.get('/api/forgotten').expect(403);
+      await request(server).get('/api/forgotten').expect(403);
+    });
+  });
+
+  describe('forced password change (SPEC §6.11)', () => {
+    it('limits the staff member to /api/admin/auth/* until they set a new password', async () => {
+      const { agent, res } = await staffAgent({ mustChangePassword: true, permissions: ['orders.view'] });
+      expect(res.body.data.mustChangePassword).toBe(true);
+
+      await agent.get('/api/admin/auth/me').expect(200);
+      const blocked = await agent.get('/api/admin/probe/any').expect(403);
+      expect(blocked.body.error.details).toEqual({ reason: 'PASSWORD_CHANGE_REQUIRED' });
+
+      const wrongCurrent = await agent
+        .post('/api/admin/auth/change-password')
+        .set('Origin', ORIGIN)
+        .send({ currentPassword: 'Wrong12345', newPassword: 'Fresh2027x' })
+        .expect(400);
+      expect(wrongCurrent.body.error.details[0].path).toBe('currentPassword');
+
+      await agent
+        .post('/api/admin/auth/change-password')
+        .set('Origin', ORIGIN)
+        .send({ currentPassword: PASSWORD, newPassword: PASSWORD })
+        .expect(400);
+
+      const changed = await agent
+        .post('/api/admin/auth/change-password')
+        .set('Origin', ORIGIN)
+        .send({ currentPassword: PASSWORD, newPassword: 'Fresh2027x' })
+        .expect(200);
+      expect(changed.body.data.mustChangePassword).toBe(false);
+      await agent.get('/api/admin/probe/any').expect(200);
+    });
+  });
+});

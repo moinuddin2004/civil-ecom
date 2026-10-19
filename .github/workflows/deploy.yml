@@ -1,0 +1,115 @@
+# Production deploy on every push to main (SPEC §18.4): the full CI checks first, then build on
+# ubuntu-24.04 x64 (so sharp's native binaries match the server), upload the release over SSH and
+# activate it on the server (health check, automatic rollback). The server never builds.
+#
+# Repository secrets: SSH_HOST, SSH_USER, SSH_KEY (private key of the deploy user),
+#   SSH_KNOWN_HOSTS (output of `ssh-keyscan -t ed25519 <host>`).
+# Repository variables: NEXT_PUBLIC_SITE_URL, NEXT_PUBLIC_IMAGE_BASE_URL (inlined into the browser
+#   bundle at build time). Server-only settings live in /srv/aricon/shared/.env.* — see infra/DEPLOY.md.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One deploy at a time; a newer push waits instead of cancelling a deploy halfway.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    name: Build and deploy
+    needs: ci
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment:
+      name: production
+      url: https://shop.aricon.com.pk
+    env:
+      NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
+      NEXT_PUBLIC_IMAGE_BASE_URL: ${{ vars.NEXT_PUBLIC_IMAGE_BASE_URL }}
+      # Read by the web app's config check during `next build` only. At runtime both come from
+      # /srv/aricon/shared/.env.web (server-side values are not inlined into the bundle).
+      INTERNAL_API_URL: http://127.0.0.1:4000
+      REVALIDATE_SECRET: build-only-placeholder-not-used-at-runtime
+      TURBO_TELEMETRY_DISABLED: '1'
+    steps:
+      - name: Check repository variables
+        run: |
+          for name in NEXT_PUBLIC_SITE_URL NEXT_PUBLIC_IMAGE_BASE_URL; do
+            if [ -z "${!name}" ]; then echo "::error::Repository variable $name is not set"; exit 1; fi
+          done
+
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      # out/release/
+      #   api/    dist + production node_modules (pnpm deploy)
+      #   web/    Next.js standalone server, with .next/static and public copied in
+      #   infra/  PM2 config, activation and backup scripts
+      - name: Package release
+        run: |
+          set -euo pipefail
+          echo "RELEASE_ID=$(date -u +%Y%m%d%H%M%S)" >> "$GITHUB_ENV"
+          rm -rf out
+          mkdir -p out/release/infra
+          pnpm --filter api deploy --legacy --prod out/release/api
+          cp -a apps/web/.next/standalone out/release/web
+          mkdir -p out/release/web/apps/web/.next
+          cp -a apps/web/.next/static out/release/web/apps/web/.next/static
+          cp -a apps/web/public out/release/web/apps/web/public
+          cp -a infra/ecosystem.config.cjs infra/scripts infra/backup out/release/infra/
+          test -f out/release/api/dist/main.js
+          test -f out/release/web/apps/web/server.js
+          du -sh out/release/*
+
+      - name: Set up SSH
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Upload release
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          rsync -az --delete \
+            -e "ssh -i $HOME/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
+            out/release/ "$SSH_USER@$SSH_HOST:/srv/aricon/releases/$RELEASE_ID/"
+
+      - name: Activate release
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          ssh -i "$HOME/.ssh/deploy_key" -o StrictHostKeyChecking=yes "$SSH_USER@$SSH_HOST" \
+            "bash /srv/aricon/releases/$RELEASE_ID/infra/scripts/activate-release.sh $RELEASE_ID"
+
+      - name: Remove SSH key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key

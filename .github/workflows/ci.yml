@@ -1,0 +1,66 @@
+# Checks every push and pull request (SPEC §17 Phase 0, CLAUDE.md §2.6): install, typecheck, lint,
+# unit and API tests (MongoDB from mongodb-memory-server as a replica set), production build.
+# deploy.yml runs this same workflow before it deploys main.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches-ignore: [main]
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Typecheck, lint, test, build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      # Build-time values for the web app (public ones are inlined into the bundle). Placeholders:
+      # the real production values are set in deploy.yml.
+      NEXT_PUBLIC_SITE_URL: https://shop.aricon.com.pk
+      NEXT_PUBLIC_IMAGE_BASE_URL: https://images.aricon.com.pk
+      INTERNAL_API_URL: http://127.0.0.1:4000
+      REVALIDATE_SECRET: ci-only-revalidate-secret-0123456789abcdef
+      TURBO_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # The API tests start a MongoDB replica set from a downloaded binary; keep it between runs.
+      - name: Cache MongoDB binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/mongodb-binaries
+          key: mongodb-binaries-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: mongodb-binaries-${{ runner.os }}-
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: API tests (MongoDB replica set)
+        run: pnpm test:e2e
+
+      - name: Build
+        run: pnpm build

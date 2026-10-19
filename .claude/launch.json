@@ -1,0 +1,20 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "aricon-web",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "project/portal/apps/web/node_modules/next/dist/bin/next",
+        "dev",
+        "project/portal/apps/web",
+        "--port",
+        "3100"
+      ],
+      "port": 3100,
+      "env": {
+        "NEXT_PUBLIC_IMAGE_BASE_URL": "http://localhost:3100/api/dev-files"
+      }
+    }
+  ]
+}
