@@ -2,9 +2,9 @@ import { Check, MessageCircle } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { CategoryTile, CategoryTileGrid } from '@/components/shop/category-tile';
-import { HeroBannerCarousel, toImageSlide } from '@/components/shop/hero-banner-carousel';
+import { HeroBannerCarousel } from '@/components/shop/hero-banner-carousel';
 import { JsonLd } from '@/components/shop/json-ld';
-import { DEFAULT_HERO_SLIDES } from '@/components/shop/home-hero-slides';
+import { DEFAULT_HERO_SLIDES, toImageSlide } from '@/components/shop/home-hero-slides';
 import { ProductCard } from '@/components/shop/product-card';
 import { ProductSection } from '@/components/shop/product-rail';
 import { iconProps } from '@/components/shop/styles';
@@ -117,10 +117,10 @@ export default async function HomePage() {
         </section>
       ) : null}
 
-      <section className="flex flex-col items-start gap-4 rounded-2xl bg-ink px-6 py-8 text-white md:flex-row md:items-center md:justify-between md:px-12">
+      <section className="flex flex-col items-start gap-4 rounded-2xl bg-blueprint-50 px-6 py-8 text-ink md:flex-row md:items-center md:justify-between md:px-12">
         <div className="flex flex-col gap-1.5">
-          <h2 className="type-h2 text-white">Ordering for a whole project?</h2>
-          <p className="max-w-[52ch] text-concrete-200">Send us your list on WhatsApp and we&apos;ll prepare a quote.</p>
+          <h2 className="type-h2 text-ink">Ordering for a whole project?</h2>
+          <p className="max-w-[52ch] text-ink-700">Send us your list on WhatsApp and we&apos;ll prepare a quote.</p>
         </div>
         <Button asChild size="lg" className="w-full shrink-0 md:w-auto">
           <a

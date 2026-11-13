@@ -9,7 +9,7 @@ import { AccessDenied } from '@/components/admin/access-denied';
 import { RiderForm, type RiderFormValues } from '@/components/admin/rider-form';
 import { Pill } from '@/components/shop/status-badges';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Sheet, SheetBody, SheetCloseButton, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { apiClient } from '@/lib/api-client';
 import { useAdminSession } from '@/lib/admin/session';
 
@@ -93,16 +93,19 @@ export function RidersView({ riders }: RidersViewProps) {
       </div>
 
       {canManage ? (
-        <Dialog open={editing !== undefined} onOpenChange={(open) => !open && setEditing(undefined)}>
-          <DialogContent size="sm" mobile="sheet" aria-describedby={undefined}>
-            <DialogHeader>
-              <DialogTitle>{editing ? `Edit ${editing.name}` : 'Add rider'}</DialogTitle>
-            </DialogHeader>
-            {editing !== undefined ? (
-              <RiderForm key={editing?.id ?? 'new'} rider={editing ?? undefined} onSubmit={handleSave} onCancel={() => setEditing(undefined)} />
-            ) : null}
-          </DialogContent>
-        </Dialog>
+        <Sheet open={editing !== undefined} onOpenChange={(open) => !open && setEditing(undefined)}>
+          <SheetContent size="sm" aria-describedby={undefined}>
+            <SheetHeader>
+              <SheetTitle>{editing ? `Edit ${editing.name}` : 'Add rider'}</SheetTitle>
+              <SheetCloseButton />
+            </SheetHeader>
+            <SheetBody>
+              {editing !== undefined ? (
+                <RiderForm key={editing?.id ?? 'new'} rider={editing ?? undefined} onSubmit={handleSave} onCancel={() => setEditing(undefined)} />
+              ) : null}
+            </SheetBody>
+          </SheetContent>
+        </Sheet>
       ) : null}
     </div>
   );

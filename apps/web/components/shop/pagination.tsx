@@ -1,10 +1,14 @@
 import { DEFAULT_PAGE_SIZE, type PageMeta, type ProductListQuery } from '@aricon/shared';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import Link from 'next/link';
-import type { ComponentProps, ReactNode } from 'react';
+import {
+  Pagination as PaginationNav,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 import { buildListingHref } from '@/lib/product-query';
-import { cn } from '@/lib/utils';
-import { iconProps } from './styles';
 
 export interface PaginationProps {
   basePath: string;
@@ -24,37 +28,29 @@ export function Pagination({ basePath, query, meta, className }: PaginationProps
   const pages = pageNumbers(current, pageCount);
 
   return (
-    <nav aria-label="Pagination" className={cn('flex flex-wrap items-center justify-center gap-1', className)}>
-      <PageLink
-        href={current > 1 ? hrefFor(current - 1) : undefined}
-        disabled={current <= 1}
-        aria-label="Previous page"
-      >
-        <ChevronLeft {...iconProps} className="size-4" />
-        <span className="hidden sm:inline">Previous</span>
-      </PageLink>
-
-      {pages.map((page, index) =>
-        page === 'ellipsis' ? (
-          <span key={`ellipsis-${index}`} className="px-2 text-cement" aria-hidden="true">
-            …
-          </span>
-        ) : (
-          <PageLink key={page} href={hrefFor(page)} active={page === current} aria-label={`Page ${page}`}>
-            {page}
-          </PageLink>
-        ),
-      )}
-
-      <PageLink
-        href={current < pageCount ? hrefFor(current + 1) : undefined}
-        disabled={current >= pageCount}
-        aria-label="Next page"
-      >
-        <span className="hidden sm:inline">Next</span>
-        <ChevronRight {...iconProps} className="size-4" />
-      </PageLink>
-    </nav>
+    <PaginationNav className={className}>
+      <PaginationContent>
+        <PaginationItem>
+          <PaginationPrevious href={current > 1 ? hrefFor(current - 1) : undefined} disabled={current <= 1} />
+        </PaginationItem>
+        {pages.map((page, index) =>
+          page === 'ellipsis' ? (
+            <PaginationItem key={`ellipsis-${index}`}>
+              <PaginationEllipsis />
+            </PaginationItem>
+          ) : (
+            <PaginationItem key={page}>
+              <PaginationLink href={hrefFor(page)} isActive={page === current} aria-label={`Page ${page}`}>
+                {page}
+              </PaginationLink>
+            </PaginationItem>
+          ),
+        )}
+        <PaginationItem>
+          <PaginationNext href={current < pageCount ? hrefFor(current + 1) : undefined} disabled={current >= pageCount} />
+        </PaginationItem>
+      </PaginationContent>
+    </PaginationNav>
   );
 }
 
@@ -73,31 +69,4 @@ function pageNumbers(current: number, pageCount: number): (number | 'ellipsis')[
     previous = page;
   }
   return result;
-}
-
-type PageLinkProps = {
-  href?: string;
-  active?: boolean;
-  disabled?: boolean;
-  children: ReactNode;
-} & Omit<ComponentProps<'a'>, 'href' | 'children'>;
-
-function PageLink({ href, active, disabled, children, ...props }: PageLinkProps) {
-  const classes = cn(
-    'flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-md px-3 text-sm font-medium',
-    active ? 'bg-ink text-white' : 'text-ink-700 hover:bg-concrete-50',
-    disabled && 'pointer-events-none text-concrete-400',
-  );
-  if (!href || disabled) {
-    return (
-      <span aria-disabled="true" className={classes} {...props}>
-        {children}
-      </span>
-    );
-  }
-  return (
-    <Link href={href} className={classes} {...props}>
-      {children}
-    </Link>
-  );
 }

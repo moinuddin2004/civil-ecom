@@ -7,9 +7,10 @@ import {
   type PaymentStatus,
 } from '@aricon/shared';
 import type { Metadata } from 'next';
+import { parsePageSize } from '@/lib/admin/page-size';
 import { AccessDenied } from '@/components/admin/access-denied';
 import { OrdersListView, type OrdersListFilters } from '@/components/admin/orders-list-view';
-import { can, getAdminOrders, requireStaff } from '@/lib/admin-data';
+import { can, getAdminOrders, getRiders, requireStaff } from '@/lib/admin-data';
 
 export const metadata: Metadata = { title: 'Orders' };
 
@@ -49,9 +50,13 @@ export default async function AdminOrdersPage({ searchParams }: OrdersPageProps)
   const paymentMethod = oneOf<PaymentMethod>(PAYMENT_METHODS, param(sp, 'paymentMethod'));
   const q = param(sp, 'q');
   const page = Math.max(1, Number(param(sp, 'page') ?? '1') || 1);
+  const pageSize = parsePageSize(param(sp, 'pageSize'));
 
-  const result = await getAdminOrders({ status: statusesFor(tab), paymentStatus, paymentMethod, q, page });
+  const [result, riders] = await Promise.all([
+    getAdminOrders({ status: statusesFor(tab), paymentStatus, paymentMethod, q, page, pageSize }),
+    can(me, 'orders.assign_rider') ? getRiders() : Promise.resolve([]),
+  ]);
   const filters: OrdersListFilters = { status: tab, paymentStatus, paymentMethod, q };
 
-  return <OrdersListView orders={result.data} meta={result.meta} counts={result.statusCounts} filters={filters} />;
+  return <OrdersListView orders={result.data} meta={result.meta} counts={result.statusCounts} filters={filters} riders={riders} />;
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { BackButton } from '@/components/ui/back-button';
 import { AccessDenied } from '@/components/admin/access-denied';
 import { ProductForm } from '@/components/admin/product-form';
 import { can, getAdminBrands, getAdminCategories, getAdminProduct, requireStaff } from '@/lib/admin-data';
@@ -24,5 +25,10 @@ export default async function AdminEditProductPage({ params }: ProductEditPagePr
     getAdminCategories(),
     getAdminBrands(),
   ]);
-  return <ProductForm mode="edit" product={product} categories={categories} brands={brands} />;
+  return (
+    <>
+      <BackButton fallbackHref="/admin/products" className="mb-2" />
+      <ProductForm mode="edit" product={product} categories={categories} brands={brands} />
+    </>
+  );
 }

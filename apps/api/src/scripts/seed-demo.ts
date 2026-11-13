@@ -108,9 +108,9 @@ async function addPlaceholderPhoto(app: INestApplicationContext, productId: Type
 }
 
 const DEMO_BANNERS = [
-  { heading: 'Buy more, pay less per bag', subline: 'Bulk prices on cement, delivered across Karachi', link: '/category/cement-plaster' },
-  { heading: 'Genuine wires and switches', subline: 'Trusted electrical brands for every site', link: '/category/electrical' },
-  { heading: 'Cash on delivery or bank transfer', subline: 'Order today, pay the way that suits you', link: '/pages/delivery-policy' },
+  { heading: 'Buy more, pay less per bag', subline: 'Bulk prices on cement, delivered across Karachi', link: '/category/cement-plaster', tone: 'blue' },
+  { heading: 'Genuine wires and switches', subline: 'Trusted electrical brands for every site', link: '/category/electrical', tone: 'green' },
+  { heading: 'Cash on delivery or bank transfer', subline: 'Order today, pay the way that suits you', link: '/pages/delivery-policy', tone: 'sand' },
 ] as const;
 
 /** Three demo banners (SPEC §19), desktop 1600 px and mobile 800 px wide. */
@@ -122,7 +122,7 @@ async function placeholderBanners(app: INestApplicationContext) {
     const id = new Types.ObjectId();
     const keys = { desktop: bannerImageKey(String(id), 'desktop'), mobile: bannerImageKey(String(id), 'mobile') };
     for (const variant of ['desktop', 'mobile'] as const) {
-      const png = variant === 'desktop' ? await bannerPlaceholder(1600, 600, banner.heading, banner.subline) : await bannerPlaceholder(800, 800, banner.heading, banner.subline);
+      const png = variant === 'desktop' ? await bannerPlaceholder(1600, 600, banner.heading, banner.subline, banner.tone) : await bannerPlaceholder(800, 800, banner.heading, banner.subline, banner.tone);
       const body = await files.bannerImage({ buffer: png, size: png.length }, variant);
       await storage.putPublic(keys[variant], body, 'image/webp', SHORT_CACHE);
     }

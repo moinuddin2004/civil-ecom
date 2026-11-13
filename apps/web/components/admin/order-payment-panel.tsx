@@ -72,10 +72,7 @@ export function OrderPaymentPanel({ order }: OrderPaymentPanelProps) {
           )}
         </div>
       ) : order.codCollected ? (
-        <p className="text-sm text-cement">
-          Cash collected: {formatPKR(order.codCollected.amount)} on {formatDateTime(order.codCollected.at)}
-          {order.codCollected.byName ? ` by ${order.codCollected.byName}` : ''}.
-        </p>
+        <CodCollectedSummary order={order} collected={order.codCollected} />
       ) : (
         <p className="text-sm text-cement">
           {order.paymentStatus === 'PAID' ? 'Cash collected on delivery.' : 'Cash on delivery — collect from the customer.'}
@@ -83,6 +80,36 @@ export function OrderPaymentPanel({ order }: OrderPaymentPanelProps) {
       )}
 
       {showCodForm ? <CodCollectedForm order={order} /> : null}
+    </div>
+  );
+}
+
+/** Expected vs collected for a paid COD order: the difference and the reason staff gave stay visible here. */
+function CodCollectedSummary({ order, collected }: { order: AdminOrderDTO; collected: NonNullable<AdminOrderDTO['codCollected']> }) {
+  const difference = collected.amount - order.total;
+  return (
+    <div className="flex flex-col gap-2 text-sm">
+      <dl className="flex flex-col gap-1">
+        <div className="flex justify-between text-ink-700">
+          <dt>Expected</dt>
+          <dd className="tabular-nums">{formatPKR(order.total)}</dd>
+        </div>
+        <div className="flex justify-between text-ink-700">
+          <dt>Collected</dt>
+          <dd className="tabular-nums">{formatPKR(collected.amount)}</dd>
+        </div>
+        {difference !== 0 ? (
+          <div className={`flex justify-between font-semibold ${difference < 0 ? 'text-danger' : 'text-success'}`}>
+            <dt>{difference < 0 ? 'Short' : 'Extra'}</dt>
+            <dd className="tabular-nums">{formatPKR(Math.abs(difference))}</dd>
+          </div>
+        ) : null}
+      </dl>
+      {collected.note ? <p className="rounded-md bg-concrete-50 px-3 py-2 text-ink-700">Reason: {collected.note}</p> : null}
+      <p className="text-cement">
+        Recorded {formatDateTime(collected.at)}
+        {collected.byName ? ` by ${collected.byName}` : ''}.
+      </p>
     </div>
   );
 }

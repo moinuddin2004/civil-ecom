@@ -24,6 +24,33 @@ export interface SalesPoint extends SalesTotals {
   period: string;
 }
 
+/** Money received vs still to come, per order, as pipeline expressions (shared by every finance aggregation). */
+const RECEIVED = { $cond: [{ $eq: ['$paymentStatus', 'PAID'] }, { $ifNull: ['$codCollected.amount', '$total'] }, 0] };
+const OUTSTANDING = { $cond: [{ $eq: ['$paymentStatus', 'PAID'] }, 0, '$total'] };
+
+export interface FinanceTotals extends SalesTotals {
+  subtotal: number;
+  discounts: number;
+  deliveryFees: number;
+  collected: number;
+  pending: number;
+}
+
+export interface FinancePoint {
+  period: string;
+  orders: number;
+  revenue: number;
+  collected: number;
+}
+
+export interface PaymentRow {
+  method: string;
+  orders: number;
+  revenue: number;
+  collected: number;
+  pending: number;
+}
+
 export interface LowStockItem {
   productId: Types.ObjectId;
   productName: string;
@@ -43,6 +70,10 @@ export interface ProductSalesRow {
 }
 
 export interface CodRow {
+  orderId: Types.ObjectId;
+  orderNumber: string;
+  total: number;
+  note: string | null;
   riderId: Types.ObjectId | null;
   riderName: string | null;
   date: string;
@@ -74,6 +105,60 @@ export class ReportsRepository {
       ])
       .exec();
     return row ?? { orders: 0, revenue: 0 };
+  }
+
+  /** The finance report's totals: revenue, discounts, delivery fees, money received and outstanding. */
+  async financeTotals(from: Date, to: Date): Promise<FinanceTotals> {
+    const [row] = await this.orders
+      .aggregate<FinanceTotals>([
+        { $match: { ...SALES, ...range(from, to) } },
+        {
+          $group: {
+            _id: null,
+            orders: { $sum: 1 },
+            revenue: { $sum: '$total' },
+            subtotal: { $sum: '$subtotal' },
+            discounts: { $sum: { $ifNull: ['$discountAmount', 0] } },
+            deliveryFees: { $sum: '$deliveryFee' },
+            collected: { $sum: RECEIVED },
+            pending: { $sum: OUTSTANDING },
+          },
+        },
+        { $project: { _id: 0 } },
+      ])
+      .exec();
+    return row ?? { orders: 0, revenue: 0, subtotal: 0, discounts: 0, deliveryFees: 0, collected: 0, pending: 0 };
+  }
+
+  /** Revenue and money received per day/month that had sales (callers fill the gaps). */
+  financeSeries(from: Date, to: Date, unit: 'day' | 'month'): Promise<FinancePoint[]> {
+    return this.orders
+      .aggregate<FinancePoint>([
+        { $match: { ...SALES, ...range(from, to) } },
+        { $group: { _id: periodOf(unit), orders: { $sum: 1 }, revenue: { $sum: '$total' }, collected: { $sum: RECEIVED } } },
+        { $project: { _id: 0, period: '$_id', orders: 1, revenue: 1, collected: 1 } },
+        { $sort: { period: 1 } },
+      ])
+      .exec();
+  }
+
+  paymentBreakdown(from: Date, to: Date): Promise<PaymentRow[]> {
+    return this.orders
+      .aggregate<PaymentRow>([
+        { $match: { ...SALES, ...range(from, to) } },
+        {
+          $group: {
+            _id: '$paymentMethod',
+            orders: { $sum: 1 },
+            revenue: { $sum: '$total' },
+            collected: { $sum: RECEIVED },
+            pending: { $sum: OUTSTANDING },
+          },
+        },
+        { $project: { _id: 0, method: '$_id', orders: 1, revenue: 1, collected: 1, pending: 1 } },
+        { $sort: { method: 1 } },
+      ])
+      .exec();
   }
 
   /** One point per day/month that had sales (callers fill the gaps). */
@@ -191,7 +276,11 @@ export class ReportsRepository {
         { $match: { ...SALES, ...range(from, to), paymentMethod: 'COD' } },
         {
           $project: {
+            orderId: '$_id',
             _id: 0,
+            orderNumber: 1,
+            total: 1,
+            note: { $ifNull: ['$codCollected.note', null] },
             riderId: { $ifNull: ['$riderId', null] },
             riderName: { $ifNull: ['$rider.name', null] },
             date: periodOf('day'),

@@ -7,6 +7,7 @@ import { OrderInternalNote } from '@/components/admin/order-internal-note';
 import { OrderPaymentPanel } from '@/components/admin/order-payment-panel';
 import { OrderRiderPanel } from '@/components/admin/order-rider-panel';
 import { OrderStatusActions } from '@/components/admin/order-status-actions';
+import { TrackingCode } from '@/components/shop/tracking-code';
 import { OrderStatusBadge, PaymentStatusBadge } from '@/components/shop/status-badges';
 import { useAdminSession } from '@/lib/admin/session';
 
@@ -44,6 +45,7 @@ export function OrderDetailView({ order, riders }: OrderDetailViewProps) {
           <PaymentStatusBadge status={order.paymentStatus} />
         </div>
         <p className="text-sm text-cement">Placed {formatDateTime(order.createdAt)}</p>
+        <TrackingCode code={order.trackingCode} variant="inline" />
         <OrderStatusActions order={order} />
       </div>
 
@@ -117,10 +119,17 @@ export function OrderDetailView({ order, riders }: OrderDetailViewProps) {
             <span>Subtotal</span>
             <span className="tabular-nums">{formatPKR(order.subtotal)}</span>
           </div>
+          {order.discount > 0 ? (
+            <div className="flex w-48 justify-between text-success" title={order.discountReason ?? undefined}>
+              <span>Discount</span>
+              <span className="tabular-nums">-{formatPKR(order.discount)}</span>
+            </div>
+          ) : null}
           <div className="flex w-48 justify-between text-ink-700">
             <span>Delivery</span>
             <span className="tabular-nums">{formatPKR(order.deliveryFee)}</span>
           </div>
+          {order.discount > 0 && order.discountReason ? <p className="text-xs text-cement">Discount reason: {order.discountReason}</p> : null}
           <div className="flex w-48 justify-between font-semibold text-ink">
             <span>Total</span>
             <span className="tabular-nums">{formatPKR(order.total)}</span>

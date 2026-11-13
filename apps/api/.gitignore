@@ -38,12 +38,11 @@ lerna-debug.log*
 !.vscode/launch.json
 !.vscode/extensions.json
 
-# dotenv environment variable files. `.env.example`, `.env.development` and `.env.test` are
-# committed (safe example values); everything personal or production stays out of git.
-.env
+# dotenv environment variable files: `.env`, `.env.development`, `.env.production`, `.env.test` and
+# `.env.example` are committed on purpose (this is a private repo). Only machine-private overrides
+# (`.env.local`, `.env.*.local`) stay out of git; the API no longer reads them.
 .env.local
 .env.*.local
-.env.production
 
 # Local file storage (STORAGE_DRIVER=local)
 /.uploads

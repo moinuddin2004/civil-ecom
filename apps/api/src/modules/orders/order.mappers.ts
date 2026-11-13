@@ -52,6 +52,7 @@ export function toCustomerOrderDto(order: OrderLean, productSlugs: ReadonlyMap<s
   return {
     id: String(order._id),
     orderNumber: order.orderNumber,
+    trackingCode: order.trackingCode ?? null,
     createdAt: order.createdAt.toISOString(),
     status: order.status,
     paymentMethod: order.paymentMethod,
@@ -75,6 +76,7 @@ export function toCustomerOrderDto(order: OrderLean, productSlugs: ReadonlyMap<s
     })),
     subtotal: order.subtotal,
     deliveryFee: order.deliveryFee,
+    discount: order.discountAmount ?? 0,
     total: order.total,
     shippingAddress: {
       label: order.shippingAddress.label,
@@ -114,6 +116,7 @@ export function toOrderListItem(row: OrderListRow): CustomerOrderListItemDTO {
   return {
     id: String(row._id),
     orderNumber: row.orderNumber,
+    trackingCode: row.trackingCode ?? null,
     createdAt: row.createdAt.toISOString(),
     itemCount: row.items.reduce((sum, item) => sum + item.qty, 0),
     total: row.total,

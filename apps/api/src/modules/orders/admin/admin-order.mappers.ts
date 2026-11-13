@@ -4,7 +4,7 @@ import type { OrderLean } from '../../../models/order.model.js';
 /** The fields an admin order row needs. */
 export type AdminOrderRow = Pick<
   OrderLean,
-  '_id' | 'orderNumber' | 'createdAt' | 'user' | 'shippingAddress' | 'total' | 'paymentMethod' | 'paymentStatus' | 'status' | 'rider'
+  '_id' | 'orderNumber' | 'createdAt' | 'user' | 'shippingAddress' | 'total' | 'paymentMethod' | 'paymentStatus' | 'status' | 'rider' | 'riderId' | 'codCollected'
 >;
 
 /** Projection for `AdminOrderRow` queries. */
@@ -18,6 +18,8 @@ export const ADMIN_ORDER_ROW_FIELDS = {
   paymentStatus: 1,
   status: 1,
   rider: 1,
+  riderId: 1,
+  'codCollected.amount': 1,
 } as const;
 
 export function toAdminOrderListItem(order: AdminOrderRow): AdminOrderListItemDTO {
@@ -32,6 +34,8 @@ export function toAdminOrderListItem(order: AdminOrderRow): AdminOrderListItemDT
     paymentMethod: order.paymentMethod,
     paymentStatus: order.paymentStatus,
     status: order.status,
+    riderId: order.riderId ? String(order.riderId) : null,
     riderName: order.rider?.name ?? null,
+    codCollectedAmount: order.codCollected?.amount ?? null,
   };
 }

@@ -87,6 +87,8 @@ export interface StatusHistoryEntryDTO {
 export interface CustomerOrderDTO {
   id: string;
   orderNumber: string;
+  /** 6 digits, for public tracking. Null only for orders from before tracking codes existed. */
+  trackingCode: string | null;
   createdAt: string;
   status: OrderStatus;
   paymentMethod: PaymentMethod;
@@ -94,6 +96,8 @@ export interface CustomerOrderDTO {
   items: OrderItemDTO[];
   subtotal: number;
   deliveryFee: number;
+  /** Discount given by staff (0 when none). */
+  discount: number;
   total: number;
   shippingAddress: ShippingAddressDTO;
   receipts: ReceiptDTO[];
@@ -106,10 +110,25 @@ export interface CustomerOrderDTO {
   canUploadReceipt: boolean;
 }
 
+/**
+ * `POST /api/public/track-order`: just enough to follow an order. No address, items, prices,
+ * customer name or phone (the order number and phone are the only proof of ownership).
+ */
+export interface OrderTrackingDTO {
+  orderNumber: string;
+  status: OrderStatus;
+  createdAt: string;
+  /** Every status the order has been in, oldest first. */
+  history: { status: OrderStatus; at: string }[];
+  /** Name only (no phone), shown once the order is dispatched or delivered. */
+  riderName: string | null;
+}
+
 /** Row in `GET /api/orders`. */
 export interface CustomerOrderListItemDTO {
   id: string;
   orderNumber: string;
+  trackingCode: string | null;
   createdAt: string;
   itemCount: number;
   total: number;

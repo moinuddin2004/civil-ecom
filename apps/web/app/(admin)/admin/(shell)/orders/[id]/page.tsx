@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { BackButton } from '@/components/ui/back-button';
 import { AccessDenied } from '@/components/admin/access-denied';
 import { OrderDetailView } from '@/components/admin/order-detail-view';
 import { can, getAdminOrder, getRiders, requireStaff } from '@/lib/admin-data';
@@ -27,5 +28,10 @@ export default async function AdminOrderDetailPage({ params }: OrderDetailPagePr
     orNotFound(getAdminOrder(id)),
     can(me, 'orders.assign_rider') ? getRiders() : Promise.resolve([]),
   ]);
-  return <OrderDetailView order={order} riders={riders} />;
+  return (
+    <>
+      <BackButton fallbackHref="/admin/orders" className="mb-2" />
+      <OrderDetailView order={order} riders={riders} />
+    </>
+  );
 }

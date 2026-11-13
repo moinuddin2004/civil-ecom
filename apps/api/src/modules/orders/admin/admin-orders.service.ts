@@ -197,7 +197,10 @@ export class AdminOrdersService {
         current._id,
         { status: current.status, paymentStatus: current.paymentStatus },
         {
-          $set: { paymentStatus: 'PAID', codCollected: { amount, at: new Date(), byUserId: new Types.ObjectId(actor.id) } },
+          $set: {
+            paymentStatus: 'PAID',
+            codCollected: { amount, at: new Date(), byUserId: new Types.ObjectId(actor.id), ...(note && { note }) },
+          },
         },
         session,
       );
@@ -388,6 +391,7 @@ export class AdminOrdersService {
     return {
       id: String(order._id),
       orderNumber: order.orderNumber,
+      trackingCode: order.trackingCode ?? null,
       createdAt: order.createdAt.toISOString(),
       updatedAt: order.updatedAt.toISOString(),
       userId: String(order.userId),
@@ -423,6 +427,8 @@ export class AdminOrdersService {
       })),
       subtotal: order.subtotal,
       deliveryFee: order.deliveryFee,
+      discount: order.discountAmount ?? 0,
+      discountReason: order.discountReason ?? null,
       total: order.total,
       paymentMethod: order.paymentMethod,
       paymentStatus: order.paymentStatus,
@@ -447,7 +453,12 @@ export class AdminOrdersService {
       riderId: order.riderId ? String(order.riderId) : null,
       rider: order.rider ? { name: order.rider.name, phone: order.rider.phone } : null,
       codCollected: order.codCollected
-        ? { amount: order.codCollected.amount, at: order.codCollected.at.toISOString(), byName: nameOf(order.codCollected.byUserId) }
+        ? {
+            amount: order.codCollected.amount,
+            at: order.codCollected.at.toISOString(),
+            byName: nameOf(order.codCollected.byUserId),
+            note: order.codCollected.note ?? null,
+          }
         : null,
       customerNote: order.customerNote ?? null,
       internalNote: order.internalNote ?? null,

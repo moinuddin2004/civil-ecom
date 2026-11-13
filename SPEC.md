@@ -111,6 +111,8 @@ Defined once in `packages/shared/src/permissions.ts`. The admin UI (checkboxes, 
 |---|---|---|---|---|
 | Dashboard | `dashboard.view` | View sales dashboard | – | |
 | Orders | `orders.view` | View orders and invoices | – | |
+| Orders | `orders.create` | Create orders for customers | `orders.view`, `customers.view` | |
+| Orders | `orders.discount` | Give a discount when creating an order | `orders.view`, `customers.view`, `orders.create` | yes |
 | Orders | `orders.update_status` | Confirm, dispatch and deliver orders | `orders.view` | |
 | Orders | `orders.cancel` | Cancel and return orders | `orders.view` | ✓ |
 | Orders | `orders.assign_rider` | Assign riders | `orders.view` | |
@@ -163,7 +165,7 @@ export function hasPermission(user, perm): boolean; // ADMIN → always true
 
 | Preset | Permissions |
 |---|---|
-| Order Manager | `orders.view`, `orders.update_status`, `orders.assign_rider`, `orders.cod_collect`, `orders.verify_payment`, `customers.view` |
+| Order Manager | `orders.view`, `orders.create`, `orders.update_status`, `orders.assign_rider`, `orders.cod_collect`, `orders.verify_payment`, `customers.view` |
 | Catalog Manager | all `products.*`, `categories.manage`, `brands.manage`, `stock_movements.view` |
 | Accountant / Viewer | `dashboard.view`, `reports.view`, `reports.export`, `orders.view` |
 
@@ -315,7 +317,11 @@ Index: `{ city: 1, name: 1 }` unique.
 | `items` | OrderItem[] | ≥ 1 |
 | `subtotal` | int | sum of `lineTotal` |
 | `deliveryFee` | int | |
-| `total` | int | `subtotal + deliveryFee` |
+| `discountAmount` | int | staff discount on the subtotal (§6.6c), default 0; absent on older orders |
+| `discountReason` | string? | required when `discountAmount > 0` |
+| `discountByUserId` | ObjectId? | the staff member who gave it |
+| `trackingCode` | string | 6 digits (`100000`–`999999`), unique per order (§6.6b); older orders get one at start-up |
+| `total` | int | `subtotal - discountAmount + deliveryFee` |
 | `paymentMethod` | `COD` \| `BANK_TRANSFER` | |
 | `paymentStatus` | `PENDING` \| `AWAITING_VERIFICATION` \| `PAID` \| `REJECTED` \| `REFUNDED` | |
 | `receipts` | Receipt[] | bank transfer only |
@@ -323,7 +329,7 @@ Index: `{ city: 1, name: 1 }` unique.
 | `statusHistory` | `{ status, at, byUserId?, byType: 'customer' \| 'staff' \| 'system', note? }[]` | append-only |
 | `riderId` | ObjectId? | |
 | `rider` | `{ name, phone }?` | snapshot at assignment |
-| `codCollected` | `{ amount, at, byUserId }?` | |
+| `codCollected` | `{ amount, at, byUserId, note? }?` | `note` is the reason when `amount ≠ total` |
 | `customerNote` | string? | max 500 |
 | `internalNote` | string? | staff only, max 2,000 |
 | `cancelReason` | string? | |
@@ -446,6 +452,36 @@ Requires a customer session (`CUSTOMER`, `active`) and header `Idempotency-Key` 
 
 Concurrency test (MUST): two parallel orders for the last 5 units with qty 5 each → exactly one succeeds.
 
+### 6.6a Orders created by staff (`POST /api/admin/orders`)
+
+Staff with `orders.create` place an order for an existing, active `CUSTOMER` (phone or counter orders). It follows §6.6 with these differences:
+
+- Staff choose the customer, one of that customer's saved addresses, the lines (`productId`, `variantId`, `qty`) and the payment method. Prices, bulk tiers, delivery fee, stock and payment-method rules are the server's (§6.1–6.5); staff cannot override any of them.
+- The lines come from the request: the customer's own cart is not read or changed.
+- `expectedTotal` comes from `POST /api/admin/orders/quote`; a mismatch returns `409 PRICE_CHANGED`. Not enough stock returns `409 OUT_OF_STOCK`. A blocked customer or an address that isn't theirs returns `400`.
+- `statusHistory[0]` is `{ status: 'NEW', byType: 'staff' }`; an `order.created` audit log entry is written in the same transaction.
+- The customer gets the normal "Order placed" email and staff the "New order" email. Idempotency is per `{ userId, Idempotency-Key }` as in §6.6.
+
+### 6.6b Public order tracking (`POST /api/public/track-order`)
+
+Every order gets a random, unique **6-digit tracking code** when it is placed (by the customer or by staff). Anyone who has the code can check where the order is without signing in.
+
+- The code is shown with a copy button on the order placed page, in the customer's order list and order page, in the "Order placed" email and on the admin order page; staff can also find an order by it in the orders search.
+- Body `{ code }` (6 digits).
+- Returns only `{ orderNumber, status, createdAt, history: [{ status, at }], riderName }`. `riderName` (name only, no phone) appears once the order is `DISPATCHED` or `DELIVERED`. No address, items, prices, customer name, phone or notes.
+- A code that matches no order gives `404 NOT_FOUND`. The data is small on purpose (status trail and rider name only), because the code is the only proof.
+- Rate limit: 10 requests per 15 minutes per IP (`429`). Same-origin only (the Origin check stays on). The storefront page is `/track-order`, linked from the header and footer.
+
+### 6.6c Staff discount on orders they create
+
+Staff with `orders.discount` (in addition to `orders.create`) can take a fixed amount of rupees off an order they create (§6.6a). Customers can't, and the customer checkout is unchanged.
+
+- Body fields `discountAmount` (whole rupees, > 0) and `discountReason` (required, up to 300 characters).
+- The discount comes off the **products subtotal**, never the delivery fee, and can't be more than the subtotal (`400`). `total = subtotal − discountAmount + deliveryFee`, calculated by the server; `expectedTotal` must be that discounted total (`409 PRICE_CHANGED` otherwise). The COD limit (§6.5) is checked against the discounted total.
+- Without `orders.discount` a request with a discount is `403`.
+- Stored on the order (`discountAmount`, `discountReason`, `discountByUserId`), written to the `order.created` audit entry, and shown on the invoice, the "Order placed" email, the customer's order page and the admin order page.
+- Revenue in reports is after discounts; the sales report also shows the discounts given.
+
 ### 6.7 Order status machine
 
 Defined in `packages/shared/src/order-status.ts` as a table used by API and UI.
@@ -465,7 +501,7 @@ Defined in `packages/shared/src/order-status.ts` as a table used by API and UI.
 
 ### 6.8 Payments
 
-**COD:** `POST /api/admin/orders/:id/cod-collected { amount }` (`orders.cod_collect`), allowed when status is `DISPATCHED` or `DELIVERED`. Sets `codCollected` and `paymentStatus = PAID`. If `amount ≠ total`, a note is required (audit log keeps both).
+**COD:** `POST /api/admin/orders/:id/cod-collected { amount }` (`orders.cod_collect`), allowed when status is `DISPATCHED` or `DELIVERED`. Sets `codCollected` and `paymentStatus = PAID`. If `amount ≠ total`, a note is required. The note is saved on the order (`codCollected.note`) and in the audit log (which keeps both amounts). The admin order page shows expected, collected, short or extra, and the reason; the orders list marks short or extra orders; the COD report totals them and lists the orders (§7.3).
 
 **Bank transfer receipts:**
 
@@ -600,6 +636,7 @@ Defined in `packages/shared/src/order-status.ts` as a table used by API and UI.
 
 | Method | Path | Notes |
 |---|---|---|
+| POST | `/api/public/track-order` `{ code }` | public, same-origin, 10 per 15 min per IP (§6.6b) |
 | POST | `/api/public/rfp` | CORS only from `RFP_CORS_ORIGINS`; `{ company, contactPerson, email, phone?, location?, service, brief, website }` (`website` = honeypot, must be empty); emails `settings.rfpEmail`; nothing stored |
 
 ### 7.3 Admin endpoints (`/api/admin/*`, admin session)
@@ -627,6 +664,9 @@ Defined in `packages/shared/src/order-status.ts` as a table used by API and UI.
 |---|---|---|
 | GET | `/api/admin/orders` (filters: `status`, `paymentStatus`, `paymentMethod`, `from`, `to`, `areaId`, `riderId`, `q` = order number / phone / name) | `orders.view` |
 | GET | `/api/admin/orders/:id` | `orders.view` |
+| GET | `/api/admin/orders/product-options?q=` | `orders.create` (active variants by name/SKU) |
+| POST | `/api/admin/orders/quote` `{ userId, addressId, items, discountAmount? }` | `orders.create` (server-priced, nothing saved; a discount also needs `orders.discount`) |
+| POST | `/api/admin/orders` header `Idempotency-Key`; `{ userId, addressId, items, paymentMethod, customerNote?, discountAmount?, discountReason?, expectedTotal }` (§6.6a, §6.6c) | `orders.create` (`orders.discount` for a discount) |
 | POST | `/api/admin/orders/:id/status` `{ to, note?, reason? }` | `orders.update_status`; `CANCELLED`/`RETURNED` need `orders.cancel` |
 | POST | `/api/admin/orders/:id/rider` `{ riderId }` | `orders.assign_rider` |
 | POST | `/api/admin/orders/:id/cod-collected` `{ amount, note? }` | `orders.cod_collect` |
@@ -693,9 +733,9 @@ Defined in `packages/shared/src/order-status.ts` as a table used by API and UI.
 
 | Method | Path | perm |
 |---|---|---|
-| GET | `/api/admin/reports/sales?from&to&groupBy=day\|month` — orders count, revenue (excl. cancelled/returned), average order, series | `reports.view` |
+| GET | `/api/admin/reports/sales?from&to&groupBy=day\|month` — orders count, revenue (excl. cancelled/returned, after discounts), average order, products subtotal, discounts, delivery fees, collected vs still to collect, a series with collected per period, and a by-payment-method breakdown | `reports.view` |
 | GET | `/api/admin/reports/top-products?from&to&limit=20` — by quantity and revenue | `reports.view` |
-| GET | `/api/admin/reports/cod?from&to` — COD collected vs pending, by rider and by day | `reports.view` |
+| GET | `/api/admin/reports/cod?from&to` — COD expected vs collected, short and extra, still to collect; by rider and by day; and the list of orders collected short or extra with their reasons | `reports.view` |
 | GET | `/api/admin/reports/:report/export` | `reports.export` |
 
 **Staff, permissions, settings, audit (ADMIN only)**

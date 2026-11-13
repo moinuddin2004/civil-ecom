@@ -2,7 +2,7 @@ import { formatNumber } from '@aricon/shared';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ActiveFilterChips, countActiveFilters } from '@/components/shop/active-filter-chips';
-import { FilterPanel } from '@/components/shop/filter-panel';
+import { FilterBar, FilterPanel } from '@/components/shop/filter-panel';
 import { Pagination } from '@/components/shop/pagination';
 import { ProductCard } from '@/components/shop/product-card';
 import { ProductGrid } from '@/components/shop/product-grid';
@@ -64,7 +64,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           total={meta.total}
           activeFilterCount={countActiveFilters(query)}
           mobileFilterPanel={<FilterPanel query={query} facets={facets} basePath={basePath} idPrefix="mobile" />}
-          desktopFilterPanel={<FilterPanel query={query} facets={facets} basePath={basePath} idPrefix="desktop" />}
+          desktopFilterBar={<FilterBar query={query} facets={facets} basePath={basePath} idPrefix="desktop" />}
           sortSelect={<SortSelect currentSort={query.sort} />}
           activeChips={<ActiveFilterChips query={query} facets={facets} basePath={basePath} />}
         >

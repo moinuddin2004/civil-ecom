@@ -162,6 +162,7 @@ export class AdminOrdersRepository {
     if (q) {
       const phone = normalizePkPhone(q);
       if (ORDER_NUMBER_PATTERN.test(q.toUpperCase())) filter.orderNumber = q.toUpperCase();
+      else if (/^\d{6}$/.test(q)) filter.trackingCode = q;
       else if (phone) filter['user.phone'] = phone;
       else filter.$or = [{ orderNumber: new RegExp(escapeRegExp(q), 'i') }, { 'user.name': new RegExp(escapeRegExp(q), 'i') }];
     }

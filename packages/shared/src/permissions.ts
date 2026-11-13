@@ -44,6 +44,20 @@ export const PERMISSIONS = [
     sensitive: false,
   },
   {
+    key: 'orders.create',
+    group: 'Orders',
+    label: 'Create orders for customers',
+    dependsOn: ['orders.view', 'customers.view'],
+    sensitive: false,
+  },
+  {
+    key: 'orders.discount',
+    group: 'Orders',
+    label: 'Give a discount when creating an order',
+    dependsOn: ['orders.view', 'customers.view', 'orders.create'],
+    sensitive: true,
+  },
+  {
     key: 'orders.update_status',
     group: 'Orders',
     label: 'Confirm, dispatch and deliver orders',
@@ -291,6 +305,7 @@ export const PERMISSION_PRESETS = {
     label: 'Order Manager',
     permissions: [
       'orders.view',
+      'orders.create',
       'orders.update_status',
       'orders.assign_rider',
       'orders.cod_collect',

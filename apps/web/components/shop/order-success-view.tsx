@@ -6,6 +6,7 @@ import { routes } from '@/lib/routes';
 import { cn } from '@/lib/utils';
 import { BankDetails } from './bank-details';
 import { ReceiptUpload } from './receipt-upload';
+import { TrackingCode } from './tracking-code';
 import { CARD_CLASS, iconProps } from './styles';
 
 export interface OrderSuccessViewProps {
@@ -29,6 +30,8 @@ export function OrderSuccessView({ order, whatsapp, bankAccounts, bankTransferIn
         <h1 className="type-h1">Order placed</h1>
         <p className="font-display text-xl font-semibold tabular-nums text-ink-700">{order.orderNumber}</p>
       </div>
+
+      <TrackingCode code={order.trackingCode} className="w-full text-left" />
 
       <div className={cn(CARD_CLASS, 'flex w-full flex-col gap-3 p-5 text-left')}>
         <div className="flex justify-between text-sm">

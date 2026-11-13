@@ -1,3 +1,4 @@
+import { parsePageSize } from '@/lib/admin/page-size';
 import { DEFAULT_PAGE_SIZE, STOCK_MOVEMENT_REASONS, type StockMovementReason } from '@aricon/shared';
 import type { Metadata } from 'next';
 import { AccessDenied } from '@/components/admin/access-denied';
@@ -29,10 +30,11 @@ export default async function StockMovementsPage({ searchParams }: StockMovement
   const reasonParam = param(sp, 'reason');
   const reason = STOCK_MOVEMENT_REASONS.includes(reasonParam as StockMovementReason) ? (reasonParam as StockMovementReason) : undefined;
   const page = Math.max(1, Number(param(sp, 'page') ?? '1') || 1);
+  const pageSize = parsePageSize(param(sp, 'pageSize'));
 
   const { data, meta } =
     sku && !SKU.test(sku)
       ? { data: [], meta: { page: 1, pageSize: DEFAULT_PAGE_SIZE, total: 0 } }
-      : await getStockMovements({ sku, reason, page });
+      : await getStockMovements({ sku, reason, page, pageSize });
   return <StockMovementsView movements={data} meta={meta} filters={{ sku, reason }} />;
 }

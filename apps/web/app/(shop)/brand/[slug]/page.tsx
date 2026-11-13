@@ -2,7 +2,7 @@ import { formatNumber } from '@aricon/shared';
 import type { Metadata } from 'next';
 import { ActiveFilterChips, countActiveFilters } from '@/components/shop/active-filter-chips';
 import { Breadcrumbs } from '@/components/shop/breadcrumbs';
-import { FilterPanel } from '@/components/shop/filter-panel';
+import { FilterBar, FilterPanel } from '@/components/shop/filter-panel';
 import { Pagination } from '@/components/shop/pagination';
 import { ProductCard } from '@/components/shop/product-card';
 import { ProductGrid } from '@/components/shop/product-grid';
@@ -56,9 +56,7 @@ export default async function BrandPage({ params, searchParams }: BrandPageProps
         mobileFilterPanel={
           <FilterPanel query={query} facets={facets} basePath={basePath} idPrefix="mobile" hideBrand />
         }
-        desktopFilterPanel={
-          <FilterPanel query={query} facets={facets} basePath={basePath} idPrefix="desktop" hideBrand />
-        }
+        desktopFilterBar={<FilterBar query={query} facets={facets} basePath={basePath} idPrefix="desktop" hideBrand />}
         sortSelect={<SortSelect currentSort={query.sort} />}
         activeChips={<ActiveFilterChips query={query} facets={facets} basePath={basePath} />}
       >

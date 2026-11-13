@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { BackButton } from '@/components/ui/back-button';
 import { CheckoutForm } from '@/components/shop/checkout-form';
 import { getAddresses, getDeliveryAreas, getPublicSettings, requireCustomer } from '@/lib/api-server';
 import { routes } from '@/lib/routes';
@@ -15,6 +16,7 @@ export default async function CheckoutPage() {
 
   return (
     <div className="mx-auto max-w-content px-4 py-6 md:px-8 md:py-10">
+      <BackButton fallbackHref="/cart" label="Back" className="mb-2" />
       <h1 className="type-h1 mb-6">Checkout</h1>
       <CheckoutForm areas={areas} settings={settings} initialAddresses={addresses} />
     </div>

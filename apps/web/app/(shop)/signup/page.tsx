@@ -15,7 +15,7 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
   const { next } = await searchParams;
 
   return (
-    <AuthCard title="Create your account" subtitle="Order construction materials, bulk-priced, delivered in Karachi.">
+    <AuthCard wide title="Create your account" subtitle="Order construction materials, bulk-priced, delivered in Karachi.">
       <SignupForm next={next} />
     </AuthCard>
   );

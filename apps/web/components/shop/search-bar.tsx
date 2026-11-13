@@ -3,7 +3,8 @@
 import { formatPKR } from '@aricon/shared';
 import { Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
+import { useId, useRef, useState, type KeyboardEvent } from 'react';
+import { useDebouncedValue } from '@/lib/hooks/use-debounced-value';
 import { useSearchSuggestions } from '@/lib/search';
 import { cn } from '@/lib/utils';
 import { routes } from '@/lib/routes';
@@ -29,14 +30,10 @@ export function SearchBar({ className, size = 'lg' }: SearchBarProps) {
   const listboxId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState('');
-  const [debounced, setDebounced] = useState('');
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setDebounced(query), 250);
-    return () => clearTimeout(timer);
-  }, [query]);
+  const debounced = useDebouncedValue(query);
 
   const results = useSearchSuggestions(debounced);
   const hasResults = results.products.length + results.categories.length + results.brands.length > 0;
@@ -79,8 +76,8 @@ export function SearchBar({ className, size = 'lg' }: SearchBarProps) {
     <div className={cn('relative', className)}>
       <div
         className={cn(
-          'flex items-center gap-2 rounded-md border border-transparent bg-surface px-3.5 text-ink',
-          'focus-within:border-blueprint',
+          'flex items-center gap-2 rounded-md border border-concrete-200 bg-concrete-50 px-3.5 text-ink',
+          'focus-within:border-blueprint focus-within:bg-surface',
           size === 'lg' ? 'h-12' : 'h-10',
         )}
       >

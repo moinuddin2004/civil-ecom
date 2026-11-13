@@ -71,7 +71,10 @@ export interface AdminOrderListItemDTO {
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
   status: OrderStatus;
+  riderId: string | null;
   riderName: string | null;
+  /** Cash recorded for a COD order; null until then. Compare with `total` for a short/extra amount. */
+  codCollectedAmount: number | null;
 }
 
 export interface AdminStatusHistoryEntryDTO {
@@ -93,9 +96,22 @@ export interface FileLinkDTO {
   expiresAt: string;
 }
 
+/** One sellable variant staff can add to an order they create (`GET /api/admin/orders/product-options`). */
+export interface AdminOrderProductOptionDTO {
+  productId: string;
+  variantId: string;
+  productName: string;
+  variantLabel: string;
+  sku: string;
+  /** Current single-unit price; the server re-prices the order (bulk tiers included). */
+  price: number;
+  stock: number;
+}
+
 export interface AdminOrderDTO {
   id: string;
   orderNumber: string;
+  trackingCode: string | null;
   createdAt: string;
   updatedAt: string;
   userId: string;
@@ -105,6 +121,9 @@ export interface AdminOrderDTO {
   items: OrderItemDTO[];
   subtotal: number;
   deliveryFee: number;
+  /** Staff discount on the subtotal (0 when none). `total = subtotal - discount + deliveryFee`. */
+  discount: number;
+  discountReason: string | null;
   total: number;
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
@@ -113,7 +132,7 @@ export interface AdminOrderDTO {
   statusHistory: AdminStatusHistoryEntryDTO[];
   riderId: string | null;
   rider: { name: string; phone: string } | null;
-  codCollected: { amount: number; at: string; byName: string | null } | null;
+  codCollected: { amount: number; at: string; byName: string | null; note: string | null } | null;
   customerNote: string | null;
   internalNote: string | null;
   cancelReason: string | null;
@@ -309,8 +328,23 @@ export interface SalesReportDTO {
   from: string;
   to: string;
   groupBy: 'day' | 'month';
-  totals: { orders: number; revenue: number; averageOrder: number };
-  series: { period: string; orders: number; revenue: number }[];
+  totals: {
+    orders: number;
+    /** Sum of order totals (after discounts, delivery included); cancelled and returned orders left out. */
+    revenue: number;
+    averageOrder: number;
+    /** Revenue before discounts and delivery fees. */
+    subtotal: number;
+    discounts: number;
+    deliveryFees: number;
+    /** Money actually received: bank transfers once approved, COD as recorded (a short amount counts as received). */
+    collected: number;
+    /** Revenue of orders whose payment hasn't been received yet. */
+    pending: number;
+  };
+  series: { period: string; orders: number; revenue: number; collected: number }[];
+  /** Per payment method: what was sold and what has come in. */
+  byPayment: { method: PaymentMethod; orders: number; revenue: number; collected: number; pending: number }[];
 }
 
 export interface TopProductsReportDTO {
@@ -323,9 +357,32 @@ export interface TopProductsReportDTO {
 export interface CodReportDTO {
   from: string;
   to: string;
-  totals: { collected: number; pending: number; collectedOrders: number; pendingOrders: number };
-  byRider: { riderId: string | null; riderName: string; collected: number; pending: number }[];
-  byDay: { date: string; collected: number; pending: number }[];
+  totals: {
+    collected: number;
+    pending: number;
+    collectedOrders: number;
+    pendingOrders: number;
+    /** Order totals of the orders whose cash is recorded (what should have come in). */
+    expected: number;
+    /** Sum of what was collected below the order total. */
+    short: number;
+    /** Sum of what was collected above the order total. */
+    extra: number;
+  };
+  byRider: { riderId: string | null; riderName: string; collected: number; pending: number; expected: number; short: number; extra: number }[];
+  byDay: { date: string; collected: number; pending: number; expected: number; short: number; extra: number }[];
+  /** Orders where the cash collected differs from the total, biggest shortfall first (at most 100). */
+  differences: {
+    orderId: string;
+    orderNumber: string;
+    riderName: string | null;
+    date: string;
+    total: number;
+    collected: number;
+    /** `collected - total`: negative is short. */
+    difference: number;
+    note: string | null;
+  }[];
 }
 
 export interface AdminSettingsDTO {

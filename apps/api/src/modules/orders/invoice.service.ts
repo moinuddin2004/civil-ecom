@@ -102,6 +102,7 @@ export class InvoiceService {
     y += 6;
     for (const [label, value, bold] of [
       ['Subtotal', formatPKR(order.subtotal), false],
+      ...((order.discountAmount ?? 0) > 0 ? ([['Discount', `-${formatPKR(order.discountAmount)}`, false]] as const) : []),
       ['Delivery', order.deliveryFee === 0 ? 'Free' : formatPKR(order.deliveryFee), false],
       ['Total', formatPKR(order.total), true],
     ] as const) {

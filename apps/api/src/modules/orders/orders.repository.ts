@@ -11,7 +11,7 @@ const { trusted } = mongoose;
 /** A row of the customer's order list. */
 export type OrderListRow = Pick<
   OrderLean,
-  '_id' | 'orderNumber' | 'createdAt' | 'total' | 'paymentMethod' | 'paymentStatus' | 'status'
+  '_id' | 'orderNumber' | 'trackingCode' | 'createdAt' | 'total' | 'paymentMethod' | 'paymentStatus' | 'status'
 > & { items: { qty: number }[] };
 
 /** Fields of a new order; the repository adds nothing, the service builds every snapshot. */
@@ -36,11 +36,16 @@ export class OrdersRepository extends BaseRepository<Order, OrderLean> {
     return this.findOne({ userId: new Types.ObjectId(userId), orderNumber }, session);
   }
 
+  /** True when some order already uses this 6-digit tracking code. */
+  async trackingCodeTaken(code: string, session?: ClientSession): Promise<boolean> {
+    return (await this.findOne({ trackingCode: code }, session)) !== null;
+  }
+
   async listOwn(userId: string, page: number, pageSize: number): Promise<Paginated<OrderListRow>> {
     const filter = { userId: new Types.ObjectId(userId) };
     const [rows, total] = await Promise.all([
       this.model
-        .find(filter, { orderNumber: 1, createdAt: 1, total: 1, paymentMethod: 1, paymentStatus: 1, status: 1, 'items.qty': 1 })
+        .find(filter, { orderNumber: 1, trackingCode: 1, createdAt: 1, total: 1, paymentMethod: 1, paymentStatus: 1, status: 1, 'items.qty': 1 })
         .sort({ createdAt: -1, _id: -1 })
         .skip((page - 1) * pageSize)
         .limit(pageSize)

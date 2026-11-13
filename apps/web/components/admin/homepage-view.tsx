@@ -25,6 +25,7 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { useAdminSession } from '@/lib/admin/session';
 import { apiClient } from '@/lib/api-client';
+import { SEARCH_DEBOUNCE_MS, useDebouncedValue } from '@/lib/hooks/use-debounced-value';
 import { errorMessage, fieldErrors, type FieldError } from '@/lib/api-errors';
 
 export interface HomepageViewProps {
@@ -52,7 +53,6 @@ interface PickedProduct {
 
 type PickList = 'featuredProductIds' | 'dealProductIds';
 
-const SEARCH_DEBOUNCE_MS = 250;
 const SEARCH_PAGE_SIZE = 10;
 
 function moveItem<T>(list: T[], index: number, direction: -1 | 1): T[] {
@@ -351,27 +351,23 @@ function ProductPicker({
   const [query, setQuery] = useState('');
   const [result, setResult] = useState<SearchResult>({ query: '', items: [], error: null });
   const q = query.trim();
+  const debouncedQ = useDebouncedValue(q, SEARCH_DEBOUNCE_MS);
   const atLimit = selectedIds.length >= MAX_HOMEPAGE_PRODUCTS;
   const inputId = `${list}-search`;
 
-  // Debounced search of active products; a newer query (or unmount) cancels the one in flight.
+  // Search of active products once typing pauses; a newer query (or unmount) cancels the one in flight.
   useEffect(() => {
-    if (!q) return;
+    if (!debouncedQ) return;
     const controller = new AbortController();
-    const timer = window.setTimeout(() => {
-      const params = new URLSearchParams({ q, status: 'active', pageSize: String(SEARCH_PAGE_SIZE) });
-      apiClient<ApiListResponse<AdminProductListItemDTO>>(`/admin/products?${params.toString()}`, { signal: controller.signal })
-        .then(({ data }) => setResult({ query: q, items: data, error: null }))
-        .catch((error: unknown) => {
-          if (controller.signal.aborted) return;
-          setResult({ query: q, items: [], error: errorMessage(error, "We couldn't search products. Please try again.") });
-        });
-    }, SEARCH_DEBOUNCE_MS);
-    return () => {
-      window.clearTimeout(timer);
-      controller.abort();
-    };
-  }, [q]);
+    const params = new URLSearchParams({ q: debouncedQ, status: 'active', pageSize: String(SEARCH_PAGE_SIZE) });
+    apiClient<ApiListResponse<AdminProductListItemDTO>>(`/admin/products?${params.toString()}`, { signal: controller.signal })
+      .then(({ data }) => setResult({ query: debouncedQ, items: data, error: null }))
+      .catch((error: unknown) => {
+        if (controller.signal.aborted) return;
+        setResult({ query: debouncedQ, items: [], error: errorMessage(error, "We couldn't search products. Please try again.") });
+      });
+    return () => controller.abort();
+  }, [debouncedQ]);
 
   const settled = q !== '' && result.query === q;
 

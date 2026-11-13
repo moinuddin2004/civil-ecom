@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ActiveFilterChips, countActiveFilters } from '@/components/shop/active-filter-chips';
 import { Breadcrumbs } from '@/components/shop/breadcrumbs';
-import { FilterPanel } from '@/components/shop/filter-panel';
+import { FilterBar, FilterPanel } from '@/components/shop/filter-panel';
 import { breadcrumbList, JsonLd } from '@/components/shop/json-ld';
 import { Pagination } from '@/components/shop/pagination';
 import { ProductCard } from '@/components/shop/product-card';
@@ -81,7 +81,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
         total={meta.total}
         activeFilterCount={countActiveFilters(query)}
         mobileFilterPanel={<FilterPanel query={query} facets={facets} basePath={basePath} idPrefix="mobile" />}
-        desktopFilterPanel={<FilterPanel query={query} facets={facets} basePath={basePath} idPrefix="desktop" />}
+        desktopFilterBar={<FilterBar query={query} facets={facets} basePath={basePath} idPrefix="desktop" />}
         sortSelect={<SortSelect currentSort={query.sort} />}
         activeChips={<ActiveFilterChips query={query} facets={facets} basePath={basePath} />}
       >

@@ -13,7 +13,7 @@ export async function StorefrontShell({ children }: { children: ReactNode }) {
   const [categories, areas, settings] = await Promise.all([getCategories(), getDeliveryAreas(), getPublicSettings()]);
 
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex min-h-dvh flex-col bg-surface">
       <Header categories={categories} areas={areas} whatsapp={settings.whatsapp} phone={settings.phone} />
       <main className="flex-1">{children}</main>
       <Footer categories={categories} settings={settings} />

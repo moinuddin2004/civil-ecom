@@ -18,7 +18,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { useFieldArray, useForm, useWatch } from 'react-hook-form';
+import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import remarkGfm from 'remark-gfm';
 import { toast } from 'sonner';
 import { AccessDenied } from '@/components/admin/access-denied';
@@ -174,7 +174,7 @@ export function ProductForm({ mode, product, categories, brands }: ProductFormPr
   const title = mode === 'create' ? 'Add product' : product?.name;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 pb-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-col gap-1">
           <h1 className="type-h1">{title}</h1>
@@ -183,7 +183,7 @@ export function ProductForm({ mode, product, categories, brands }: ProductFormPr
         {!canSave && mode === 'edit' && product && can('products.archive') ? <ProductStatusControl product={product} /> : null}
       </div>
 
-      <nav aria-label="Form sections" className="sticky top-0 z-10 -mx-4 flex gap-1 overflow-x-auto border-b border-concrete-150 bg-concrete px-4 py-2 md:-mx-6 md:px-6 lg:-mx-8 lg:px-8">
+      <nav aria-label="Form sections" className="sticky top-[57px] z-10 -mx-4 flex gap-1 overflow-x-auto border-b border-concrete-150 bg-concrete px-4 py-2 md:-mx-6 md:px-6 lg:-mx-8 lg:px-8">
         {SECTIONS.map((section) => (
           <a
             key={section.id}
@@ -209,13 +209,51 @@ export function ProductForm({ mode, product, categories, brands }: ProductFormPr
               <Input id="product-type" size="sm" {...register('type')} />
             </FormField>
             <FormField label="Brand" htmlFor="product-brand" error={formState.errors.brandId?.message} required>
-              <Select id="product-brand" size="sm" placeholder="Choose a brand" {...register('brandId')} options={brands.map((b) => ({ value: b.id, label: b.name }))} />
+              <Controller
+                control={control}
+                name="brandId"
+                render={({ field }) => (
+                  <Select
+                    id="product-brand"
+                    size="sm"
+                    placeholder="Choose a brand"
+                    value={field.value ?? ''}
+                    onValueChange={field.onChange}
+                    options={brands.map((b) => ({ value: b.id, label: b.name }))}
+                  />
+                )}
+              />
             </FormField>
             <FormField label="Category" htmlFor="product-category" error={formState.errors.categoryId?.message} required>
-              <Select id="product-category" size="sm" placeholder="Choose a category" {...register('categoryId')} options={categoryChoices} />
+              <Controller
+                control={control}
+                name="categoryId"
+                render={({ field }) => (
+                  <Select
+                    id="product-category"
+                    size="sm"
+                    placeholder="Choose a category"
+                    value={field.value ?? ''}
+                    onValueChange={field.onChange}
+                    options={categoryChoices}
+                  />
+                )}
+              />
             </FormField>
             <FormField label="Unit" htmlFor="product-unit" error={formState.errors.unit?.message} required>
-              <Select id="product-unit" size="sm" {...register('unit')} options={UNITS.map((u) => ({ value: u, label: UNIT_LABELS[u].one }))} />
+              <Controller
+                control={control}
+                name="unit"
+                render={({ field }) => (
+                  <Select
+                    id="product-unit"
+                    size="sm"
+                    value={field.value}
+                    onValueChange={field.onChange}
+                    options={UNITS.map((u) => ({ value: u, label: UNIT_LABELS[u].one }))}
+                  />
+                )}
+              />
             </FormField>
             <FormField
               label="Status"
@@ -224,7 +262,13 @@ export function ProductForm({ mode, product, categories, brands }: ProductFormPr
               hint={canChangeStatus ? 'Active products need an active brand and category.' : "You don't have permission to change the status."}
               required
             >
-              <Select id="product-status" size="sm" disabled={!canChangeStatus} {...register('status')} options={statusOptions} />
+              <Controller
+                control={control}
+                name="status"
+                render={({ field }) => (
+                  <Select id="product-status" size="sm" disabled={!canChangeStatus} value={field.value} onValueChange={field.onChange} options={statusOptions} />
+                )}
+              />
             </FormField>
           </div>
         </section>
@@ -308,7 +352,7 @@ export function ProductForm({ mode, product, categories, brands }: ProductFormPr
         </section>
       </fieldset>
 
-      <div className="sticky bottom-0 -mx-4 flex flex-wrap items-center justify-end gap-3 border-t border-concrete-150 bg-surface px-4 py-3 shadow-lifted md:-mx-6 md:px-6 lg:-mx-8 lg:px-8">
+      <div className="sticky bottom-0 z-10 -mx-4 -mb-6 flex flex-wrap items-center justify-end gap-3 border-t border-concrete-150 bg-surface px-4 py-3 shadow-lifted md:-mx-6 md:px-6 lg:-mx-8 lg:px-8">
         <FormError message={formError} className="mr-auto" />
         <Button type="button" variant="secondary" onClick={() => router.push('/admin/products')}>
           {canSave ? 'Cancel' : 'Back to products'}

@@ -7,7 +7,7 @@ import { routes } from '@/lib/routes';
 import { cn } from '@/lib/utils';
 import { Price } from './price';
 import { ProductImage } from './product-image';
-import { cardStockLevel, DiscountBadge, StockBadge } from './status-badges';
+import { cardStockLevel, StockBadge } from './status-badges';
 import { StepsIcon } from './steps-icon';
 import { iconProps } from './styles';
 
@@ -16,6 +16,9 @@ export const PRODUCT_CARD_IMAGE_SIZES = '(min-width: 1024px) 260px, (min-width: 
 
 /** Card action buttons: h 44, radius 12 (v2 §1.12 2g). */
 const ACTION_CLASS = 'h-11 w-full rounded-lg px-3 text-base/5';
+
+/** Flat "7% off" tag on the image (HomeRun-style): small amber label, no pill. */
+const OFF_TAG_CLASS = 'absolute top-0 left-0 rounded-br-lg rounded-tl-xl bg-amber px-2 py-1 text-xs/4 font-semibold text-ink tabular-nums';
 
 export interface ProductCardProps {
   product: ProductCardData;
@@ -77,8 +80,7 @@ export function ProductCard({
         <span className="hidden lg:inline">Add to cart</span>
       </>
     );
-    // v2: the card button keeps only the inset bottom edge of the primary shadow.
-    const addClass = cn(ACTION_CLASS, 'shadow-[inset_0_-2px_0_rgb(0_0_0/0.1)]');
+    const addClass = ACTION_CLASS;
     action = onAdd ? (
       <Button
         className={addClass}
@@ -98,23 +100,16 @@ export function ProductCard({
   }
 
   return (
-    <article
-      className={cn(
-        'flex h-full w-full min-w-0 flex-col overflow-hidden rounded-xl border border-concrete-150 bg-surface',
-        // Resting shadow is only the first layer of shadow-card (v2 §1.12).
-        'shadow-[0_1px_2px_rgb(30_42_50/0.05)] transition-[transform,box-shadow] duration-150 ease-out',
-        'hover:-translate-y-[3px] hover:shadow-card-hover',
-        className,
-      )}
-    >
-      <div className="relative aspect-square p-3">
+    <article className={cn('group flex h-full w-full min-w-0 flex-col bg-surface', className)}>
+      <div className="relative aspect-square">
         {/* The name below is the accessible link; this one is for pointer users only. */}
         <Link
           href={href}
           tabIndex={-1}
           aria-hidden="true"
           className={cn(
-            'relative flex size-full items-center justify-center overflow-hidden rounded-lg bg-concrete-50',
+            'relative flex size-full items-center justify-center overflow-hidden rounded-xl bg-concrete-50',
+            'transition-colors duration-150 group-hover:bg-concrete-100',
             outOfStock && 'opacity-60',
           )}
         >
@@ -127,10 +122,11 @@ export function ProductCard({
             placeholderClassName="lg:size-[88px]"
           />
         </Link>
-        <StockBadge level={stock} appearance="overlay" className="absolute top-[18px] left-[18px]" />
+        {savePercent > 0 ? <span className={OFF_TAG_CLASS}>{savePercent}% off</span> : null}
+        <StockBadge level={stock} appearance="overlay" className="absolute top-2 right-2" />
       </div>
 
-      <div className="flex flex-1 flex-col gap-1 px-3 pb-3">
+      <div className="flex flex-1 flex-col gap-1 pt-3">
         <p className="text-sm text-cement">{product.brandName}</p>
         {/* Clamp the link, not the heading: an ancestor's overflow would clip the focus ring. */}
         <h3 className="min-h-11 text-base/[22px] text-pretty text-ink">
@@ -145,12 +141,11 @@ export function ProductCard({
           className="mt-0.5"
         />
         {savePercent > 0 ? (
-          <p className="flex flex-wrap items-center gap-2">
+          <p>
             <s className="text-sm text-cement tabular-nums">
               <span className="sr-only">MRP </span>
               {formatPKR(product.mrpOfMin)}
             </s>
-            <DiscountBadge percent={savePercent} />
           </p>
         ) : null}
         {product.lowestTierPrice !== null ? (

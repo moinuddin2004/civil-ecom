@@ -1,4 +1,4 @@
-import type { CartProductData } from '@aricon/shared';
+import { escapeRegExp, type CartProductData } from '@aricon/shared';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Types, type ClientSession, type Model } from 'mongoose';
@@ -76,6 +76,17 @@ export class CartProductsRepository {
     return this.model
       .findOne({ 'variants._id': new Types.ObjectId(variantId) }, PRICING_FIELDS)
       .lean<PricingProduct>()
+      .exec();
+  }
+
+  /** Active products whose name or a variant SKU contains `q`, for staff building an order (SPEC §6.6a). */
+  searchActive(q: string, limit: number): Promise<PricingProduct[]> {
+    const pattern = new RegExp(escapeRegExp(q), 'i');
+    return this.model
+      .find({ status: 'active', $or: [{ name: pattern }, { 'variants.sku': pattern }] }, PRICING_FIELDS)
+      .sort({ name: 1 })
+      .limit(limit)
+      .lean<PricingProduct[]>()
       .exec();
   }
 }

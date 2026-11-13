@@ -7,7 +7,7 @@ import { useForm, useWatch } from 'react-hook-form';
 import type { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { DialogFooter } from '@/components/ui/dialog';
+import { SheetFooter } from '@/components/ui/sheet';
 import { FormError } from '@/components/ui/form-error';
 import { FormField } from '@/components/ui/form-field';
 import { Input } from '@/components/ui/input';
@@ -66,14 +66,14 @@ export function RiderForm({ rider, onSubmit, onCancel }: RiderFormProps) {
         Active
       </label>
       <FormError message={formError} />
-      <DialogFooter>
+      <SheetFooter>
         <Button type="button" variant="secondary" onClick={onCancel}>
           Cancel
         </Button>
         <Button type="submit" loading={isSubmitting}>
           {rider ? 'Save changes' : 'Add rider'}
         </Button>
-      </DialogFooter>
+      </SheetFooter>
     </form>
   );
 }

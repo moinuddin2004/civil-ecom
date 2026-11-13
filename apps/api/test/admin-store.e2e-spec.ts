@@ -178,7 +178,16 @@ describe('Admin store management', () => {
       await send('post', `orders/${second.order.id}/status`, { to: 'CANCELLED', reason: 'Testing reports' }).expect(200);
 
       const sales = (await admin.get('/api/admin/reports/sales').expect(200)).body.data;
-      expect(sales.totals).toEqual({ orders: 1, revenue: first.order.total, averageOrder: first.order.total });
+      expect(sales.totals).toEqual({
+        orders: 1,
+        revenue: first.order.total,
+        averageOrder: first.order.total,
+        subtotal: first.order.subtotal,
+        discounts: 0,
+        deliveryFees: first.order.deliveryFee,
+        collected: 0,
+        pending: first.order.total,
+      });
       expect(sales.series).toHaveLength(30);
       expect(sales.series.at(-1)).toMatchObject({ orders: 1, revenue: first.order.total });
 
@@ -187,7 +196,7 @@ describe('Admin store management', () => {
 
       const cod = (await admin.get('/api/admin/reports/cod').expect(200)).body.data;
       expect(cod.totals).toMatchObject({ collected: 0, pending: first.order.total, pendingOrders: 1 });
-      expect(cod.byRider).toEqual([{ riderId: null, riderName: 'No rider yet', collected: 0, pending: first.order.total }]);
+      expect(cod.byRider).toEqual([{ riderId: null, riderName: 'No rider yet', collected: 0, pending: first.order.total, expected: 0, short: 0, extra: 0 }]);
 
       // An explicit range is accepted (regression: the date format check once rejected every date).
       const today = karachiDateKey(new Date());

@@ -81,6 +81,7 @@ export class OrderRiderDto {
 export class CustomerOrderDto implements CustomerOrderDTO {
   @ApiProperty() id!: string;
   @ApiProperty({ example: 'ARC-2026-000123' }) orderNumber!: string;
+  @ApiProperty({ type: String, nullable: true, example: '482915', description: '6-digit code to track the order without signing in.' }) trackingCode!: string | null;
   @ApiProperty({ format: 'date-time' }) createdAt!: string;
   @ApiProperty({ enum: ORDER_STATUSES }) status!: OrderStatus;
   @ApiProperty({ enum: PAYMENT_METHODS }) paymentMethod!: PaymentMethod;
@@ -88,6 +89,7 @@ export class CustomerOrderDto implements CustomerOrderDTO {
   @ApiProperty({ type: [OrderItemDto] }) items!: OrderItemDto[];
   @ApiProperty() subtotal!: number;
   @ApiProperty() deliveryFee!: number;
+  @ApiProperty() discount!: number;
   @ApiProperty() total!: number;
   @ApiProperty({ type: ShippingAddressDto }) shippingAddress!: ShippingAddressDto;
   @ApiProperty({ type: [ReceiptDto] }) receipts!: ReceiptDto[];
@@ -102,6 +104,7 @@ export class CustomerOrderDto implements CustomerOrderDTO {
 export class CustomerOrderListItemDto implements CustomerOrderListItemDTO {
   @ApiProperty() id!: string;
   @ApiProperty() orderNumber!: string;
+  @ApiProperty({ type: String, nullable: true, example: '482915' }) trackingCode!: string | null;
   @ApiProperty({ format: 'date-time' }) createdAt!: string;
   @ApiProperty({ description: 'Units across all lines.' }) itemCount!: number;
   @ApiProperty() total!: number;

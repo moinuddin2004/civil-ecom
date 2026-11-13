@@ -139,7 +139,11 @@ export class ReportsService {
 
   async sales(range: ReportRange, groupBy: 'day' | 'month'): Promise<SalesReportDTO> {
     const { fromKey, toKey, from, to } = resolveRange(range);
-    const [totals, points] = await Promise.all([this.reports.salesTotals(from, to), this.reports.salesSeries(from, to, groupBy)]);
+    const [totals, points, payments] = await Promise.all([
+      this.reports.financeTotals(from, to),
+      this.reports.financeSeries(from, to, groupBy),
+      this.reports.paymentBreakdown(from, to),
+    ]);
     return {
       from: fromKey,
       to: toKey,
@@ -149,8 +153,20 @@ export class ReportsService {
         revenue: totals.revenue,
         // Whole rupees, like every amount in the app.
         averageOrder: totals.orders > 0 ? Math.round(totals.revenue / totals.orders) : 0,
+        subtotal: totals.subtotal,
+        discounts: totals.discounts,
+        deliveryFees: totals.deliveryFees,
+        collected: totals.collected,
+        pending: totals.pending,
       },
-      series: fillSeries(periodKeys(fromKey, toKey, groupBy), points, (period) => ({ period, orders: 0, revenue: 0 })),
+      series: fillSeries(periodKeys(fromKey, toKey, groupBy), points, (period) => ({ period, orders: 0, revenue: 0, collected: 0 })),
+      byPayment: payments.map((row) => ({
+        method: row.method as SalesReportDTO['byPayment'][number]['method'],
+        orders: row.orders,
+        revenue: row.revenue,
+        collected: row.collected,
+        pending: row.pending,
+      })),
     };
   }
 
@@ -165,14 +181,35 @@ export class ReportsService {
     const { fromKey, toKey, from, to } = resolveRange(range);
     const rows = await this.reports.codOrders(from, to);
 
-    const totals = { collected: 0, pending: 0, collectedOrders: 0, pendingOrders: 0 };
+    const totals = { collected: 0, pending: 0, collectedOrders: 0, pendingOrders: 0, expected: 0, short: 0, extra: 0 };
     const riders = new Map<string, CodReportDTO['byRider'][number]>();
-    const days = new Map<string, { collected: number; pending: number }>();
+    const days = new Map<string, { collected: number; pending: number; expected: number; short: number; extra: number }>();
+    const differences: CodReportDTO['differences'] = [];
     for (const row of rows) {
+      // Only orders whose cash is recorded have an "expected" and a difference.
+      const expected = row.isCollected ? row.total : 0;
+      const difference = row.isCollected ? row.collected - row.total : 0;
+      const short = difference < 0 ? -difference : 0;
+      const extra = difference > 0 ? difference : 0;
       totals.collected += row.collected;
       totals.pending += row.pending;
+      totals.expected += expected;
+      totals.short += short;
+      totals.extra += extra;
       if (row.isCollected) totals.collectedOrders += 1;
       else totals.pendingOrders += 1;
+      if (difference !== 0) {
+        differences.push({
+          orderId: String(row.orderId),
+          orderNumber: row.orderNumber,
+          riderName: row.riderName,
+          date: row.date,
+          total: row.total,
+          collected: row.collected,
+          difference,
+          note: row.note,
+        });
+      }
 
       const riderKey = row.riderId ? String(row.riderId) : 'none';
       const rider = riders.get(riderKey) ?? {
@@ -180,14 +217,23 @@ export class ReportsService {
         riderName: row.riderName ?? 'No rider yet',
         collected: 0,
         pending: 0,
+        expected: 0,
+        short: 0,
+        extra: 0,
       };
       rider.collected += row.collected;
       rider.pending += row.pending;
+      rider.expected += expected;
+      rider.short += short;
+      rider.extra += extra;
       riders.set(riderKey, rider);
 
-      const day = days.get(row.date) ?? { collected: 0, pending: 0 };
+      const day = days.get(row.date) ?? { collected: 0, pending: 0, expected: 0, short: 0, extra: 0 };
       day.collected += row.collected;
       day.pending += row.pending;
+      day.expected += expected;
+      day.short += short;
+      day.extra += extra;
       days.set(row.date, day);
     }
 
@@ -196,7 +242,15 @@ export class ReportsService {
       to: toKey,
       totals,
       byRider: [...riders.values()].sort((a, b) => b.collected + b.pending - (a.collected + a.pending)),
-      byDay: periodKeys(fromKey, toKey, 'day').map((date) => ({ date, collected: days.get(date)?.collected ?? 0, pending: days.get(date)?.pending ?? 0 })),
+      byDay: periodKeys(fromKey, toKey, 'day').map((date) => ({
+        date,
+        collected: days.get(date)?.collected ?? 0,
+        pending: days.get(date)?.pending ?? 0,
+        expected: days.get(date)?.expected ?? 0,
+        short: days.get(date)?.short ?? 0,
+        extra: days.get(date)?.extra ?? 0,
+      })),
+      differences: differences.sort((a, b) => a.difference - b.difference).slice(0, 100),
     };
   }
 }

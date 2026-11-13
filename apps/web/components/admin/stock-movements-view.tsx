@@ -13,7 +13,8 @@ import Link from 'next/link';
 import { AccessDenied } from '@/components/admin/access-denied';
 import { AdminPagination } from '@/components/admin/admin-pagination';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { AutoFilterForm } from '@/components/admin/auto-filter-form';
+import { LiveSearchInput } from '@/components/admin/live-search-input';
 import { Select } from '@/components/ui/select';
 import { useAdminSession } from '@/lib/admin/session';
 import { cn } from '@/lib/utils';
@@ -43,12 +44,12 @@ export function StockMovementsView({ movements, meta, filters }: StockMovementsV
     <div className="flex flex-col gap-4">
       <h1 className="type-h1">Stock history</h1>
 
-      <form method="get" action={BASE_PATH} className="flex flex-wrap items-end gap-3 rounded-xl border border-concrete-150 bg-surface p-3">
+      <AutoFilterForm action={BASE_PATH} className="flex flex-wrap items-end gap-3 rounded-xl border border-concrete-150 bg-surface p-3">
         <div className="flex min-w-48 flex-1 flex-col gap-1.5">
           <label htmlFor="stock-sku" className="text-sm font-medium text-ink">
             SKU
           </label>
-          <Input id="stock-sku" name="sku" size="sm" placeholder="Search by SKU" defaultValue={filters.sku ?? ''} />
+          <LiveSearchInput id="stock-sku" name="sku" size="sm" placeholder="Search by SKU" defaultValue={filters.sku ?? ''} />
         </div>
         <div className="flex min-w-48 flex-col gap-1.5">
           <label htmlFor="stock-reason" className="text-sm font-medium text-ink">
@@ -63,15 +64,12 @@ export function StockMovementsView({ movements, meta, filters }: StockMovementsV
             options={STOCK_MOVEMENT_REASONS.map((reason) => ({ value: reason, label: STOCK_MOVEMENT_REASON_LABELS[reason] }))}
           />
         </div>
-        <Button type="submit" variant="secondary" size="sm">
-          Filter
-        </Button>
         {filters.sku || filters.reason ? (
           <Button type="button" variant="tertiary" size="sm" asChild>
             <Link href={BASE_PATH}>Clear</Link>
           </Button>
         ) : null}
-      </form>
+      </AutoFilterForm>
 
       <div className="overflow-x-auto rounded-xl border border-concrete-150 bg-surface">
         <table className="w-full min-w-[920px] text-sm">

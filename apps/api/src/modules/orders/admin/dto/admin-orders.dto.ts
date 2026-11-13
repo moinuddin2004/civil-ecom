@@ -1,5 +1,7 @@
 import {
   ACTOR_TYPES,
+  CART_MAX_LINES,
+  CUSTOMER_NOTE_MAX,
   INTERNAL_NOTE_MAX,
   ORDER_STATUSES,
   PAYMENT_METHODS,
@@ -7,6 +9,7 @@ import {
   type ActorType,
   type AdminOrderDTO,
   type AdminOrderListItemDTO,
+  type AdminOrderProductOptionDTO,
   type AdminReceiptDTO,
   type AdminStatusHistoryEntryDTO,
   type FileLinkDTO,
@@ -15,8 +18,8 @@ import {
   type PaymentStatus,
 } from '@aricon/shared';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
-import { IsIn, IsOptional, IsString, Matches, MaxLength } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsIn, IsInt, IsOptional, IsString, Matches, Max, MaxLength, Min, ValidateNested } from 'class-validator';
 import { PaginationQueryDto } from '../../../../common/http/pagination.dto.js';
 import {
   IsMoney,
@@ -26,6 +29,8 @@ import {
   IsOptionalText,
   IsRequiredText,
 } from '../../../../common/validation/validators.js';
+import { CartItemDto } from '../../../cart/dto/cart.request.dto.js';
+import { PricedCartDto } from '../../../cart/dto/cart.response.dto.js';
 import { OrderItemDto, ReceiptDto, ShippingAddressDto } from '../../dto/order.response.dto.js';
 
 /* Admin order requests and responses (SPEC §7.3 "Orders"); mirror the shared order schemas. */
@@ -86,7 +91,9 @@ export class AdminOrderListItemDto implements AdminOrderListItemDTO {
   @ApiProperty({ enum: PAYMENT_METHODS }) paymentMethod!: PaymentMethod;
   @ApiProperty({ enum: PAYMENT_STATUSES }) paymentStatus!: PaymentStatus;
   @ApiProperty({ enum: ORDER_STATUSES }) status!: OrderStatus;
+  @ApiProperty({ type: String, nullable: true }) riderId!: string | null;
   @ApiProperty({ type: String, nullable: true }) riderName!: string | null;
+  @ApiProperty({ type: Number, nullable: true }) codCollectedAmount!: number | null;
 }
 
 export class OrderStatusChangeDto {
@@ -175,11 +182,13 @@ export class CodCollectedResponseDto {
   @ApiProperty() amount!: number;
   @ApiProperty({ format: 'date-time' }) at!: string;
   @ApiProperty({ type: String, nullable: true }) byName!: string | null;
+  @ApiProperty({ type: String, nullable: true }) note!: string | null;
 }
 
 export class AdminOrderDto implements AdminOrderDTO {
   @ApiProperty() id!: string;
   @ApiProperty() orderNumber!: string;
+  @ApiProperty({ type: String, nullable: true }) trackingCode!: string | null;
   @ApiProperty({ format: 'date-time' }) createdAt!: string;
   @ApiProperty({ format: 'date-time' }) updatedAt!: string;
   @ApiProperty() userId!: string;
@@ -189,6 +198,8 @@ export class AdminOrderDto implements AdminOrderDTO {
   @ApiProperty({ type: [OrderItemDto] }) items!: OrderItemDto[];
   @ApiProperty() subtotal!: number;
   @ApiProperty() deliveryFee!: number;
+  @ApiProperty() discount!: number;
+  @ApiProperty({ type: String, nullable: true }) discountReason!: string | null;
   @ApiProperty() total!: number;
   @ApiProperty({ enum: PAYMENT_METHODS }) paymentMethod!: PaymentMethod;
   @ApiProperty({ enum: PAYMENT_STATUSES }) paymentStatus!: PaymentStatus;
@@ -201,4 +212,73 @@ export class AdminOrderDto implements AdminOrderDTO {
   @ApiProperty({ type: String, nullable: true }) customerNote!: string | null;
   @ApiProperty({ type: String, nullable: true }) internalNote!: string | null;
   @ApiProperty({ type: String, nullable: true }) cancelReason!: string | null;
+}
+
+/** `GET /api/admin/orders/product-options` */
+export class ProductOptionsQueryDto {
+  @ApiPropertyOptional({ example: 'ppc', description: 'Part of a product name or SKU (at least 2 characters).' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(80)
+  q?: string;
+}
+
+export class AdminOrderProductOptionDto implements AdminOrderProductOptionDTO {
+  @ApiProperty() productId!: string;
+  @ApiProperty() variantId!: string;
+  @ApiProperty() productName!: string;
+  @ApiProperty() variantLabel!: string;
+  @ApiProperty() sku!: string;
+  @ApiProperty({ description: 'Single-unit price; the order is re-priced with bulk tiers.' }) price!: number;
+  @ApiProperty() stock!: number;
+}
+
+/** `POST /api/admin/orders/quote`; mirrors `adminOrderQuoteSchema`. */
+export class AdminOrderQuoteDto {
+  @ApiProperty({ description: 'An active customer.' })
+  @IsObjectId()
+  userId!: string;
+
+  @ApiProperty({ description: "One of the customer's saved addresses; its area sets the delivery fee." })
+  @IsObjectId()
+  addressId!: string;
+
+  @ApiProperty({ type: [CartItemDto], minItems: 1, maxItems: CART_MAX_LINES })
+  @IsArray({ message: 'Send the order lines as a list.' })
+  @ArrayMinSize(1, { message: 'Add at least one product.' })
+  @ArrayMaxSize(CART_MAX_LINES, { message: `An order can have at most ${CART_MAX_LINES} lines.` })
+  @ValidateNested({ each: true })
+  @Type(() => CartItemDto)
+  items!: CartItemDto[];
+
+  @ApiPropertyOptional({ example: 300, description: 'Rupees off the subtotal. Needs the orders.discount permission.' })
+  @IsOptional()
+  @IsMoney()
+  discountAmount?: number;
+}
+
+/** The priced order with the staff discount taken off: `total = subtotal - discount + delivery`. */
+export class AdminOrderQuoteResultDto extends PricedCartDto {
+  @ApiProperty({ description: 'The discount applied (0 when none).' }) discount!: number;
+}
+
+/** `POST /api/admin/orders` (with `Idempotency-Key`); mirrors `adminCreateOrderSchema`. */
+export class AdminCreateOrderDto extends AdminOrderQuoteDto {
+  @ApiProperty({ enum: PAYMENT_METHODS })
+  @IsIn(PAYMENT_METHODS, { message: 'Choose cash on delivery or bank transfer.' })
+  paymentMethod!: PaymentMethod;
+
+  @ApiPropertyOptional({ maxLength: CUSTOMER_NOTE_MAX })
+  @IsOptionalText(CUSTOMER_NOTE_MAX)
+  customerNote?: string;
+
+  @ApiPropertyOptional({ maxLength: 300, description: 'Required when discountAmount is more than 0.' })
+  @IsOptionalText(300)
+  discountReason?: string;
+
+  @ApiProperty({ example: 20_145, description: 'The total shown in the form; a different server total gives 409 PRICE_CHANGED.' })
+  @IsInt({ message: 'Use whole rupees.' })
+  @Min(0, { message: "Amount can't be negative." })
+  @Max(1_000_000_000, { message: 'Amount is too large.' })
+  expectedTotal!: number;
 }

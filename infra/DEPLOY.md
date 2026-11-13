@@ -156,6 +156,8 @@ Generate each secret separately: `openssl rand -base64 48`.
 `/srv/aricon/shared/.env.api` — every variable is described in `apps/api/.env.example`; the API
 refuses to start in production with example secrets, local storage, no SMTP or http `APP_URL`.
 
+> The API also reads `apps/api/.env.production` (production values) and `apps/api/.env` (common values) from its own folder, so the same values can live in the repo. A real environment variable, such as the ones PM2 loads from `/srv/aricon/shared/.env.api`, always wins over those files.
+
 ```dotenv
 NODE_ENV=production
 HOST=127.0.0.1

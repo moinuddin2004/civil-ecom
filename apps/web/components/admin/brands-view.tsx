@@ -9,7 +9,7 @@ import { AccessDenied } from '@/components/admin/access-denied';
 import { BrandForm } from '@/components/admin/brand-form';
 import { Pill } from '@/components/shop/status-badges';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Sheet, SheetBody, SheetCloseButton, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { apiClient } from '@/lib/api-client';
 import { useAdminSession } from '@/lib/admin/session';
 import type { BrandFormValues } from '@/lib/admin/category-brand-form-schemas';
@@ -105,16 +105,19 @@ export function BrandsView({ brands }: BrandsViewProps) {
       </div>
 
       {canManage ? (
-        <Dialog open={editing !== undefined} onOpenChange={(open) => !open && setEditing(undefined)}>
-          <DialogContent size="md" mobile="sheet" aria-describedby={undefined}>
-            <DialogHeader>
-              <DialogTitle>{editing ? `Edit ${editing.name}` : 'Add brand'}</DialogTitle>
-            </DialogHeader>
-            {editing !== undefined ? (
-              <BrandForm key={editing?.id ?? 'new'} brand={editing ?? undefined} onSubmit={handleSave} onCancel={() => setEditing(undefined)} />
-            ) : null}
-          </DialogContent>
-        </Dialog>
+        <Sheet open={editing !== undefined} onOpenChange={(open) => !open && setEditing(undefined)}>
+          <SheetContent size="md" aria-describedby={undefined}>
+            <SheetHeader>
+              <SheetTitle>{editing ? `Edit ${editing.name}` : 'Add brand'}</SheetTitle>
+              <SheetCloseButton />
+            </SheetHeader>
+            <SheetBody>
+              {editing !== undefined ? (
+                <BrandForm key={editing?.id ?? 'new'} brand={editing ?? undefined} onSubmit={handleSave} onCancel={() => setEditing(undefined)} />
+              ) : null}
+            </SheetBody>
+          </SheetContent>
+        </Sheet>
       ) : null}
     </div>
   );

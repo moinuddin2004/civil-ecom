@@ -3,7 +3,7 @@
 import { addressSchema, DEFAULT_CITY, type AddressData, type AddressDTO, type AddressInput, type DeliveryAreaDTO } from '@aricon/shared';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { DialogFooter } from '@/components/ui/dialog';
@@ -78,15 +78,24 @@ export function AddressForm({ areas, defaultValues, onSubmit, onCancel }: Addres
       </FormField>
 
       <FormField label="Delivery area" htmlFor="address-area" error={errors.areaId?.message} required>
-        <Select
-          id="address-area"
-          placeholder="Choose a delivery area"
-          {...form.register('areaId')}
-          options={areas.map((area) => ({
-            value: area.id,
-            label: area.isServiceable ? area.name : `${area.name} — not delivering yet`,
-            disabled: !area.isServiceable,
-          }))}
+        <Controller
+          control={form.control}
+          name="areaId"
+          render={({ field }) => (
+            <Select
+              id="address-area"
+              placeholder="Choose a delivery area"
+              value={field.value ?? ''}
+              onValueChange={field.onChange}
+              onBlur={field.onBlur}
+              aria-invalid={Boolean(errors.areaId)}
+              options={areas.map((area) => ({
+                value: area.id,
+                label: area.isServiceable ? area.name : `${area.name} — not delivering yet`,
+                disabled: !area.isServiceable,
+              }))}
+            />
+          )}
         />
       </FormField>
 

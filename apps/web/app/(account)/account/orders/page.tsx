@@ -2,6 +2,8 @@ import { formatDateTime, formatNumber, formatPKR } from '@aricon/shared';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { CopyButton } from '@/components/shop/copy-button';
+import { TrackingCode } from '@/components/shop/tracking-code';
 import { OrderStatusBadge, PaymentStatusBadge } from '@/components/shop/status-badges';
 import { CARD_CLASS } from '@/components/shop/styles';
 import { getCustomerOrders } from '@/lib/api-server';
@@ -40,15 +42,21 @@ export default async function AccountOrdersPage({ searchParams }: AccountOrdersP
         <ul className="flex flex-col gap-3">
           {orders.map((order) => (
             <li key={order.id}>
-              <Link
-                href={routes.accountOrder(order.orderNumber)}
+              <div
                 className={cn(
                   CARD_CLASS,
-                  'flex flex-col gap-3 p-4 transition-shadow hover:shadow-card-hover sm:flex-row sm:items-center sm:justify-between',
+                  'relative flex flex-col gap-3 p-4 transition-shadow hover:shadow-card-hover sm:flex-row sm:items-center sm:justify-between',
                 )}
               >
                 <div className="flex flex-col gap-0.5">
-                  <span className="font-semibold text-ink">{order.orderNumber}</span>
+                  <span className="flex items-center gap-1">
+                    {/* The link covers the whole card; the copy button sits above it. */}
+                    <Link href={routes.accountOrder(order.orderNumber)} className="font-semibold text-ink after:absolute after:inset-0 after:content-['']">
+                      {order.orderNumber}
+                    </Link>
+                    <CopyButton value={order.orderNumber} label={`Copy order number ${order.orderNumber}`} className="relative z-10" />
+                  </span>
+                  <TrackingCode code={order.trackingCode} variant="inline" />
                   <span className="text-sm text-cement">
                     {formatDateTime(order.createdAt)} · {formatNumber(order.itemCount)} item
                     {order.itemCount === 1 ? '' : 's'}
@@ -59,7 +67,7 @@ export default async function AccountOrdersPage({ searchParams }: AccountOrdersP
                   <OrderStatusBadge status={order.status} />
                   <span className="type-price ml-1">{formatPKR(order.total)}</span>
                 </div>
-              </Link>
+              </div>
             </li>
           ))}
         </ul>

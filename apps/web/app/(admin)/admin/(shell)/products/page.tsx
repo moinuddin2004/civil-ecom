@@ -1,3 +1,4 @@
+import { parsePageSize } from '@/lib/admin/page-size';
 import { PRODUCT_STATUSES, type ProductStatus } from '@aricon/shared';
 import type { Metadata } from 'next';
 import { AccessDenied } from '@/components/admin/access-denied';
@@ -35,11 +36,12 @@ export default async function AdminProductsPage({ searchParams }: ProductsPagePr
   const status = isProductStatus(statusRaw) ? statusRaw : undefined;
   const lowStock = first(sp.lowStock) === '1';
   const page = Math.max(1, Number(first(sp.page)) || 1);
+  const pageSize = parsePageSize(first(sp.pageSize));
 
   const [categories, brands] = await Promise.all([getAdminCategories(), getAdminBrands()]);
   const categoryId = categories.find((category) => category.slug === categorySlug)?.id;
   const brandId = brands.find((brand) => brand.slug === brandSlug)?.id;
-  const { data: products, meta } = await getAdminProducts({ q, categoryId, brandId, status, lowStock, page });
+  const { data: products, meta } = await getAdminProducts({ q, categoryId, brandId, status, lowStock, page, pageSize });
 
   const filters: ProductsListFilters = {
     q: q ?? '',

@@ -1,3 +1,4 @@
+import { parsePageSize } from '@/lib/admin/page-size';
 import { AUDIT_ACTIONS, AUDIT_ENTITIES, type AuditAction, type AuditEntity } from '@aricon/shared';
 import type { Metadata } from 'next';
 import { AccessDenied } from '@/components/admin/access-denied';
@@ -40,9 +41,10 @@ export default async function AdminAuditLogsPage({ searchParams }: AuditLogPageP
   const from = fromParam && DATE_KEY.test(fromParam) ? fromParam : undefined;
   const to = toParam && DATE_KEY.test(toParam) ? toParam : undefined;
   const page = Math.max(1, Number(firstParam(sp.page)) || 1);
+  const pageSize = parsePageSize(firstParam(sp.pageSize));
 
   const [logs, staff] = await Promise.all([
-    getAuditLogs({ actorId, entity, action, from, to, page }),
+    getAuditLogs({ actorId, entity, action, from, to, page, pageSize }),
     getStaffList(),
   ]);
 

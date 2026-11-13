@@ -76,7 +76,7 @@ export function CategoryMenu({ categories, trigger }: CategoryMenuProps) {
 /** Mobile hamburger trigger button. */
 export function CategoryMenuButton() {
   return (
-    <button type="button" aria-label="All categories" className="flex size-11 items-center justify-center text-white">
+    <button type="button" aria-label="All categories" className="flex size-11 items-center justify-center text-ink">
       <Menu aria-hidden strokeWidth={1.75} className="size-6" />
     </button>
   );

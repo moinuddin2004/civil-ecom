@@ -16,7 +16,7 @@ import { useFieldArray, useWatch, type UseFormReturn } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Dialog, DialogBody, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Sheet, SheetBody, SheetCloseButton, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { FormError } from '@/components/ui/form-error';
 import { FormField } from '@/components/ui/form-field';
 import { Input } from '@/components/ui/input';
@@ -390,12 +390,13 @@ function StockAdjustDialog({ productId, variantId, variantLabel, currentStock, o
   }
 
   return (
-    <Dialog open onOpenChange={(open) => !open && !saving && onClose()}>
-      <DialogContent size="sm" aria-describedby={undefined}>
-        <DialogHeader>
-          <DialogTitle>Adjust stock · {variantLabel}</DialogTitle>
-        </DialogHeader>
-        <DialogBody>
+    <Sheet open onOpenChange={(open) => !open && !saving && onClose()}>
+      <SheetContent size="sm" aria-describedby={undefined}>
+        <SheetHeader>
+          <SheetTitle>Adjust stock · {variantLabel}</SheetTitle>
+          <SheetCloseButton />
+        </SheetHeader>
+        <SheetBody>
           <p className="text-sm text-ink-700">
             Current stock: <span className="font-semibold text-ink tabular-nums">{currentStock}</span>
           </p>
@@ -420,16 +421,16 @@ function StockAdjustDialog({ productId, variantId, variantLabel, currentStock, o
             </p>
           )}
           <FormError message={error} />
-        </DialogBody>
-        <DialogFooter>
-          <Button type="button" variant="secondary" disabled={saving} onClick={onClose}>
-            Cancel
-          </Button>
-          <Button type="button" loading={saving} disabled={!valid} onClick={() => void save()}>
-            Save adjustment
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          <SheetFooter>
+            <Button type="button" variant="secondary" disabled={saving} onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="button" loading={saving} disabled={!valid} onClick={() => void save()}>
+              Save adjustment
+            </Button>
+          </SheetFooter>
+        </SheetBody>
+      </SheetContent>
+    </Sheet>
   );
 }

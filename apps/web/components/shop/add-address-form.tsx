@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { addressSchema, DEFAULT_CITY, type AddressDTO, type AddressInput, type ApiResponse, type DeliveryAreaDTO } from '@aricon/shared';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { FormError } from '@/components/ui/form-error';
 import { FormField } from '@/components/ui/form-field';
@@ -41,6 +41,7 @@ export function AddAddressForm({ areas, onAdd, onCancel }: AddAddressFormProps) 
   const [formError, setFormError] = useState<string | null>(null);
   const {
     register,
+    control,
     handleSubmit,
     reset,
     setError,
@@ -84,16 +85,24 @@ export function AddAddressForm({ areas, onAdd, onCancel }: AddAddressFormProps) 
         <Input id="new-landmark" {...register('landmark')} />
       </FormField>
       <FormField label="Delivery area" htmlFor="new-area" error={errors.areaId?.message} required>
-        <Select
-          id="new-area"
-          placeholder="Choose an area"
-          aria-invalid={Boolean(errors.areaId)}
-          {...register('areaId')}
-          options={areas.map((area) => ({
-            value: area.id,
-            label: area.isServiceable ? area.name : `${area.name} (not delivering yet)`,
-            disabled: !area.isServiceable,
-          }))}
+        <Controller
+          control={control}
+          name="areaId"
+          render={({ field }) => (
+            <Select
+              id="new-area"
+              placeholder="Choose an area"
+              aria-invalid={Boolean(errors.areaId)}
+              value={field.value ?? ''}
+              onValueChange={field.onChange}
+              onBlur={field.onBlur}
+              options={areas.map((area) => ({
+                value: area.id,
+                label: area.isServiceable ? area.name : `${area.name} (not delivering yet)`,
+                disabled: !area.isServiceable,
+              }))}
+            />
+          )}
         />
       </FormField>
       <FormField label="City" htmlFor="new-city" error={errors.city?.message} required>

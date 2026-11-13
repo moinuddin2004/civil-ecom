@@ -8,13 +8,13 @@ import { z } from 'zod';
  * input, and the schema needs cross-field rules per profile.
  */
 
-/** Spring-style profiles: `NODE_ENV` picks which `.env.{profile}` files load (see `env-files.ts`). */
+/** `NODE_ENV` picks the profile, and with it which `.env.{profile}` file loads on top of `.env` (see `env-files.ts`). */
 export const PROFILES = ['development', 'test', 'production'] as const;
 export type Profile = (typeof PROFILES)[number];
 
 /**
- * Secrets in the committed `.env.development` / `.env.test` start with this prefix so the repo works
- * out of the box. Production refuses to start while any secret still has it.
+ * Placeholder secrets (in `.env.test`, and in `.env.production` until you fill it in) start with this
+ * prefix. Production refuses to start while any secret still has it.
  */
 export const DEV_SECRET_PREFIX = 'dev-only-';
 

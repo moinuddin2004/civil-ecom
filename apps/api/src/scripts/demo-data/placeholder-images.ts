@@ -48,15 +48,29 @@ export function productPlaceholder(name: string, colour: string): Promise<Buffer
   return sharp(Buffer.from(svg)).png().toBuffer();
 }
 
-/** Banner PNG at the given size: dark panel, amber accent bar, heading and sub-line. */
-export function bannerPlaceholder(width: number, height: number, heading: string, subline: string): Promise<Buffer> {
+/** Light panel colours for the demo banners (ink text stays readable on all of them). */
+const BANNER_TONES = {
+  blue: '#E3EEFB',
+  green: '#E2F3E9',
+  sand: '#FFF3CC',
+} as const;
+export type BannerTone = keyof typeof BANNER_TONES;
+
+/** Banner PNG at the given size: light panel, amber accent bar, ink heading and sub-line. */
+export function bannerPlaceholder(
+  width: number,
+  height: number,
+  heading: string,
+  subline: string,
+  tone: BannerTone = 'blue',
+): Promise<Buffer> {
   const scale = width / 1600;
   const size = (value: number) => Math.round(value * (width < 1000 ? 1.6 : 1) * scale);
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
-  <rect width="${width}" height="${height}" fill="#1E2A33"/>
+  <rect width="${width}" height="${height}" fill="${BANNER_TONES[tone]}"/>
   <rect x="${size(80)}" y="${Math.round(height * 0.3)}" width="${size(120)}" height="${size(14)}" fill="#F2A900"/>
-  <text x="${size(80)}" y="${Math.round(height * 0.3) + size(110)}" font-family="Arial, Helvetica, sans-serif" font-size="${size(84)}" font-weight="700" fill="#FFFFFF">${escapeXml(heading)}</text>
-  <text x="${size(80)}" y="${Math.round(height * 0.3) + size(190)}" font-family="Arial, Helvetica, sans-serif" font-size="${size(40)}" fill="#C9CFD4">${escapeXml(subline)}</text>
+  <text x="${size(80)}" y="${Math.round(height * 0.3) + size(110)}" font-family="Arial, Helvetica, sans-serif" font-size="${size(84)}" font-weight="700" fill="#1E2A32">${escapeXml(heading)}</text>
+  <text x="${size(80)}" y="${Math.round(height * 0.3) + size(190)}" font-family="Arial, Helvetica, sans-serif" font-size="${size(40)}" fill="#33424D">${escapeXml(subline)}</text>
 </svg>`;
   return sharp(Buffer.from(svg)).png().toBuffer();
 }

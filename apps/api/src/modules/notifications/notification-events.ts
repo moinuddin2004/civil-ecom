@@ -17,9 +17,13 @@ export interface NotificationPayloads {
     to: string;
     name: string;
     orderNumber: string;
+    /** 6-digit code to track the order without signing in (SPEC §6.6b). */
+    trackingCode?: string | null;
     orderUrl: string;
     items: EmailOrderLine[];
     subtotal: number;
+    /** Staff discount on the subtotal; 0 (or missing) when none. */
+    discount?: number;
     deliveryFee: number;
     total: number;
     paymentMethod: PaymentMethod;

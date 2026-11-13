@@ -15,19 +15,15 @@ export function activeProfile(nodeEnv: string | undefined = process.env.NODE_ENV
 
 /**
  * Env files for a profile, highest priority first (the first file that sets a key wins, and real
- * environment variables beat every file) — the same layering as Spring's `application-{profile}`:
+ * environment variables set on the machine beat every file):
  *
- * 1. `.env.{profile}.local` — your machine only (git-ignored)
- * 2. `.env.{profile}`       — committed defaults for that profile (no real secrets)
- * 3. `.env.local`           — your machine, every profile except test (git-ignored)
- * 4. `.env`                 — your machine, shared fallback (git-ignored)
+ * 1. `.env.{profile}` — values of that profile only (`.env.development` or `.env.production`)
+ * 2. `.env`           — values common to development and production
  *
- * Tests skip `.env.local` so they are reproducible on every machine. Production loads no file from
- * the repo: the server provides real values through its own environment (SPEC §18).
+ * Tests read only `.env.test`, so they run the same on every machine and never pick up real
+ * settings (a real SMTP server, a real database) from `.env`.
  */
 export function envFilesFor(profile: Profile, cwd: string = process.cwd()): string[] {
-  const files = [`.env.${profile}.local`, `.env.${profile}`];
-  if (profile !== 'test') files.push('.env.local');
-  files.push('.env');
+  const files = profile === 'test' ? ['.env.test'] : [`.env.${profile}`, '.env'];
   return files.map((file) => join(cwd, file));
 }

@@ -62,9 +62,11 @@ const CONTENT: { [E in NotificationEvent]: (payload: NotificationPayloads[E], st
     heading: 'Thanks, your order is placed',
     blocks: [
       p(`Hi ${x.name}, we got your order ${x.orderNumber}. We'll confirm it soon.`),
+      ...(x.trackingCode ? [p(`Tracking code: ${x.trackingCode}. Use it on our website to see where your order is, without signing in.`)] : []),
       orderLines(x.items),
       rows(
         ['Subtotal', formatPKR(x.subtotal)],
+        ...((x.discount ?? 0) > 0 ? ([['Discount', `-${formatPKR(x.discount ?? 0)}`]] as [string, string][]) : []),
         ['Delivery', x.deliveryFee === 0 ? 'Free' : formatPKR(x.deliveryFee)],
         ['Total', formatPKR(x.total)],
         ['Payment', PAYMENT_METHOD_LABELS[x.paymentMethod]],

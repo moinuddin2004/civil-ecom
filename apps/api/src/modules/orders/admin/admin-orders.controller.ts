@@ -1,7 +1,14 @@
-import type { AdminOrderDTO, AdminOrderListItemDTO, FileLinkDTO } from '@aricon/shared';
-import { Body, Controller, Get, HttpCode, Param, Patch, Post, Query, Req, StreamableFile } from '@nestjs/common';
-import { ApiOperation, ApiProduces, ApiTags } from '@nestjs/swagger';
-import type { Request } from 'express';
+import {
+  IDEMPOTENCY_HEADER,
+  type AdminOrderDTO,
+  type AdminOrderListItemDTO,
+  type AdminOrderProductOptionDTO,
+  type FileLinkDTO,
+  type PricedCart,
+} from '@aricon/shared';
+import { Body, Controller, Get, HttpCode, Param, Patch, Post, Query, Req, Res, StreamableFile } from '@nestjs/common';
+import { ApiHeader, ApiOperation, ApiProduces, ApiTags } from '@nestjs/swagger';
+import type { Request, Response } from 'express';
 import { AppError } from '../../../common/errors/app-error.js';
 import { ApiDataResponse, ApiErrorResponses } from '../../../common/http/api-response.decorators.js';
 import type { Paginated } from '../../../common/http/envelope.js';
@@ -10,18 +17,25 @@ import { CurrentActor, type AuditActor } from '../../audit/audit.service.js';
 import { RequirePermission } from '../../auth/auth.decorators.js';
 import { XLSX_MIME } from '../../spreadsheets/xlsx.js';
 import type { AdminOrderFilters, AdminOrderSort } from './admin-orders.repository.js';
+import { IdempotencyKey } from '../order-http.js';
 import { InvoiceService } from '../invoice.service.js';
 import { ReceiptsService } from '../receipts.service.js';
+import { AdminOrderCreateService } from './admin-order-create.service.js';
 import { AdminOrdersService } from './admin-orders.service.js';
 import {
+  AdminCreateOrderDto,
   AdminOrderDto,
   AdminOrderListItemDto,
   AdminOrderListQueryDto,
+  AdminOrderProductOptionDto,
+  AdminOrderQuoteDto,
+  AdminOrderQuoteResultDto,
   AssignRiderDto,
   CodCollectedDto,
   FileLinkDto,
   InternalNoteDto,
   OrderStatusChangeDto,
+  ProductOptionsQueryDto,
   RejectReceiptDto,
   StatusCountsDto,
 } from './dto/admin-orders.dto.js';
@@ -56,6 +70,7 @@ function parseSort(sort: string | undefined): AdminOrderSort {
 export class AdminOrdersController {
   constructor(
     private readonly orders: AdminOrdersService,
+    private readonly creation: AdminOrderCreateService,
     private readonly receipts: ReceiptsService,
     private readonly invoices: InvoiceService,
   ) {}
@@ -77,6 +92,49 @@ export class AdminOrdersController {
   @ApiErrorResponses(400, 401, 403)
   export(@Query() query: AdminOrderListQueryDto): StreamableFile {
     return this.orders.export(filtersOf(query), parseSort(query.sort));
+  }
+
+  // Before ':id', so these paths aren't read as an order id.
+  @Get('product-options')
+  @RequirePermission('orders.create')
+  @ApiOperation({ summary: 'Active product variants matching a name or SKU, for building an order' })
+  @ApiDataResponse(AdminOrderProductOptionDto, { isArray: true })
+  @ApiErrorResponses(400, 401, 403)
+  productOptions(@Query() query: ProductOptionsQueryDto): Promise<AdminOrderProductOptionDTO[]> {
+    return this.creation.productOptions(query.q ?? '');
+  }
+
+  @Post('quote')
+  @RequirePermission('orders.create')
+  @HttpCode(200)
+  @ApiOperation({ summary: "Price an order for a customer's address without saving it" })
+  @ApiDataResponse(AdminOrderQuoteResultDto)
+  @ApiErrorResponses(400, 401, 403)
+  quote(@Req() req: Request, @Body() body: AdminOrderQuoteDto): Promise<PricedCart & { discount: number }> {
+    if (!req.principal) throw AppError.unauthenticated();
+    return this.creation.quote(req.principal, body);
+  }
+
+  @Post()
+  @RequirePermission('orders.create')
+  @ApiOperation({
+    summary: 'Create an order for a customer (same price, stock and payment rules as checkout)',
+    description: '201 with the new order; 200 with the same order when the Idempotency-Key was already used.',
+  })
+  @ApiHeader({ name: IDEMPOTENCY_HEADER, required: true, description: 'A new UUID v4 per form.' })
+  @ApiDataResponse(AdminOrderDto, { status: 201 })
+  @ApiErrorResponses(400, 401, 403, 409)
+  async create(
+    @Req() req: Request,
+    @CurrentActor() actor: AuditActor,
+    @IdempotencyKey() idempotencyKey: string,
+    @Body() body: AdminCreateOrderDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<AdminOrderDTO> {
+    if (!req.principal) throw AppError.unauthenticated();
+    const { order, created } = await this.creation.create(actor, req.principal, body, idempotencyKey);
+    res.status(created ? 201 : 200);
+    return order;
   }
 
   @Get(':id')

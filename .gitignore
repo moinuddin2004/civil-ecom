@@ -5,12 +5,10 @@ node_modules
 .pnp
 .pnp.js
 
-# Local env files
-.env
+# Machine-private env overrides (the API no longer reads them). The real env files
+# (`.env`, `.env.development`, `.env.production`) are committed on purpose: private repo.
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*.local
 
 # Testing
 coverage

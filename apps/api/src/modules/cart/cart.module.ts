@@ -11,6 +11,6 @@ import { CartsRepository } from './carts.repository.js';
   imports: [SettingsModule, DeliveryModule],
   controllers: [CartController],
   providers: [CartsRepository, CartProductsRepository, CartPricingService, CartService],
-  exports: [CartsRepository, CartPricingService, CartService],
+  exports: [CartsRepository, CartProductsRepository, CartPricingService, CartService],
 })
 export class CartModule {}

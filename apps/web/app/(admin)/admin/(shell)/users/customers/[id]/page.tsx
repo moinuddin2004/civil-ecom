@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { BackButton } from '@/components/ui/back-button';
 import { AccessDenied } from '@/components/admin/access-denied';
 import { CustomerDetailView } from '@/components/admin/customer-detail-view';
 import { can, getAdminCustomer, requireStaff } from '@/lib/admin-data';
@@ -17,5 +18,10 @@ export default async function CustomerDetailPage({ params }: CustomerDetailPageP
 
   const { id } = await params;
   const customer = await orNotFound(getAdminCustomer(id));
-  return <CustomerDetailView customer={customer} canBlock={can(me, 'customers.block')} canViewOrders={can(me, 'orders.view')} />;
+  return (
+    <>
+      <BackButton fallbackHref="/admin/users?tab=customers" className="mb-2" />
+      <CustomerDetailView customer={customer} canBlock={can(me, 'customers.block')} canViewOrders={can(me, 'orders.view')} />
+    </>
+  );
 }

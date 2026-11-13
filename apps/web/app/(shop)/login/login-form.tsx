@@ -63,6 +63,11 @@ export function LoginForm({ next }: { next?: string }) {
           {...register('password')}
         />
       </FormField>
+      <div className="-mt-2 flex justify-end">
+        <Link href={forgotPasswordHref} className="link text-sm">
+          Forgot your password?
+        </Link>
+      </div>
 
       <FormError message={formError} />
 
@@ -70,17 +75,12 @@ export function LoginForm({ next }: { next?: string }) {
         {isSubmitting ? 'Signing in…' : 'Log in'}
       </Button>
 
-      <div className="flex flex-col items-center gap-2 text-sm">
-        <p className="text-ink-700">
-          Don&apos;t have an account?{' '}
-          <Link href={routes.signup(next)} className="link font-semibold">
-            Sign up
-          </Link>
-        </p>
-        <Link href={forgotPasswordHref} className="link">
-          Forgot your password?
+      <p className="text-center text-sm text-ink-700">
+        Don&apos;t have an account?{' '}
+        <Link href={routes.signup(next)} className="link font-semibold">
+          Sign up
         </Link>
-      </div>
+      </p>
     </form>
   );
 }

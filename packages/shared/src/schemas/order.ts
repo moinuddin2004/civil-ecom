@@ -1,7 +1,8 @@
 import { z } from 'zod';
-import { CUSTOMER_NOTE_MAX, INTERNAL_NOTE_MAX } from '../constants.js';
+import { CART_MAX_LINES, CUSTOMER_NOTE_MAX, INTERNAL_NOTE_MAX } from '../constants.js';
+import { cartItemSchema } from './cart.js';
 import { ORDER_STATUSES, PAYMENT_METHODS, PAYMENT_STATUSES } from '../enums.js';
-import { ORDER_NUMBER_PATTERN } from '../order-number.js';
+import { ORDER_NUMBER_PATTERN, TRACKING_CODE_PATTERN } from '../order-number.js';
 import {
   csvQuery,
   dateQuery,
@@ -25,6 +26,34 @@ export const placeOrderSchema = z.strictObject({
   expectedTotal: moneySchema,
 });
 export type PlaceOrderInput = z.input<typeof placeOrderSchema>;
+
+/** The customer, address and lines the server prices for staff (`POST /api/admin/orders/quote`). */
+export const adminOrderQuoteSchema = z.strictObject({
+  userId: objectIdSchema,
+  addressId: objectIdSchema,
+  /** Rupees off the subtotal; needs `orders.discount` (SPEC §6.6c). */
+  discountAmount: moneySchema.optional(),
+  items: z.array(cartItemSchema).min(1, 'Add at least one product.').max(CART_MAX_LINES, `An order can have at most ${CART_MAX_LINES} lines.`),
+});
+export type AdminOrderQuoteInput = z.input<typeof adminOrderQuoteSchema>;
+
+/** `POST /api/admin/orders` (with the `Idempotency-Key` header): a quote plus payment and the total staff saw. */
+export const adminCreateOrderSchema = z.strictObject({
+  ...adminOrderQuoteSchema.shape,
+  paymentMethod: z.enum(PAYMENT_METHODS),
+  customerNote: optionalText(CUSTOMER_NOTE_MAX),
+  /** Required when `discountAmount` is more than 0. */
+  discountReason: optionalText(300),
+  /** The total staff saw; a mismatch returns 409 PRICE_CHANGED. */
+  expectedTotal: moneySchema,
+});
+export type AdminCreateOrderInput = z.input<typeof adminCreateOrderSchema>;
+
+/** `POST /api/public/track-order`: the 6-digit tracking code of the order (SPEC §6.6b). */
+export const trackOrderSchema = z.strictObject({
+  code: z.string().trim().regex(TRACKING_CODE_PATTERN, 'Enter the 6-digit tracking code.'),
+});
+export type TrackOrderInput = z.input<typeof trackOrderSchema>;
 
 export const orderNumberParams = z.strictObject({
   orderNumber: z.string().regex(ORDER_NUMBER_PATTERN, 'Order not found.'),

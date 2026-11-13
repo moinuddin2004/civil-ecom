@@ -202,7 +202,7 @@ export function SettingsView({ settings: initialSettings }: SettingsViewProps) {
   const notificationEmails = settings.orderNotificationEmails;
 
   return (
-    <div ref={containerRef} className="flex flex-col gap-6 pb-24">
+    <div ref={containerRef} className="flex flex-col gap-6">
       <h1 className="type-h1">Settings</h1>
 
       <Section title="Store info">
@@ -515,7 +515,7 @@ export function SettingsView({ settings: initialSettings }: SettingsViewProps) {
         </div>
       </Section>
 
-      <div className="sticky bottom-0 z-10 -mx-4 border-t border-concrete-200 bg-surface px-4 py-3 shadow-float md:-mx-6 md:px-6 lg:-mx-8 lg:px-8">
+      <div className="sticky bottom-0 z-10 -mx-4 -mb-6 border-t border-concrete-200 bg-surface px-4 py-3 shadow-float md:-mx-6 md:px-6 lg:-mx-8 lg:px-8">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
           {formError ? (
             <div className="flex min-w-0 flex-1 flex-col gap-1">

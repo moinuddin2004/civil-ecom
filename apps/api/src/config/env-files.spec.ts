@@ -14,13 +14,12 @@ describe('activeProfile', () => {
 });
 
 describe('envFilesFor', () => {
-  it('orders files from most to least specific', () => {
-    expect(envFilesFor('development', '/app')).toEqual(
-      ['.env.development.local', '.env.development', '.env.local', '.env'].map((file) => join('/app', file)),
-    );
+  it('reads the profile file first, then the common .env', () => {
+    expect(envFilesFor('development', '/app')).toEqual(['.env.development', '.env'].map((file) => join('/app', file)));
+    expect(envFilesFor('production', '/app')).toEqual(['.env.production', '.env'].map((file) => join('/app', file)));
   });
 
-  it('skips .env.local in tests so they run the same on every machine', () => {
-    expect(envFilesFor('test', '/app')).toEqual(['.env.test.local', '.env.test', '.env'].map((file) => join('/app', file)));
+  it('reads only .env.test in tests so they run the same on every machine', () => {
+    expect(envFilesFor('test', '/app')).toEqual([join('/app', '.env.test')]);
   });
 });

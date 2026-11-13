@@ -8,8 +8,11 @@ import {
   type ApiResponse,
   type CancelOrderInput,
   type OrderTransition,
+  type PaymentMethod,
+  type PaymentStatus,
 } from '@aricon/shared';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Ban, CircleCheck, PackageCheck, Truck, Undo2, type LucideIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -21,6 +24,7 @@ import { DownloadButton } from '@/components/ui/download-button';
 import { FormError } from '@/components/ui/form-error';
 import { FormField } from '@/components/ui/form-field';
 import { Textarea } from '@/components/ui/textarea';
+import { Tooltip } from '@/components/ui/tooltip';
 import { useAdminSession } from '@/lib/admin/session';
 import { apiClient } from '@/lib/api-client';
 import { applyFieldErrors, errorMessage } from '@/lib/api-errors';
@@ -29,19 +33,86 @@ export interface OrderStatusActionsProps {
   order: AdminOrderDTO;
 }
 
+/** What a transition button needs to know about an order: the order page and list rows both have it. */
+export interface TransitionOrder {
+  id: string;
+  orderNumber: string;
+  paymentMethod: PaymentMethod;
+  paymentStatus: PaymentStatus;
+  hasRider: boolean;
+}
+
 /** The extra §6.7 conditions `staffTransitionsFrom()` deliberately ignores, so the button can
  * explain why it's disabled instead of just being missing. */
-function blockedReason(order: AdminOrderDTO, transition: OrderTransition): string | null {
+function blockedReason(order: TransitionOrder, transition: OrderTransition): string | null {
   if (transition.to === 'CONFIRMED' && order.paymentMethod === 'BANK_TRANSFER' && order.paymentStatus !== 'PAID') {
     return 'Approve the bank transfer receipt before confirming this order.';
   }
-  if (transition.to === 'DISPATCHED' && !order.riderId) {
+  if (transition.to === 'DISPATCHED' && !order.hasRider) {
     return 'Assign a rider before marking the order dispatched.';
   }
   return null;
 }
 
 const DESTRUCTIVE_TARGETS = new Set(['CANCELLED', 'RETURNED']);
+
+const TRANSITION_ICONS: Record<string, LucideIcon> = {
+  CONFIRMED: CircleCheck,
+  DISPATCHED: Truck,
+  DELIVERED: PackageCheck,
+  CANCELLED: Ban,
+  RETURNED: Undo2,
+};
+
+/** One-line explanation shown in the icon button's tooltip, under its name. */
+const TRANSITION_HINTS: Record<string, string> = {
+  CONFIRMED: 'Accept the order so it can be prepared.',
+  DISPATCHED: 'The rider has left with the order.',
+  DELIVERED: 'The order reached the customer.',
+  CANCELLED: 'Cancel the order and put the stock back. Needs a reason.',
+  RETURNED: 'The order came back. Stock is put back.',
+};
+
+interface ActionTriggerProps {
+  transition: OrderTransition;
+  variant: ButtonProps['variant'];
+  /** Why the action isn't available right now, if it isn't. */
+  blocked: string | null;
+  loading?: boolean;
+  /** Icon-only with a tooltip (orders list rows) instead of a text button (order page). */
+  compact?: boolean;
+  onClick: () => void;
+}
+
+/** The button that opens a transition's confirmation: text on the order page, icon + tooltip in list rows. */
+function ActionTrigger({ transition, variant, blocked, loading, compact, onClick }: ActionTriggerProps) {
+  if (!compact) {
+    return (
+      <Button type="button" variant={variant} size="sm" disabled={Boolean(blocked)} loading={loading} title={blocked ?? undefined} onClick={onClick}>
+        {transition.actionLabel}
+      </Button>
+    );
+  }
+  const Icon = TRANSITION_ICONS[transition.to] ?? CircleCheck;
+  return (
+    <Tooltip
+      content={
+        <span className="flex flex-col gap-0.5">
+          <span className="font-semibold">{transition.actionLabel}</span>
+          <span className="text-concrete-200">{TRANSITION_HINTS[transition.to] ?? ''}</span>
+          {blocked ? <span className="text-amber">{blocked}</span> : null}
+        </span>
+      }
+    >
+      {/* A disabled button gets no hover events, so the span carries the tooltip. */}
+      <span className="inline-flex" tabIndex={blocked ? 0 : undefined}>
+        <Button type="button" variant={variant} size="icon-sm" aria-label={transition.actionLabel} disabled={Boolean(blocked)} loading={loading} onClick={onClick}>
+          <Icon aria-hidden strokeWidth={1.75} className="size-4.5" />
+        </Button>
+      </span>
+    </Tooltip>
+  );
+}
 
 /**
  * Header action buttons (SPEC §10.4, DESIGN.md §9.3): one per `staffTransitionsFrom()` result for
@@ -54,11 +125,18 @@ export function OrderStatusActions({ order }: OrderStatusActionsProps) {
   if (!me) return null;
 
   const transitions = staffTransitionsFrom(order.status, { role: me.user.role, permissions: me.permissions });
+  const transitionOrder: TransitionOrder = {
+    id: order.id,
+    orderNumber: order.orderNumber,
+    paymentMethod: order.paymentMethod,
+    paymentStatus: order.paymentStatus,
+    hasRider: Boolean(order.riderId),
+  };
 
   return (
     <div className="flex flex-wrap items-center gap-2">
       {transitions.map((transition) => (
-        <TransitionButton key={transition.to} order={order} transition={transition} />
+        <TransitionButton key={transition.to} order={transitionOrder} transition={transition} />
       ))}
       <DownloadButton path={`/admin/orders/${order.id}/invoice`} fileName={`invoice-${order.orderNumber}.pdf`} variant="secondary" size="sm">
         Download invoice
@@ -67,7 +145,7 @@ export function OrderStatusActions({ order }: OrderStatusActionsProps) {
   );
 }
 
-function TransitionButton({ order, transition }: { order: AdminOrderDTO; transition: OrderTransition }) {
+export function TransitionButton({ order, transition, compact = false }: { order: TransitionOrder; transition: OrderTransition; compact?: boolean }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -109,17 +187,7 @@ function TransitionButton({ order, transition }: { order: AdminOrderDTO; transit
   if (!transition.requiresReason) {
     return (
       <>
-        <Button
-          type="button"
-          variant={variant}
-          size="sm"
-          disabled={Boolean(blocked)}
-          loading={submitting}
-          title={blocked ?? undefined}
-          onClick={() => setOpen(true)}
-        >
-          {transition.actionLabel}
-        </Button>
+        <ActionTrigger transition={transition} variant={variant} blocked={blocked} loading={submitting} compact={compact} onClick={() => setOpen(true)} />
         <ConfirmDialog
           open={open}
           onOpenChange={setOpen}
@@ -136,19 +204,16 @@ function TransitionButton({ order, transition }: { order: AdminOrderDTO; transit
 
   return (
     <>
-      <Button
-        type="button"
+      <ActionTrigger
+        transition={transition}
         variant={variant}
-        size="sm"
-        disabled={Boolean(blocked)}
-        title={blocked ?? undefined}
+        blocked={blocked}
+        compact={compact}
         onClick={() => {
           setFormError(null);
           setOpen(true);
         }}
-      >
-        {transition.actionLabel}
-      </Button>
+      />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent mobile="sheet" size="sm" aria-describedby={undefined}>

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { AdminLoginForm } from '@/components/admin/admin-login-form';
 import { getAdminMe } from '@/lib/api-server';
@@ -28,6 +29,12 @@ export default async function AdminLoginPage({ searchParams }: AdminLoginPagePro
         </span>
         <h1 className="mt-4 type-h2">Staff login</h1>
         <AdminLoginForm next={adminTarget} />
+        <p className="mt-6 border-t border-concrete-150 pt-4 text-center text-sm text-cement">
+          Not staff?{' '}
+          <Link href={routes.home} className="font-medium text-blueprint underline-offset-2 hover:underline">
+            Go to the shop
+          </Link>
+        </p>
       </div>
     </div>
   );

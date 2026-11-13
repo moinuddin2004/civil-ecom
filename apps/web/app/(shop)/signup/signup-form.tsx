@@ -43,7 +43,7 @@ export function SignupForm({ next }: { next?: string }) {
   });
 
   return (
-    <form noValidate onSubmit={onSubmit} className="flex flex-col gap-4">
+    <form noValidate onSubmit={onSubmit} className="grid gap-x-4 gap-y-3 md:grid-cols-2">
       <FormField label="Full name" htmlFor="name" error={errors.name?.message} required>
         <Input id="name" autoComplete="name" aria-invalid={Boolean(errors.name)} {...register('name')} />
       </FormField>
@@ -79,17 +79,17 @@ export function SignupForm({ next }: { next?: string }) {
           {...register('password')}
         />
       </FormField>
-      <FormField label="Company name" htmlFor="companyName" error={errors.companyName?.message} hint="Optional">
+      <FormField label="Company name" htmlFor="companyName" error={errors.companyName?.message} hint="Optional" className="md:col-span-2">
         <Input id="companyName" autoComplete="organization" {...register('companyName')} />
       </FormField>
 
-      <FormError message={formError} />
+      <FormError message={formError} className="md:col-span-2" />
 
-      <Button type="submit" size="lg" className="mt-1 w-full" loading={isSubmitting}>
+      <Button type="submit" size="lg" className="mt-1 w-full md:col-span-2" loading={isSubmitting}>
         {isSubmitting ? 'Creating your account…' : 'Sign up'}
       </Button>
 
-      <p className="text-center text-sm text-ink-700">
+      <p className="text-center text-sm text-ink-700 md:col-span-2">
         Already have an account?{' '}
         <Link href={routes.login(next)} className="link font-semibold">
           Log in

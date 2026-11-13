@@ -40,20 +40,27 @@ export function DashboardView({ dashboard }: DashboardViewProps) {
 
           <div className="rounded-xl border border-concrete-150 bg-surface p-4 shadow-card">
             <p className="mb-2 text-sm font-semibold text-ink">Revenue, last 30 days</p>
-            <div className="h-56">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={dashboard.sales.series}>
-                  <XAxis dataKey="date" tick={{ fontSize: 11 }} tickFormatter={(value: string) => value.slice(5)} />
-                  <Tooltip formatter={(value) => formatPKR(Number(value))} />
-                  <Line type="monotone" dataKey="revenue" stroke="var(--color-amber)" strokeWidth={2} dot={false} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            {dashboard.sales.series.some((day) => day.revenue > 0) ? (
+              <div className="h-56">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={dashboard.sales.series}>
+                    <XAxis dataKey="date" tick={{ fontSize: 11 }} tickFormatter={(value: string) => value.slice(5)} />
+                    <Tooltip formatter={(value) => formatPKR(Number(value))} />
+                    <Line type="monotone" dataKey="revenue" stroke="var(--color-amber)" strokeWidth={2} dot={false} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="flex h-56 flex-col items-center justify-center gap-1 rounded-lg bg-concrete-50/60 text-center">
+                <p className="text-sm font-medium text-ink">No sales in the last 30 days yet</p>
+                <p className="max-w-xs text-sm text-cement">Revenue will chart here as soon as orders start coming in.</p>
+              </div>
+            )}
           </div>
         </>
       ) : null}
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-3">
         {dashboard.ordersByStatus && can('orders.view') ? (
           <div className="rounded-xl border border-concrete-150 bg-surface p-4 shadow-card">
             <p className="mb-3 text-sm font-semibold text-ink">Orders by status</p>
@@ -70,29 +77,31 @@ export function DashboardView({ dashboard }: DashboardViewProps) {
           </div>
         ) : null}
 
-        {dashboard.receiptsToVerify && can('orders.verify_payment') ? (
-          <div className="rounded-xl border border-concrete-150 bg-surface p-4 shadow-card">
-            <p className="mb-3 text-sm font-semibold text-ink">Receipts to verify ({formatNumber(dashboard.receiptsToVerify.count)})</p>
-            <ul className="flex flex-col divide-y divide-concrete-150">
-              {dashboard.receiptsToVerify.orders.slice(0, 5).map((order) => (
-                <li key={order.id}>
-                  <Link href={`/admin/orders/${order.id}`} className="flex items-center justify-between py-2.5 text-sm hover:text-blueprint">
-                    <span>{order.orderNumber}</span>
-                    <span className="tabular-nums text-ink-700">{formatPKR(order.total)}</span>
-                  </Link>
-                </li>
-              ))}
-              {dashboard.receiptsToVerify.count === 0 ? <li className="py-2.5 text-sm text-cement">Nothing to verify.</li> : null}
-            </ul>
-          </div>
-        ) : null}
+        <div className="flex flex-col gap-4 lg:col-span-2">
+          {dashboard.codToCollect && (can('orders.cod_collect') || can('dashboard.view')) ? (
+            <StatCard label="Cash to collect" value={formatPKR(dashboard.codToCollect.amount)} sub={`${formatNumber(dashboard.codToCollect.count)} orders`} />
+          ) : null}
 
-        {dashboard.codToCollect && (can('orders.cod_collect') || can('dashboard.view')) ? (
-          <StatCard label="Cash to collect" value={formatPKR(dashboard.codToCollect.amount)} sub={`${formatNumber(dashboard.codToCollect.count)} orders`} />
-        ) : null}
+          {dashboard.receiptsToVerify && can('orders.verify_payment') ? (
+            <div className="flex-1 rounded-xl border border-concrete-150 bg-surface p-4 shadow-card">
+              <p className="mb-3 text-sm font-semibold text-ink">Receipts to verify ({formatNumber(dashboard.receiptsToVerify.count)})</p>
+              <ul className="flex flex-col divide-y divide-concrete-150">
+                {dashboard.receiptsToVerify.orders.slice(0, 5).map((order) => (
+                  <li key={order.id}>
+                    <Link href={`/admin/orders/${order.id}`} className="flex items-center justify-between py-2.5 text-sm hover:text-blueprint">
+                      <span>{order.orderNumber}</span>
+                      <span className="tabular-nums text-ink-700">{formatPKR(order.total)}</span>
+                    </Link>
+                  </li>
+                ))}
+                {dashboard.receiptsToVerify.count === 0 ? <li className="py-2.5 text-sm text-cement">Nothing to verify.</li> : null}
+              </ul>
+            </div>
+          ) : null}
+        </div>
 
         {dashboard.lowStock && can('products.view') ? (
-          <div className="rounded-xl border border-concrete-150 bg-surface p-4 shadow-card lg:col-span-2">
+          <div className="rounded-xl border border-concrete-150 bg-surface p-4 shadow-card lg:col-span-3">
             <p className="mb-3 text-sm font-semibold text-ink">Low stock ({formatNumber(dashboard.lowStock.count)})</p>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">

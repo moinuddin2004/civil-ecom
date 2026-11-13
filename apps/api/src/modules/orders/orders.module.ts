@@ -4,11 +4,15 @@ import { DeliveryModule } from '../delivery/delivery.module.js';
 import { InventoryModule } from '../inventory/inventory.module.js';
 import { SettingsModule } from '../settings/settings.module.js';
 import { UsersModule } from '../users/users.module.js';
+import { AdminOrderCreateService } from './admin/admin-order-create.service.js';
 import { AdminOrdersController } from './admin/admin-orders.controller.js';
 import { AdminOrdersRepository } from './admin/admin-orders.repository.js';
 import { AdminOrdersService } from './admin/admin-orders.service.js';
 import { CustomerOrdersController } from './customer-orders.controller.js';
 import { CustomerOrdersService } from './customer-orders.service.js';
+import { OrderTrackingController } from './order-tracking.controller.js';
+import { OrderTrackingService } from './order-tracking.service.js';
+import { TrackingCodeBackfillService } from './tracking-code-backfill.service.js';
 import { OrderNumbersRepository } from './order-numbers.repository.js';
 import { OrderPlacementService } from './order-placement.service.js';
 import { OrderStockService } from './order-stock.service.js';
@@ -19,15 +23,18 @@ import { ReceiptsService } from './receipts.service.js';
 /** Orders: customer placement and history (SPEC §6.6–6.9, §7.2) and staff management (§7.3). */
 @Module({
   imports: [CartModule, UsersModule, DeliveryModule, InventoryModule, SettingsModule],
-  controllers: [CustomerOrdersController, AdminOrdersController],
+  controllers: [CustomerOrdersController, AdminOrdersController, OrderTrackingController],
   providers: [
     OrdersRepository,
     AdminOrdersRepository,
     OrderNumbersRepository,
     OrderStockService,
     OrderPlacementService,
+    OrderTrackingService,
+    TrackingCodeBackfillService,
     CustomerOrdersService,
     AdminOrdersService,
+    AdminOrderCreateService,
     ReceiptsService,
     InvoiceService,
   ],

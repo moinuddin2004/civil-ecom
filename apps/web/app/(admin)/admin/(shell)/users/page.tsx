@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { parsePageSize } from '@/lib/admin/page-size';
 import { AccessDenied } from '@/components/admin/access-denied';
 import { UsersView } from '@/components/admin/users-view';
 import { can, getAdminCustomers, getPermissionCatalog, getStaffList, isAdmin, requireStaff } from '@/lib/admin-data';
@@ -31,11 +32,12 @@ export default async function AdminUsersPage({ searchParams }: UsersPageProps) {
   const statusParam = firstParam(sp.status);
   const status = statusParam === 'active' || statusParam === 'blocked' ? statusParam : undefined;
   const page = Math.max(1, Number(firstParam(sp.page)) || 1);
+  const pageSize = parsePageSize(firstParam(sp.pageSize));
 
   const [staff, catalog, customers] = await Promise.all([
     tab === 'staff' ? getStaffList() : Promise.resolve([]),
     tab === 'staff' ? getPermissionCatalog() : Promise.resolve(null),
-    tab === 'customers' ? getAdminCustomers({ q, status, page }) : Promise.resolve(null),
+    tab === 'customers' ? getAdminCustomers({ q, status, page, pageSize }) : Promise.resolve(null),
   ]);
 
   return (

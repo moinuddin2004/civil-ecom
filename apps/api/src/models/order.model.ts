@@ -113,6 +113,8 @@ export class CodCollected {
   @Prop({ ...MONEY, required: true }) amount!: number;
   @Prop({ type: Date, required: true, default: Date.now }) at!: Date;
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true }) byUserId!: Types.ObjectId;
+  /** Why the amount differs from the order total (required then, SPEC §6.8). */
+  @Prop({ type: String, trim: true, maxlength: 500 }) note?: string;
 }
 
 @Schema({ ...BASE_SCHEMA_OPTIONS, collection: 'orders' })
@@ -145,10 +147,17 @@ export class Order extends TimestampedEntity {
   })
   items!: OrderItem[];
 
+  /** 6-digit code for public tracking, unique per order (SPEC §6.6b). */
+  @Prop({ type: String, match: /^\d{6}$/ }) trackingCode?: string;
+
   /** Sum of `lineTotal`. */
   @Prop({ ...MONEY, required: true }) subtotal!: number;
   @Prop({ ...MONEY, required: true }) deliveryFee!: number;
-  /** `subtotal + deliveryFee`. */
+  /** Staff discount on the subtotal (SPEC §6.6c); 0 when none. Orders from before it existed have no value. */
+  @Prop({ ...MONEY, required: true, default: 0 }) discountAmount!: number;
+  @Prop({ type: String, trim: true, maxlength: 300 }) discountReason?: string;
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' }) discountByUserId?: Types.ObjectId;
+  /** `subtotal - discountAmount + deliveryFee`. */
   @Prop({ ...MONEY, required: true }) total!: number;
 
   @Prop({ type: String, enum: PAYMENT_METHODS, required: true }) paymentMethod!: PaymentMethod;
@@ -192,10 +201,16 @@ OrderSchema.pre('validate', function () {
     subtotal += item.lineTotal;
   });
   if (this.subtotal !== subtotal) this.invalidate('subtotal', 'Subtotal must equal the sum of the line totals.');
-  if (this.total !== this.subtotal + this.deliveryFee) this.invalidate('total', 'Total must equal subtotal plus delivery fee.');
+  const discount = this.discountAmount ?? 0;
+  if (discount > this.subtotal) this.invalidate('discountAmount', 'Discount can not be more than the subtotal.');
+  if (this.total !== this.subtotal - discount + this.deliveryFee) {
+    this.invalidate('total', 'Total must equal subtotal minus discount plus delivery fee.');
+  }
 });
 
 OrderSchema.index({ orderNumber: 1 }, { unique: true });
+// Partial: orders from before tracking codes existed have none until the start-up backfill gives them one.
+OrderSchema.index({ trackingCode: 1 }, { unique: true, partialFilterExpression: { trackingCode: { $type: 'string' } } });
 OrderSchema.index({ userId: 1, createdAt: -1 });
 OrderSchema.index({ userId: 1, idempotencyKey: 1 }, { unique: true });
 OrderSchema.index({ status: 1, createdAt: -1 });

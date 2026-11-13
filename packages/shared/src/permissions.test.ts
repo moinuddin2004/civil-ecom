@@ -22,6 +22,8 @@ import {
 const SPEC_CATALOG: [string, string, string, string[], boolean][] = [
   ['dashboard.view', 'Dashboard', 'View sales dashboard', [], false],
   ['orders.view', 'Orders', 'View orders and invoices', [], false],
+  ['orders.create', 'Orders', 'Create orders for customers', ['orders.view', 'customers.view'], false],
+  ['orders.discount', 'Orders', 'Give a discount when creating an order', ['orders.view', 'customers.view', 'orders.create'], true],
   ['orders.update_status', 'Orders', 'Confirm, dispatch and deliver orders', ['orders.view'], false],
   ['orders.cancel', 'Orders', 'Cancel and return orders', ['orders.view'], true],
   ['orders.assign_rider', 'Orders', 'Assign riders', ['orders.view'], false],
@@ -138,6 +140,8 @@ describe('withDependencies (SPEC §4.5 rule 1)', () => {
 describe('dependentsOf and withoutPermission (unticking, SPEC §10.8)', () => {
   it('lists everything that needs a permission, in catalog order', () => {
     expect(dependentsOf('orders.view')).toEqual([
+      'orders.create',
+      'orders.discount',
       'orders.update_status',
       'orders.cancel',
       'orders.assign_rider',
@@ -154,7 +158,7 @@ describe('dependentsOf and withoutPermission (unticking, SPEC §10.8)', () => {
       'products.import',
       'products.export',
     ]);
-    expect(dependentsOf('customers.view')).toEqual(['customers.block', 'customers.export']);
+    expect(dependentsOf('customers.view')).toEqual(['orders.create', 'orders.discount', 'customers.block', 'customers.export']);
     expect(dependentsOf('reports.view')).toEqual(['reports.export']);
   });
 
@@ -198,6 +202,7 @@ describe('presets (SPEC §4.4)', () => {
     expect(new Set(PERMISSION_PRESETS.orderManager.permissions)).toEqual(
       new Set([
         'orders.view',
+        'orders.create',
         'orders.update_status',
         'orders.assign_rider',
         'orders.cod_collect',

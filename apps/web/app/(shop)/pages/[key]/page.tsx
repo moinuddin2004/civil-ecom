@@ -1,6 +1,7 @@
 import { pageKeyFromSlug } from '@aricon/shared';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { BackButton } from '@/components/ui/back-button';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { getPage } from '@/lib/api-server';
@@ -29,6 +30,7 @@ export default async function ContentPage({ params }: PageProps) {
 
   return (
     <div className="mx-auto max-w-content px-4 py-8 md:px-8 md:py-12">
+      <BackButton fallbackHref="/" className="mx-auto mb-4 flex max-w-[72ch]" />
       <article className="mx-auto flex max-w-[72ch] flex-col">
         <h1 className="type-h1">{page.title}</h1>
         <div

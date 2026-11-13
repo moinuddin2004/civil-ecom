@@ -12,14 +12,17 @@ import {
   type OrderStatus,
   type PaymentMethod,
   type PaymentStatus,
+  type RiderDTO,
 } from '@aricon/shared';
 import Link from 'next/link';
 import { AccessDenied } from '@/components/admin/access-denied';
 import { AdminPagination } from '@/components/admin/admin-pagination';
+import { OrderRowRider, OrderRowStatusActions } from '@/components/admin/order-row-actions';
 import { OrderStatusBadge, PaymentStatusBadge } from '@/components/shop/status-badges';
 import { Button } from '@/components/ui/button';
 import { DownloadButton } from '@/components/ui/download-button';
-import { Input } from '@/components/ui/input';
+import { AutoFilterForm } from '@/components/admin/auto-filter-form';
+import { LiveSearchInput } from '@/components/admin/live-search-input';
 import { Select } from '@/components/ui/select';
 import { buildAdminHref } from '@/lib/admin/query-string';
 import { useAdminSession } from '@/lib/admin/session';
@@ -38,6 +41,8 @@ export interface OrdersListViewProps {
   meta: { page: number; pageSize: number; total: number };
   counts: Record<OrderStatus | 'all', number>;
   filters: OrdersListFilters;
+  /** For the inline rider picker; empty unless the staff member may assign riders. */
+  riders?: RiderDTO[];
 }
 
 const BASE_PATH = '/admin/orders';
@@ -61,11 +66,14 @@ function tabCount(counts: OrdersListViewProps['counts'], key: string): number {
  * page checks `orders.view` before loading anything; the check here only keeps the view safe on
  * its own.
  */
-export function OrdersListView({ orders, meta, counts, filters }: OrdersListViewProps) {
+export function OrdersListView({ orders, meta, counts, filters, riders = [] }: OrdersListViewProps) {
   const { me } = useAdminSession();
   if (!me) return null;
   if (!me.permissions.includes('orders.view')) return <AccessDenied />;
   const canExport = me.permissions.includes('orders.export');
+  const canCreate = me.permissions.includes('orders.create');
+  // The Actions column is only there for staff who can move orders along.
+  const showActions = me.permissions.includes('orders.update_status') || me.permissions.includes('orders.cancel');
 
   const query = {
     status: filters.status === 'all' ? undefined : filters.status,
@@ -78,6 +86,12 @@ export function OrdersListView({ orders, meta, counts, filters }: OrdersListView
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="type-h1">Orders</h1>
+        <div className="flex flex-wrap items-center gap-2">
+        {canCreate ? (
+          <Button asChild size="sm">
+            <Link href="/admin/orders/new">Create order</Link>
+          </Button>
+        ) : null}
         {canExport ? (
           <DownloadButton
             path={buildAdminHref('/admin/orders/export', {
@@ -93,6 +107,7 @@ export function OrdersListView({ orders, meta, counts, filters }: OrdersListView
             Export to Excel
           </DownloadButton>
         ) : null}
+        </div>
       </div>
 
       <nav aria-label="Order status" className="flex flex-wrap gap-1 border-b border-concrete-150">
@@ -115,13 +130,13 @@ export function OrdersListView({ orders, meta, counts, filters }: OrdersListView
         })}
       </nav>
 
-      <form method="get" action={BASE_PATH} className="flex flex-wrap items-end gap-3 rounded-xl border border-concrete-150 bg-surface p-3">
+      <AutoFilterForm action={BASE_PATH} className="flex flex-wrap items-end gap-3 rounded-xl border border-concrete-150 bg-surface p-3">
         {filters.status !== 'all' ? <input type="hidden" name="status" value={filters.status} /> : null}
         <div className="flex min-w-48 flex-1 flex-col gap-1.5">
           <label htmlFor="orders-q" className="text-sm font-medium text-ink">
             Search
           </label>
-          <Input id="orders-q" name="q" size="sm" placeholder="Order number or phone" defaultValue={filters.q ?? ''} />
+          <LiveSearchInput id="orders-q" size="sm" placeholder="Order number or phone" defaultValue={filters.q ?? ''} />
         </div>
         <div className="flex min-w-40 flex-col gap-1.5">
           <label htmlFor="orders-payment-status" className="text-sm font-medium text-ink">
@@ -149,18 +164,15 @@ export function OrdersListView({ orders, meta, counts, filters }: OrdersListView
             options={PAYMENT_METHODS.map((method) => ({ value: method, label: PAYMENT_METHOD_LABELS[method] }))}
           />
         </div>
-        <Button type="submit" variant="secondary" size="sm">
-          Filter
-        </Button>
         {filters.q || filters.paymentStatus || filters.paymentMethod ? (
           <Button type="button" variant="tertiary" size="sm" asChild>
             <Link href={buildAdminHref(BASE_PATH, { status: filters.status === 'all' ? undefined : filters.status })}>Clear</Link>
           </Button>
         ) : null}
-      </form>
+      </AutoFilterForm>
 
       <div className="overflow-x-auto rounded-xl border border-concrete-150 bg-surface">
-        <table className="w-full min-w-[960px] text-sm">
+        <table className="w-full min-w-[1100px] text-sm">
           <thead>
             <tr className="border-b border-concrete-150 text-left text-xs text-cement">
               <th className="px-3 py-2.5 font-medium">Order</th>
@@ -172,6 +184,7 @@ export function OrdersListView({ orders, meta, counts, filters }: OrdersListView
               <th className="px-3 py-2.5 font-medium">Payment</th>
               <th className="px-3 py-2.5 font-medium">Status</th>
               <th className="px-3 py-2.5 font-medium">Rider</th>
+              {showActions ? <th className="px-3 py-2.5 font-medium">Actions</th> : null}
             </tr>
           </thead>
           <tbody>
@@ -188,20 +201,38 @@ export function OrdersListView({ orders, meta, counts, filters }: OrdersListView
                 <td className="px-3 py-2.5 text-ink-700">{order.areaName}</td>
                 <td className="px-3 py-2.5 tabular-nums text-ink">{formatPKR(order.total)}</td>
                 <td className="px-3 py-2.5 whitespace-nowrap">
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col items-start gap-1">
                     <span className="text-xs text-cement">{PAYMENT_METHOD_LABELS[order.paymentMethod]}</span>
                     <PaymentStatusBadge status={order.paymentStatus} size="sm" />
+                    {order.codCollectedAmount !== null && order.codCollectedAmount !== order.total ? (
+                      <span
+                        className={cn(
+                          'rounded-full px-2 py-0.5 text-xs font-medium',
+                          order.codCollectedAmount < order.total ? 'bg-danger-50 text-danger' : 'bg-success-50 text-success',
+                        )}
+                        title={`Expected ${formatPKR(order.total)}, collected ${formatPKR(order.codCollectedAmount)}`}
+                      >
+                        {order.codCollectedAmount < order.total ? 'Short' : 'Extra'} {formatPKR(Math.abs(order.total - order.codCollectedAmount))}
+                      </span>
+                    ) : null}
                   </div>
                 </td>
                 <td className="px-3 py-2.5">
                   <OrderStatusBadge status={order.status} size="sm" />
                 </td>
-                <td className="px-3 py-2.5 text-ink-700">{order.riderName ?? '—'}</td>
+                <td className="px-3 py-2.5">
+                  <OrderRowRider order={order} riders={riders} />
+                </td>
+                {showActions ? (
+                  <td className="px-3 py-2.5">
+                    <OrderRowStatusActions order={order} />
+                  </td>
+                ) : null}
               </tr>
             ))}
             {orders.length === 0 ? (
               <tr>
-                <td colSpan={9} className="px-3 py-8 text-center text-cement">
+                <td colSpan={showActions ? 10 : 9} className="px-3 py-8 text-center text-cement">
                   No orders match these filters.
                 </td>
               </tr>

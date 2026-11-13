@@ -23,7 +23,8 @@ export interface ProductListingShellProps {
   /** Badge count for the mobile "Filters (n)" button. */
   activeFilterCount: number;
   mobileFilterPanel: ReactNode;
-  desktopFilterPanel: ReactNode;
+  /** The `FilterBar` shown in one row from `lg`. */
+  desktopFilterBar: ReactNode;
   sortSelect: ReactNode;
   activeChips?: ReactNode;
   /** Grid, pagination and/or the empty state. */
@@ -33,8 +34,8 @@ export interface ProductListingShellProps {
 
 /**
  * Category/brand/search listing shell (DESIGN.md §6 "Filter panel", §8.3 "Category page"): a
- * ~260 px filter sidebar from `lg`, a "Filters (n)" full-screen sheet below it, a sort control,
- * active-filter chips, then whatever the page passes as `children`. Stays a Server Component —
+ * one-row filter bar of dropdowns from `lg`, a "Filters (n)" full-screen sheet below it, a sort
+ * control, active-filter chips, then whatever the page passes as `children`. Stays a Server Component —
  * `Dialog` is uncontrolled (Radix manages its own open state), so no client boundary is needed
  * here; only `SortSelect` (passed in as a prop) is a client component.
  */
@@ -42,18 +43,14 @@ export function ProductListingShell({
   total,
   activeFilterCount,
   mobileFilterPanel,
-  desktopFilterPanel,
+  desktopFilterBar,
   sortSelect,
   activeChips,
   children,
   className,
 }: ProductListingShellProps) {
   return (
-    <div className={cn('flex flex-col gap-5 lg:flex-row lg:items-start lg:gap-8', className)}>
-      <aside className="hidden w-[260px] shrink-0 lg:block">
-        <div className="rounded-xl border border-concrete-150 bg-surface p-4">{desktopFilterPanel}</div>
-      </aside>
-
+    <div className={cn('flex flex-col gap-5', className)}>
       <div className="flex min-w-0 flex-1 flex-col gap-4">
         <div className="flex items-center gap-3">
           <div className="lg:hidden">
@@ -78,6 +75,7 @@ export function ProductListingShell({
               </DialogContent>
             </Dialog>
           </div>
+          <div className="hidden min-w-0 flex-1 lg:block">{desktopFilterBar}</div>
           <div className="ml-auto w-[168px] shrink-0 sm:w-[200px]">{sortSelect}</div>
         </div>
 
@@ -97,7 +95,7 @@ export interface ListingEmptyStateProps {
 /** DESIGN.md §6 "Empty states": a short line and one action. */
 export function ListingEmptyState({ message, actionLabel, actionHref }: ListingEmptyStateProps) {
   return (
-    <div className="flex flex-col items-center gap-4 rounded-xl border border-concrete-150 bg-surface px-6 py-16 text-center">
+    <div className="flex flex-col items-center gap-4 rounded-xl bg-concrete-50 px-6 py-16 text-center">
       <p className="max-w-[42ch] text-ink-700">{message}</p>
       <Button asChild variant="secondary">
         <Link href={actionHref}>{actionLabel}</Link>

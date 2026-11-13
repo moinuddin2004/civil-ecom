@@ -1,3 +1,4 @@
+import { BackButton } from '@/components/ui/back-button';
 import { imageUrl, type ProductDetail } from '@aricon/shared';
 import type { Metadata } from 'next';
 import ReactMarkdown from 'react-markdown';
@@ -111,7 +112,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <JsonLd data={breadcrumbJsonLd} />
 
       <div className="mx-auto flex max-w-content flex-col gap-10 px-4 pt-6 pb-28 md:px-8 md:pt-10 md:pb-28 lg:pb-10">
-        <Breadcrumbs items={product.breadcrumbs} current={product.name} />
+        <div className="-mb-4 flex flex-col gap-2">
+          <BackButton fallbackHref="/" className="min-h-11" />
+          <Breadcrumbs items={product.breadcrumbs} current={product.name} />
+        </div>
 
         <div className="grid gap-8 lg:grid-cols-12 lg:gap-10">
           <div className="lg:col-span-7">

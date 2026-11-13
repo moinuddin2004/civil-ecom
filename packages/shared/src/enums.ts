@@ -184,6 +184,7 @@ export const AUDIT_ACTIONS = [
   'product.variant_added',
   'stock.adjusted',
   'products.imported',
+  'order.created',
   'order.status_changed',
   'order.rider_assigned',
   'order.cod_collected',

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { AutoFilterForm } from '@/components/admin/auto-filter-form';
 import { Input } from '@/components/ui/input';
 import { REPORT_RANGE_LABELS, REPORT_RANGE_PRESETS, type ReportRangePreset } from '@/lib/admin/report-dates';
 import { cn } from '@/lib/utils';
@@ -33,7 +33,7 @@ export function ReportDateRange({ preset, from, to }: ReportDateRangeProps) {
           </Link>
         ))}
       </div>
-      <form method="get" className="flex flex-wrap items-end gap-2">
+      <AutoFilterForm className="flex flex-wrap items-end gap-2">
         <input type="hidden" name="preset" value="custom" />
         <div className="flex flex-col gap-1">
           <label htmlFor="report-from" className="text-xs text-cement">
@@ -47,10 +47,7 @@ export function ReportDateRange({ preset, from, to }: ReportDateRangeProps) {
           </label>
           <Input id="report-to" type="date" name="to" size="sm" defaultValue={preset === 'custom' ? to : undefined} />
         </div>
-        <Button type="submit" size="sm" variant={preset === 'custom' ? 'primary' : 'secondary'}>
-          Apply
-        </Button>
-      </form>
+      </AutoFilterForm>
     </div>
   );
 }

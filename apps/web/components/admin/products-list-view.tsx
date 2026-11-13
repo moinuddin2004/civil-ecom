@@ -20,7 +20,8 @@ import { Pill } from '@/components/shop/status-badges';
 import { Button } from '@/components/ui/button';
 import { DownloadButton } from '@/components/ui/download-button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
+import { AutoFilterForm } from '@/components/admin/auto-filter-form';
+import { LiveSearchInput } from '@/components/admin/live-search-input';
 import { Select } from '@/components/ui/select';
 import { categoryOptions } from '@/lib/admin/category-options';
 import { buildAdminHref } from '@/lib/admin/query-string';
@@ -90,12 +91,12 @@ export function ProductsListView({ products, meta, categories, brands, filters }
         </div>
       </div>
 
-      <form method="get" className="flex flex-wrap items-end gap-3 rounded-xl border border-concrete-150 bg-surface p-4 shadow-card">
+      <AutoFilterForm className="flex flex-wrap items-end gap-3 rounded-xl border border-concrete-150 bg-surface p-4 shadow-card">
         <div className="flex min-w-48 flex-1 flex-col gap-1.5">
           <label htmlFor="products-q" className="text-sm font-medium text-ink">
             Search
           </label>
-          <Input id="products-q" name="q" size="sm" placeholder="Name or SKU" defaultValue={filters.q} />
+          <LiveSearchInput id="products-q" size="sm" placeholder="Name or SKU" defaultValue={filters.q ?? ''} />
         </div>
         <div className="flex flex-col gap-1.5">
           <label htmlFor="products-category" className="text-sm font-medium text-ink">
@@ -133,15 +134,12 @@ export function ProductsListView({ products, meta, categories, brands, filters }
           <Checkbox id="products-low-stock" name="lowStock" value="1" defaultChecked={filters.lowStock} size="sm" />
           Low stock only
         </label>
-        <Button type="submit" variant="secondary" size="sm">
-          Apply
-        </Button>
         {(filters.q || filters.categorySlug || filters.brandSlug || filters.status || filters.lowStock) ? (
           <Button asChild type="button" variant="tertiary" size="sm">
             <Link href="/admin/products">Clear</Link>
           </Button>
         ) : null}
-      </form>
+      </AutoFilterForm>
 
       <div className="overflow-x-auto rounded-xl border border-concrete-150 bg-surface shadow-card">
         <table className="w-full min-w-[900px] text-sm">

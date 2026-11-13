@@ -1,8 +1,11 @@
+import { BackButton } from '@/components/ui/back-button';
 import { formatDateTime, formatPKR, formatQty, orderTimeline, PAYMENT_METHOD_LABELS } from '@aricon/shared';
 import type { Metadata } from 'next';
 import { OrderActionsBar } from '@/components/account/order-actions-bar';
 import { OrderStatusTimeline } from '@/components/account/order-status-timeline';
 import { ReceiptPanel } from '@/components/account/receipt-panel';
+import { CopyButton } from '@/components/shop/copy-button';
+import { TrackingCode } from '@/components/shop/tracking-code';
 import { OrderStatusBadge, PaymentStatusBadge } from '@/components/shop/status-badges';
 import { CARD_CLASS } from '@/components/shop/styles';
 import { getCustomerOrder, getPublicSettings, orNotFound } from '@/lib/api-server';
@@ -30,13 +33,16 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
 
   return (
     <div className="flex flex-col gap-6">
+      <BackButton fallbackHref="/account/orders" className="-mb-2 min-h-11" />
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="type-h1">{order.orderNumber}</h1>
+          <CopyButton value={order.orderNumber} label="Copy order number" className="-ml-2" />
           <OrderStatusBadge status={order.status} />
           <PaymentStatusBadge status={order.paymentStatus} />
         </div>
         <p className="text-sm text-cement">Placed {formatDateTime(order.createdAt)}</p>
+        <TrackingCode code={order.trackingCode} />
         <OrderActionsBar order={order} />
       </div>
 
@@ -105,6 +111,12 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
             <span>Subtotal</span>
             <span>{formatPKR(order.subtotal)}</span>
           </div>
+          {order.discount > 0 ? (
+            <div className="flex items-center justify-between text-sm text-success">
+              <span>Discount</span>
+              <span>-{formatPKR(order.discount)}</span>
+            </div>
+          ) : null}
           <div className="flex items-center justify-between text-sm text-ink-700">
             <span>Delivery</span>
             <span>{formatPKR(order.deliveryFee)}</span>

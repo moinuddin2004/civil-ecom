@@ -3,9 +3,9 @@
 import { CATALOG_STATUSES, type AdminBrandDTO } from '@aricon/shared';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
-import { DialogFooter } from '@/components/ui/dialog';
+import { SheetFooter } from '@/components/ui/sheet';
 import { FormError } from '@/components/ui/form-error';
 import { SingleImageUpload } from '@/components/admin/single-image-upload';
 import { FormField } from '@/components/ui/form-field';
@@ -91,18 +91,30 @@ export function BrandForm({ brand, onSubmit, onCancel }: BrandFormProps) {
           <Input id="brand-sort-order" size="sm" type="number" {...register('sortOrder', { valueAsNumber: true })} />
         </FormField>
         <FormField label="Status" htmlFor="brand-status" error={errors.status?.message}>
-          <Select id="brand-status" size="sm" {...register('status')} options={CATALOG_STATUSES.map((s) => ({ value: s, label: STATUS_LABELS[s] }))} />
+          <Controller
+            control={control}
+            name="status"
+            render={({ field }) => (
+              <Select
+                id="brand-status"
+                size="sm"
+                value={field.value}
+                onValueChange={field.onChange}
+                options={CATALOG_STATUSES.map((s) => ({ value: s, label: STATUS_LABELS[s] }))}
+              />
+            )}
+          />
         </FormField>
       </div>
       <FormError message={formError} />
-      <DialogFooter>
+      <SheetFooter>
         <Button type="button" variant="secondary" onClick={onCancel}>
           Cancel
         </Button>
         <Button type="submit" loading={isSubmitting}>
           {brand ? 'Save changes' : 'Add brand'}
         </Button>
-      </DialogFooter>
+      </SheetFooter>
     </form>
   );
 }

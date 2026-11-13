@@ -2,6 +2,7 @@ import {
   CACHE_TAGS,
   codLimitMessage,
   isPaymentMethodAllowed,
+  type CartItem,
   notServiceableMessage,
   type PaymentMethod,
   type PricedCart,
@@ -14,6 +15,7 @@ import { AppConfig } from '../../config/app-config.service.js';
 import { TransactionService } from '../../database/transaction.service.js';
 import type { OrderLean } from '../../models/order.model.js';
 import type { StoreSettings } from '../../models/settings.model.js';
+import { AuditService, type AuditActor } from '../audit/audit.service.js';
 import { CartPricingService } from '../cart/cart-pricing.service.js';
 import { CartsRepository } from '../cart/carts.repository.js';
 import { NotificationsService } from '../notifications/notifications.service.js';
@@ -21,6 +23,7 @@ import { REVALIDATE_STOCK_MS, RevalidationService } from '../revalidation/revali
 import { UsersRepository } from '../users/users.repository.js';
 import { toOrderItem } from './order.mappers.js';
 import { OrderNumbersRepository } from './order-numbers.repository.js';
+import { newTrackingCode } from './order-tracking-code.js';
 import { OrdersRepository } from './orders.repository.js';
 import { ProductStockRepository, type MovementInput } from '../inventory/product-stock.repository.js';
 
@@ -29,6 +32,14 @@ export interface PlaceOrderInput {
   paymentMethod: PaymentMethod;
   customerNote?: string;
   expectedTotal: number;
+}
+
+/** Set when staff place the order for a customer (SPEC §6.6a): the lines come from the request, not a cart. */
+export interface StaffPlacement {
+  actor: AuditActor;
+  items: readonly CartItem[];
+  /** Rupees off the subtotal, with the reason (SPEC §6.6c). The caller has checked the permission. */
+  discount?: { amount: number; reason: string };
 }
 
 export interface PlacedOrder {
@@ -66,23 +77,28 @@ export class OrderPlacementService {
     private readonly notifications: NotificationsService,
     private readonly revalidation: RevalidationService,
     private readonly config: AppConfig,
+    private readonly audit: AuditService,
   ) {}
 
-  async place(userId: string, input: PlaceOrderInput, idempotencyKey: string): Promise<PlacedOrder> {
+  async place(userId: string, input: PlaceOrderInput, idempotencyKey: string, staff?: StaffPlacement): Promise<PlacedOrder> {
     // Step 1: a retry of a request that already succeeded gets the same order back.
     const existing = await this.orders.findByIdempotencyKey(userId, idempotencyKey);
     if (existing) return { order: existing, created: false };
 
-    let result: PlacementResult;
-    try {
-      result = await this.transactions.run((session) => this.placeInTransaction(userId, input, idempotencyKey, session));
-    } catch (error) {
-      // The same key raced itself (double submit): the unique index let one through; return that one.
-      if (isDuplicateKey(error, 'idempotencyKey')) {
-        const order = await this.orders.findByIdempotencyKey(userId, idempotencyKey);
-        if (order) return { order, created: false };
+    let result: PlacementResult | undefined;
+    // Two orders picking the same 6-digit code at the same moment is rare; the unique index catches it and we pick again.
+    for (let attempt = 0; result === undefined; attempt += 1) {
+      try {
+        result = await this.transactions.run((session) => this.placeInTransaction(userId, input, idempotencyKey, session, staff));
+      } catch (error) {
+        if (isDuplicateKey(error, 'trackingCode') && attempt < 4) continue;
+        // The same key raced itself (double submit): the unique index let one through; return that one.
+        if (isDuplicateKey(error, 'idempotencyKey')) {
+          const order = await this.orders.findByIdempotencyKey(userId, idempotencyKey);
+          if (order) return { order, created: false };
+        }
+        throw error;
       }
-      throw error;
     }
 
     // Step 5: after commit (emails must never be sent for a rolled-back order).
@@ -100,24 +116,36 @@ export class OrderPlacementService {
     input: PlaceOrderInput,
     idempotencyKey: string,
     session: ClientSession,
+    staff?: StaffPlacement,
   ): Promise<PlacementResult> {
     const again = await this.orders.findByIdempotencyKey(userId, idempotencyKey, session);
     if (again) return { order: again, created: false, settings: null, productSlugs: [] };
 
     // Step 2: load and validate.
     const user = await this.users.findById(userId, session);
-    if (!user) throw AppError.unauthenticated();
+    if (staff) {
+      if (!user || user.role !== 'CUSTOMER') throw fieldError('userId', "We couldn't find that customer.");
+      if (user.status !== 'active') throw fieldError('userId', 'This customer is blocked. Unblock them before creating an order.');
+    } else if (!user) {
+      throw AppError.unauthenticated();
+    }
     const address = user.addresses.find((item) => String(item._id) === input.addressId);
-    if (!address) throw fieldError('addressId', 'Choose one of your saved addresses.');
+    if (!address) throw fieldError('addressId', staff ? "Choose one of this customer's saved addresses." : 'Choose one of your saved addresses.');
 
-    const items = await this.carts.items(userId, session);
-    if (items.length === 0) throw AppError.validation('Your cart is empty. Add something before placing an order.');
+    const items = staff ? [...staff.items] : await this.carts.items(userId, session);
+    if (items.length === 0) {
+      throw AppError.validation(staff ? 'Add at least one product.' : 'Your cart is empty. Add something before placing an order.');
+    }
 
     const { cart, area, settings } = await this.pricing.priceWithContext(items, String(address.areaId), session);
     if (!area) throw fieldError('addressId', "We don't deliver to this address's area. Choose another address.");
     if (!area.isServiceable) throw fieldError('addressId', notServiceableMessage(area.name));
     this.assertNoLineIssues(cart);
-    if (!isPaymentMethodAllowed(input.paymentMethod, settings, cart.total)) {
+    // Staff may take an amount off the subtotal (never the delivery fee); the discounted total is what the customer pays.
+    const discount = staff?.discount?.amount ?? 0;
+    if (discount > cart.subtotal) throw fieldError('discountAmount', "The discount can't be more than the order subtotal.");
+    const payable = cart.total - discount;
+    if (!isPaymentMethodAllowed(input.paymentMethod, settings, payable)) {
       // COD that is switched on can only fail on the limit (SPEC §6.5); anything else is switched off.
       const codLimit = settings.codMaxOrderAmount;
       throw fieldError(
@@ -129,7 +157,7 @@ export class OrderPlacementService {
     }
 
     // Step 3: the server's prices are the only ones that count.
-    if (cart.total !== input.expectedTotal) {
+    if (payable !== input.expectedTotal) {
       throw new AppError('PRICE_CHANGED', 'Prices changed since you opened checkout. Review your order and place it again.', {
         cart,
       });
@@ -138,6 +166,8 @@ export class OrderPlacementService {
     // Step 4: stock, number, order, movements, cart — all or nothing.
     const now = new Date();
     const orderId = new Types.ObjectId();
+    let trackingCode = newTrackingCode();
+    while (await this.orders.trackingCodeTaken(trackingCode, session)) trackingCode = newTrackingCode();
     const movements: MovementInput[] = [];
     for (const pricedLine of cart.lines) {
       const item = toOrderItem(pricedLine);
@@ -159,6 +189,7 @@ export class OrderPlacementService {
       {
         _id: orderId,
         orderNumber: await this.orderNumbers.next(now, session),
+        trackingCode,
         userId: user._id,
         user: { name: user.name, email: user.email, phone: user.phone ?? address.phone },
         shippingAddress: {
@@ -176,19 +207,46 @@ export class OrderPlacementService {
         items: cart.lines.map(toOrderItem),
         subtotal: cart.subtotal,
         deliveryFee: cart.deliveryFee ?? 0,
-        total: cart.total,
+        discountAmount: discount,
+        ...(staff?.discount && discount > 0
+          ? { discountReason: staff.discount.reason, discountByUserId: new Types.ObjectId(staff.actor.id) }
+          : {}),
+        total: payable,
         paymentMethod: input.paymentMethod,
         paymentStatus: 'PENDING',
         receipts: [],
         status: 'NEW',
-        statusHistory: [{ status: 'NEW', at: now, byUserId: user._id, byType: 'customer' }],
+        statusHistory: [
+          staff
+            ? { status: 'NEW', at: now, byUserId: new Types.ObjectId(staff.actor.id), byType: 'staff' }
+            : { status: 'NEW', at: now, byUserId: user._id, byType: 'customer' },
+        ],
         customerNote: input.customerNote,
         idempotencyKey,
       },
       session,
     );
     await this.stock.recordMovements(movements, session);
-    await this.carts.clear(userId, session);
+    if (staff) {
+      await this.audit.record(
+        staff.actor,
+        {
+          action: 'order.created',
+          entity: 'order',
+          entityId: String(order._id),
+          after: {
+            orderNumber: order.orderNumber,
+            customerId: userId,
+            total: order.total,
+            paymentMethod: order.paymentMethod,
+            ...(discount > 0 && { discount, discountReason: staff.discount?.reason }),
+          },
+        },
+        session,
+      );
+    } else {
+      await this.carts.clear(userId, session);
+    }
     return { order, created: true, settings, productSlugs: cart.lines.flatMap((line) => (line.slug ? [line.slug] : [])) };
   }
 
@@ -209,6 +267,7 @@ export class OrderPlacementService {
       to: order.user.email,
       name: order.user.name,
       orderNumber: order.orderNumber,
+      trackingCode: order.trackingCode ?? null,
       orderUrl: `${appUrl}/account/orders/${order.orderNumber}`,
       items: order.items.map(({ productName, variantLabel, qty, unitPrice, lineTotal }) => ({
         productName,
@@ -218,6 +277,7 @@ export class OrderPlacementService {
         lineTotal,
       })),
       subtotal: order.subtotal,
+      discount: order.discountAmount,
       deliveryFee: order.deliveryFee,
       total: order.total,
       paymentMethod: order.paymentMethod,

@@ -27,14 +27,10 @@ export interface ImageSlide extends BannerDTO {
 
 export type HeroSlide = MessageSlide | ImageSlide;
 
-export function toImageSlide(banner: BannerDTO): ImageSlide {
-  return { kind: 'image', ...banner };
-}
-
 const TONE_CLASS: Record<MessageSlide['tone'], string> = {
-  ink: 'bg-ink',
-  blueprint: 'bg-blueprint',
-  'ink-700': 'bg-ink-700',
+  ink: 'bg-amber-100',
+  blueprint: 'bg-blueprint-50',
+  'ink-700': 'bg-concrete-100',
 };
 
 /**
@@ -65,8 +61,8 @@ export function HeroBannerCarousel({ slides }: { slides: HeroSlide[] }) {
       aria-roledescription="carousel"
       aria-label="Featured"
       className={cn(
-        'relative overflow-hidden rounded-2xl text-white md:rounded-3xl',
-        slide.kind === 'message' ? cn('px-5 py-8 md:px-14 md:py-14', TONE_CLASS[slide.tone]) : 'bg-ink',
+        'relative overflow-hidden rounded-2xl md:rounded-3xl',
+        slide.kind === 'message' ? cn('px-5 py-8 text-ink md:px-14 md:py-14', TONE_CLASS[slide.tone]) : 'bg-ink text-white',
       )}
       onPointerEnter={() => setPaused(true)}
       onPointerLeave={() => setPaused(false)}
@@ -101,7 +97,7 @@ export function HeroBannerCarousel({ slides }: { slides: HeroSlide[] }) {
               aria-selected={dotIndex === index}
               aria-label={`Show banner ${dotIndex + 1} of ${slides.length}`}
               onClick={() => goTo(dotIndex)}
-              className={cn('h-1.5 rounded-full transition-[width]', dotIndex === index ? 'w-6 bg-amber' : 'w-1.5 bg-white/40')}
+              className={cn('h-1.5 rounded-full transition-[width]', dotIndex === index ? 'w-6 bg-amber' : cn('w-1.5', slide.kind === 'message' ? 'bg-ink/25' : 'bg-white/40'))}
             />
           ))}
         </div>
@@ -113,9 +109,9 @@ export function HeroBannerCarousel({ slides }: { slides: HeroSlide[] }) {
 function MessageSlideContent({ slide }: { slide: MessageSlide }) {
   return (
     <div className="max-w-[36ch] md:max-w-[44ch]">
-      <p className="text-sm font-semibold text-concrete-200">{slide.eyebrow}</p>
+      <p className="text-sm font-semibold text-ink-700">{slide.eyebrow}</p>
       <h1 className="mt-2 type-display">{slide.heading}</h1>
-      <p className="mt-3 max-w-[44ch] text-concrete-200">{slide.body}</p>
+      <p className="mt-3 max-w-[44ch] text-ink-700">{slide.body}</p>
       <Button asChild size="lg" className="mt-6">
         <Link href={slide.link ?? '/search'}>{slide.ctaLabel}</Link>
       </Button>

@@ -91,10 +91,24 @@ export class DashboardDto implements DashboardDTO {
 
 class SalesPointDto extends TotalsDto {
   @ApiProperty({ example: '2026-09-26', description: 'YYYY-MM-DD or YYYY-MM.' }) period!: string;
+  @ApiProperty({ description: 'Money received for the orders of this period.' }) collected!: number;
 }
 
 class SalesTotalsDto extends TotalsDto {
   @ApiProperty({ description: 'Revenue ÷ orders, whole rupees.' }) averageOrder!: number;
+  @ApiProperty({ description: 'Revenue before discounts and delivery fees.' }) subtotal!: number;
+  @ApiProperty() discounts!: number;
+  @ApiProperty() deliveryFees!: number;
+  @ApiProperty({ description: 'Money received (bank transfers once approved, COD as recorded).' }) collected!: number;
+  @ApiProperty({ description: 'Revenue of orders not paid yet.' }) pending!: number;
+}
+
+class PaymentRowDto {
+  @ApiProperty({ enum: ['COD', 'BANK_TRANSFER'] }) method!: 'COD' | 'BANK_TRANSFER';
+  @ApiProperty() orders!: number;
+  @ApiProperty() revenue!: number;
+  @ApiProperty() collected!: number;
+  @ApiProperty() pending!: number;
 }
 
 export class SalesReportDto implements SalesReportDTO {
@@ -103,6 +117,7 @@ export class SalesReportDto implements SalesReportDTO {
   @ApiProperty({ enum: ['day', 'month'] }) groupBy!: 'day' | 'month';
   @ApiProperty({ type: SalesTotalsDto }) totals!: SalesTotalsDto;
   @ApiProperty({ type: [SalesPointDto], description: 'Every period in the range, zeros included.' }) series!: SalesPointDto[];
+  @ApiProperty({ type: [PaymentRowDto] }) byPayment!: PaymentRowDto[];
 }
 
 class ProductSalesDto {
@@ -125,6 +140,9 @@ class CodTotalsDto {
   @ApiProperty() pending!: number;
   @ApiProperty() collectedOrders!: number;
   @ApiProperty() pendingOrders!: number;
+  @ApiProperty({ description: 'Order totals of the orders whose cash is recorded.' }) expected!: number;
+  @ApiProperty({ description: 'Collected below the order total.' }) short!: number;
+  @ApiProperty({ description: 'Collected above the order total.' }) extra!: number;
 }
 
 class CodRiderDto {
@@ -132,12 +150,29 @@ class CodRiderDto {
   @ApiProperty() riderName!: string;
   @ApiProperty() collected!: number;
   @ApiProperty() pending!: number;
+  @ApiProperty() expected!: number;
+  @ApiProperty() short!: number;
+  @ApiProperty() extra!: number;
 }
 
 class CodDayDto {
   @ApiProperty() date!: string;
   @ApiProperty() collected!: number;
   @ApiProperty() pending!: number;
+  @ApiProperty() expected!: number;
+  @ApiProperty() short!: number;
+  @ApiProperty() extra!: number;
+}
+
+class CodDifferenceDto {
+  @ApiProperty() orderId!: string;
+  @ApiProperty() orderNumber!: string;
+  @ApiProperty({ type: String, nullable: true }) riderName!: string | null;
+  @ApiProperty() date!: string;
+  @ApiProperty() total!: number;
+  @ApiProperty() collected!: number;
+  @ApiProperty({ description: '`collected - total`: negative is short.' }) difference!: number;
+  @ApiProperty({ type: String, nullable: true }) note!: string | null;
 }
 
 export class CodReportDto implements CodReportDTO {
@@ -146,4 +181,6 @@ export class CodReportDto implements CodReportDTO {
   @ApiProperty({ type: CodTotalsDto }) totals!: CodTotalsDto;
   @ApiProperty({ type: [CodRiderDto] }) byRider!: CodRiderDto[];
   @ApiProperty({ type: [CodDayDto] }) byDay!: CodDayDto[];
+  @ApiProperty({ type: [CodDifferenceDto], description: 'Orders collected above or below their total, biggest shortfall first (at most 100).' })
+  differences!: CodDifferenceDto[];
 }

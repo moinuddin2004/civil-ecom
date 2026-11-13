@@ -19,14 +19,14 @@ import { Controller, useForm, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogBody,
-  DialogCloseButton,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+  Sheet,
+  SheetBody,
+  SheetCloseButton,
+  SheetContent,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 import { FormError } from '@/components/ui/form-error';
 import { FormField } from '@/components/ui/form-field';
 import { Input } from '@/components/ui/input';
@@ -137,14 +137,14 @@ export function StaffFormSheet({ open, onOpenChange, mode, staffMember, catalog,
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent mobile="sheet" size="lg" aria-describedby={undefined} className="lg:max-h-[calc(100dvh-4rem)]">
-        <DialogHeader>
-          <DialogTitle>{mode === 'create' ? 'Add staff member' : 'Edit staff member'}</DialogTitle>
-          <DialogCloseButton size="sm" />
-        </DialogHeader>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="flex min-h-0 flex-1 flex-col gap-4 overflow-hidden">
-          <DialogBody>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent size="lg" aria-describedby={undefined}>
+        <SheetHeader>
+          <SheetTitle>{mode === 'create' ? 'Add staff member' : 'Edit staff member'}</SheetTitle>
+          <SheetCloseButton />
+        </SheetHeader>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex min-h-0 flex-1 flex-col">
+          <SheetBody>
             <FormField label="Name" htmlFor="staff-name" error={form.formState.errors.name?.message} required>
               <Input id="staff-name" size="sm" {...form.register('name')} />
             </FormField>
@@ -194,12 +194,19 @@ export function StaffFormSheet({ open, onOpenChange, mode, staffMember, catalog,
 
             {mode === 'edit' ? (
               <FormField label="Status" htmlFor="staff-status" error={form.formState.errors.status?.message}>
-                <Select
-                  id="staff-status"
-                  size="sm"
-                  disabled={Boolean(guard?.statusLocked)}
-                  options={USER_STATUSES.map((s) => ({ value: s, label: STATUS_LABELS[s] }))}
-                  {...form.register('status')}
+                <Controller
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <Select
+                      id="staff-status"
+                      size="sm"
+                      disabled={Boolean(guard?.statusLocked)}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      options={USER_STATUSES.map((s) => ({ value: s, label: STATUS_LABELS[s] }))}
+                    />
+                  )}
                 />
               </FormField>
             ) : null}
@@ -244,17 +251,17 @@ export function StaffFormSheet({ open, onOpenChange, mode, staffMember, catalog,
             )}
 
             <FormError message={formError} />
-          </DialogBody>
-          <DialogFooter>
-            <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" loading={submitting}>
-              {mode === 'create' ? 'Add staff member' : 'Save changes'}
-            </Button>
-          </DialogFooter>
+            <SheetFooter>
+              <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" loading={submitting}>
+                {mode === 'create' ? 'Add staff member' : 'Save changes'}
+              </Button>
+            </SheetFooter>
+          </SheetBody>
         </form>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }

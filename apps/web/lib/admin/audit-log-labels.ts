@@ -9,6 +9,7 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   'product.variant_added': 'Added a variant',
   'stock.adjusted': 'Adjusted stock',
   'products.imported': 'Imported products from Excel',
+  'order.created': 'Created an order for a customer',
   'order.status_changed': 'Changed order status',
   'order.rider_assigned': 'Assigned a rider',
   'order.cod_collected': 'Marked cash collected',

@@ -15,7 +15,8 @@ import { toast } from 'sonner';
 import { Pill } from '@/components/shop/status-badges';
 import { Button } from '@/components/ui/button';
 import { DownloadButton } from '@/components/ui/download-button';
-import { Input } from '@/components/ui/input';
+import { AutoFilterForm } from '@/components/admin/auto-filter-form';
+import { LiveSearchInput } from '@/components/admin/live-search-input';
 import { Select } from '@/components/ui/select';
 import { apiClient } from '@/lib/api-client';
 import { buildAdminHref } from '@/lib/admin/query-string';
@@ -62,13 +63,13 @@ export function CustomersTab({ customers, query, canExport, canBlock }: Customer
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <form method="get" className="flex flex-wrap items-end gap-2">
+        <AutoFilterForm className="flex flex-wrap items-end gap-2">
           <input type="hidden" name="tab" value="customers" />
           <div className="flex flex-col gap-1.5">
             <label htmlFor="customers-q" className="text-sm font-medium text-ink">
               Search
             </label>
-            <Input id="customers-q" name="q" size="sm" defaultValue={query.q} placeholder="Name, email or phone" className="w-56" />
+            <LiveSearchInput id="customers-q" size="sm" defaultValue={query.q ?? ''} placeholder="Name, email or phone" className="w-56" />
           </div>
           <div className="flex flex-col gap-1.5">
             <label htmlFor="customers-status" className="text-sm font-medium text-ink">
@@ -86,10 +87,7 @@ export function CustomersTab({ customers, query, canExport, canBlock }: Customer
               ]}
             />
           </div>
-          <Button type="submit" variant="secondary" size="sm">
-            Filter
-          </Button>
-        </form>
+        </AutoFilterForm>
         {canExport ? (
           <DownloadButton
             path={buildAdminHref('/admin/customers/export', { q: query.q || undefined, status: query.status || undefined })}

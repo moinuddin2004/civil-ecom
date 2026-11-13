@@ -29,6 +29,7 @@ export const routes = {
   search: (q?: string) => withQuery('/search', { q }),
   page: (key: PageKey) => `/pages/${PAGE_SLUGS[key]}`,
   cart: '/cart',
+  trackOrder: '/track-order',
   checkout: '/checkout',
   checkoutSuccess: (orderNumber: string) => `/checkout/success/${orderNumber}`,
   login: (next?: string) => withQuery('/login', { next }),

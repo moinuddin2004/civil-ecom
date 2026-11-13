@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
  */
 const checkboxVariants = cva(
   [
-    'peer inline-grid shrink-0 place-items-center rounded-xs border-[1.5px] border-concrete-400 bg-surface text-white',
+    'peer relative inline-grid shrink-0 place-items-center rounded-xs border-[1.5px] border-concrete-400 bg-surface text-white',
     'data-[state=checked]:border-ink data-[state=checked]:bg-ink',
     'data-[state=indeterminate]:border-ink data-[state=indeterminate]:bg-ink',
     'aria-invalid:border-danger',
@@ -40,24 +40,28 @@ export type CheckboxProps = Omit<ComponentProps<typeof CheckboxPrimitive.Root>, 
 
 export function Checkbox({ className, size, ...props }: CheckboxProps) {
   return (
-    <CheckboxPrimitive.Root
-      data-slot="checkbox"
-      className={cn(checkboxVariants({ size }), className)}
-      {...props}
-    >
-      <CheckboxPrimitive.Indicator className="group/indicator grid place-items-center">
-        <Check
-          aria-hidden
-          strokeWidth={2.5}
-          className="size-3.5 group-data-[state=indeterminate]/indicator:hidden"
-        />
-        <Minus
-          aria-hidden
-          strokeWidth={2.5}
-          className="hidden size-3.5 group-data-[state=indeterminate]/indicator:block"
-        />
-      </CheckboxPrimitive.Indicator>
-    </CheckboxPrimitive.Root>
+    /* `relative` keeps Radix's hidden checkbox input (an absolutely positioned sibling) inside
+       this box, so a checkbox inside a horizontally scrolling table can't widen the page. */
+    <span className="relative inline-flex shrink-0 align-middle">
+      <CheckboxPrimitive.Root
+        data-slot="checkbox"
+        className={cn(checkboxVariants({ size }), className)}
+        {...props}
+      >
+        <CheckboxPrimitive.Indicator className="group/indicator grid place-items-center">
+          <Check
+            aria-hidden
+            strokeWidth={2.5}
+            className="size-3.5 group-data-[state=indeterminate]/indicator:hidden"
+          />
+          <Minus
+            aria-hidden
+            strokeWidth={2.5}
+            className="hidden size-3.5 group-data-[state=indeterminate]/indicator:block"
+          />
+        </CheckboxPrimitive.Indicator>
+      </CheckboxPrimitive.Root>
+    </span>
   );
 }
 

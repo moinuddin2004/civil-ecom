@@ -4,6 +4,9 @@ import { karachiYear } from './format.js';
 
 export const ORDER_NUMBER_PATTERN = /^ARC-\d{4}-\d{6,}$/;
 
+/** The 6-digit code every order gets for public tracking (SPEC §6.6b). */
+export const TRACKING_CODE_PATTERN = /^\d{6}$/;
+
 export function orderCounterId(year: number): string {
   return `order-${year}`;
 }

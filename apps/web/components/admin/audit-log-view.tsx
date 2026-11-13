@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Fragment, useState } from 'react';
 import { AccessDenied } from '@/components/admin/access-denied';
 import { AdminPagination } from '@/components/admin/admin-pagination';
+import { AutoFilterForm } from '@/components/admin/auto-filter-form';
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/select';
 import { AUDIT_ACTION_LABELS, AUDIT_ENTITY_LABELS } from '@/lib/admin/audit-log-labels';
@@ -93,7 +94,7 @@ export function AuditLogView({ rows, meta, actors, query }: AuditLogViewProps) {
     <div className="flex flex-col gap-5">
       <h1 className="type-h1">Audit log</h1>
 
-      <form method="get" className="flex flex-wrap items-end gap-2">
+      <AutoFilterForm className="flex flex-wrap items-end gap-2">
         <div className="flex flex-col gap-1">
           <label htmlFor="audit-actor" className="text-xs text-cement">
             Actor
@@ -143,15 +144,12 @@ export function AuditLogView({ rows, meta, actors, query }: AuditLogViewProps) {
             className="h-9 rounded-md border border-concrete-400 bg-surface px-2.5 text-sm text-ink"
           />
         </div>
-        <Button type="submit" size="sm" variant="secondary">
-          Filter
-        </Button>
         {query.actor || query.entity || query.action || query.from || query.to ? (
           <Button variant="tertiary" size="sm" asChild>
             <Link href="/admin/audit-logs">Clear</Link>
           </Button>
         ) : null}
-      </form>
+      </AutoFilterForm>
 
       <div className="overflow-x-auto rounded-xl border border-concrete-150 bg-surface shadow-card">
         <table className="w-full min-w-[860px] text-sm">

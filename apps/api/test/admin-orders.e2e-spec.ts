@@ -106,6 +106,10 @@ describe('Admin orders', () => {
     const assigned = (await post(orderManager, `${order.id}/rider`, { riderId }).expect(200)).body.data as AdminOrderDTO;
     expect(assigned.rider).toEqual({ name: 'Imran Ali', phone: '+923121234567' });
 
+    // The list rows carry the rider id too, so the list can show the rider picker and the dispatch rule.
+    const listed = (await orderManager.get(`/api/admin/orders?q=${order.orderNumber}`).expect(200)).body.data as { id: string; riderId: string | null; riderName: string | null }[];
+    expect(listed.find((row) => row.id === order.id)).toMatchObject({ riderId, riderName: 'Imran Ali' });
+
     await status(orderManager, order.id, 'DISPATCHED').expect(200);
     expect((await customer.get(`/api/orders/${order.orderNumber}`).expect(200)).body.data.rider).toEqual({
       name: 'Imran Ali',
