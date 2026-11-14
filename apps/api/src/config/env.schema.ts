@@ -26,6 +26,7 @@ const R2_KEYS = [
   'R2_PUBLIC_BUCKET',
   'R2_PRIVATE_BUCKET',
 ] as const;
+const GOOGLE_KEYS = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GOOGLE_CALLBACK_URL'] as const;
 
 const required = (issue: { input?: unknown }) => (issue.input === undefined ? 'is required' : undefined);
 
@@ -92,6 +93,16 @@ const EnvSchema = z
     RFP_CORS_ORIGINS: originList.default([]),
     WEB_INTERNAL_URL: baseUrl.default('http://127.0.0.1:3000'),
     REVALIDATE_SECRET: secret,
+    /** Page that takes `?token=` and calls the verify endpoint. Defaults to `${APP_URL}/verify-email`. */
+    EMAIL_VERIFICATION_URL: baseUrl.optional(),
+    /** Links are single use and expire; 5 minutes to 24 hours. */
+    EMAIL_VERIFICATION_TOKEN_EXPIRES_MINUTES: z.coerce.number().int().min(5).max(1_440).default(60),
+
+    /* Google OAuth (customers only). All three or none; required in production. */
+    GOOGLE_CLIENT_ID: z.string().min(10, 'must be the OAuth client ID').optional(),
+    GOOGLE_CLIENT_SECRET: z.string().min(10, 'must be the OAuth client secret').optional(),
+    /** Must be the exact URL registered in Google Cloud and on the same site as APP_URL. */
+    GOOGLE_CALLBACK_URL: baseUrl.optional(),
 
     /* File storage (SPEC §3.3, §12) */
     STORAGE_DRIVER: z.enum(['local', 'r2']).default('local'),
@@ -128,7 +139,29 @@ const EnvSchema = z
       }
     }
 
+    const googleConfigured = GOOGLE_KEYS.filter((key) => env[key]);
+    if (googleConfigured.length > 0 && googleConfigured.length < GOOGLE_KEYS.length) {
+      for (const key of GOOGLE_KEYS) {
+        if (!env[key]) issue(key, 'is required when Google sign-in is configured');
+      }
+    }
+    if (env.GOOGLE_CALLBACK_URL) {
+      try {
+        if (new URL(env.GOOGLE_CALLBACK_URL).origin !== new URL(env.APP_URL).origin) {
+          issue(
+            'GOOGLE_CALLBACK_URL',
+            'must be on the same site as APP_URL so the sign-in cookie comes back with the callback',
+          );
+        }
+      } catch {
+        // `baseUrl` already reported a malformed URL.
+      }
+    }
+
     if (env.NODE_ENV === 'production') {
+      for (const key of GOOGLE_KEYS) {
+        if (!env[key]) issue(key, 'is required in production (Google sign-in for customers)');
+      }
       if (env.STORAGE_DRIVER !== 'r2') issue('STORAGE_DRIVER', 'must be "r2" in production');
       if (!env.APP_URL.startsWith('https://')) issue('APP_URL', 'must use https in production');
       if (!env.SMTP_HOST) issue('SMTP_HOST', 'is required in production');
@@ -138,6 +171,9 @@ const EnvSchema = z
         if (env[key].startsWith(DEV_SECRET_PREFIX)) {
           issue(key, 'is still the example value; generate a new random secret (openssl rand -base64 48)');
         }
+      }
+      if (env.GOOGLE_CLIENT_SECRET?.startsWith(DEV_SECRET_PREFIX)) {
+        issue('GOOGLE_CLIENT_SECRET', 'is still the example value; paste the client secret from Google Cloud Console');
       }
     }
   });

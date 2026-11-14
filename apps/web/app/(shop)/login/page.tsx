@@ -10,15 +10,15 @@ export const metadata: Metadata = {
 };
 
 interface LoginPageProps {
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ next?: string; error?: string }>;
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const { next } = await searchParams;
+  const { next, error } = await searchParams;
 
   return (
     <AuthCard title="Log in" subtitle="Welcome back to Aricon Shop.">
-      <LoginForm next={next} />
+      <LoginForm next={next} initialError={error} />
       <p className="mt-5 border-t border-concrete-150 pt-4 text-center text-sm text-cement">
         Aricon staff?{' '}
         <Link href={routes.adminLogin()} rel="nofollow" className="font-medium text-blueprint underline-offset-2 hover:underline">

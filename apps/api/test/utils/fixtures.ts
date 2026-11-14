@@ -8,6 +8,7 @@ import { Brand } from '../../src/models/brand.model.js';
 import { Category } from '../../src/models/category.model.js';
 import { DeliveryArea } from '../../src/models/delivery-area.model.js';
 import { Product } from '../../src/models/product.model.js';
+import { UsersRepository } from '../../src/modules/users/users.repository.js';
 import { createStaff, ORIGIN, PASSWORD, uniqueContact } from './auth.js';
 
 /* Data builders for e2e tests: real documents through the real models (so their hooks run). */
@@ -91,7 +92,7 @@ export async function createArea(
 
 export type Agent = ReturnType<typeof request.agent>;
 
-/** A signed-up customer and an agent that carries their cookies (and our Origin on writes). */
+/** A signed-up (verified) customer and an agent that carries their cookies (and our Origin on writes). */
 export async function customerAgent(app: INestApplication): Promise<{ agent: Agent; userId: string; email: string }> {
   const server = app.getHttpServer() as Parameters<typeof request.agent>[0];
   const agent = request.agent(server);
@@ -101,7 +102,15 @@ export async function customerAgent(app: INestApplication): Promise<{ agent: Age
     .set('Origin', ORIGIN)
     .send({ name: 'Test Customer', email: contact.email, phone: contact.phone, password: PASSWORD })
     .expect(201);
-  return { agent, userId: (res.body as { data: { id: string } }).data.id, email: contact.email };
+  const userId = (res.body as { data: { id: string } }).data.id;
+  // Signup no longer starts a session; these tests need a normal signed-in customer.
+  await app.get(UsersRepository).markEmailVerified(userId);
+  await agent
+    .post('/api/auth/login')
+    .set('Origin', ORIGIN)
+    .send({ identifier: contact.email, password: PASSWORD })
+    .expect(200);
+  return { agent, userId, email: contact.email };
 }
 
 /** A signed-in staff member (or admin) and an agent carrying their admin cookies. */

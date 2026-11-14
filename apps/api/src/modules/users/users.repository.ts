@@ -2,7 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Types, type ClientSession, type Model } from 'mongoose';
 import { BaseRepository } from '../../database/base.repository.js';
-import { User, type AddressData, type UserLean } from '../../models/user.model.js';
+import {
+  User,
+  type AddressData,
+  type UserLean,
+} from '../../models/user.model.js';
 
 const { trusted } = mongoose;
 
@@ -10,7 +14,19 @@ const { trusted } = mongoose;
 export type UserWithPassword = UserLean & { passwordHash: string };
 
 /** The fields the auth guard needs on every request (SPEC §3.2: loaded from the DB, not the token). */
-export type AuthView = Pick<UserLean, '_id' | 'name' | 'email' | 'role' | 'status' | 'permissions' | 'mustChangePassword'>;
+export type AuthView = Pick<
+  UserLean,
+  | '_id'
+  | 'name'
+  | 'email'
+  | 'role'
+  | 'status'
+  | 'permissions'
+  | 'mustChangePassword'
+  | 'emailVerified'
+  | 'deletedAt'
+  | 'tokensValidAfter'
+>;
 
 export interface AddressBook {
   addresses: AddressData[];
@@ -29,6 +45,8 @@ export interface NewUser {
   permissions?: User['permissions'];
   companyName?: string;
   mustChangePassword?: boolean;
+  emailVerified?: boolean;
+  googleSub?: string;
 }
 
 @Injectable()
@@ -46,6 +64,8 @@ export class UsersRepository extends BaseRepository<User, UserLean> {
           status: 'active',
           addresses: [],
           mustChangePassword: input.mustChangePassword ?? false,
+          emailVerified: input.emailVerified ?? false,
+          ...(input.emailVerified && { emailVerifiedAt: new Date() }),
           failedLogins: 0,
         },
       ],
@@ -56,27 +76,57 @@ export class UsersRepository extends BaseRepository<User, UserLean> {
     return created.toObject<UserLean>();
   }
 
-  emailExists(email: string): Promise<boolean> {
-    return this.exists({ email });
+  activeEmailExists(email: string): Promise<boolean> {
+    return this.exists({ email, deletedAt: null });
   }
 
-  phoneExists(phone: string): Promise<boolean> {
-    return this.exists({ phone });
+  activePhoneExists(phone: string): Promise<boolean> {
+    return this.exists({ phone, deletedAt: null });
   }
 
-  async findForLogin(filter: { email: string } | { phone: string }): Promise<UserWithPassword | null> {
-    return this.model.findOne(filter).select('+passwordHash').lean<UserWithPassword>().exec();
+  emailTakenByOther(email: string, userId: string): Promise<boolean> {
+    return this.exists({
+      email,
+      deletedAt: null,
+      _id: trusted({ $ne: new Types.ObjectId(userId) }),
+    });
   }
 
-  async findWithPasswordById(id: string | Types.ObjectId): Promise<UserWithPassword | null> {
-    return this.model.findById(id).select('+passwordHash').lean<UserWithPassword>().exec();
+  async findForLogin(
+    filter: { email: string } | { phone: string },
+  ): Promise<UserWithPassword | null> {
+    return this.model
+      .findOne({ ...filter, deletedAt: null })
+      .select('+passwordHash')
+      .lean<UserWithPassword>()
+      .exec();
+  }
+
+  async findWithPasswordById(
+    id: string | Types.ObjectId,
+  ): Promise<UserWithPassword | null> {
+    return this.model
+      .findById(id)
+      .select('+passwordHash')
+      .lean<UserWithPassword>()
+      .exec();
   }
 
   async findAuthView(id: string): Promise<AuthView | null> {
     if (!mongoose.isValidObjectId(id)) return null;
     return this.model
       .findById(id)
-      .select({ name: 1, email: 1, role: 1, status: 1, permissions: 1, mustChangePassword: 1 })
+      .select({
+        name: 1,
+        email: 1,
+        role: 1,
+        status: 1,
+        permissions: 1,
+        mustChangePassword: 1,
+        emailVerified: 1,
+        deletedAt: 1,
+        tokensValidAfter: 1,
+      })
       .lean<AuthView>()
       .exec();
   }
@@ -88,25 +138,71 @@ export class UsersRepository extends BaseRepository<User, UserLean> {
    */
   async recordFailedLogin(id: Types.ObjectId, now: Date): Promise<Date | null> {
     const updated = await this.model
-      .findByIdAndUpdate(id, { $inc: { failedLogins: 1 } }, { returnDocument: 'after', projection: { failedLogins: 1 } })
+      .findByIdAndUpdate(
+        id,
+        { $inc: { failedLogins: 1 } },
+        { returnDocument: 'after', projection: { failedLogins: 1 } },
+      )
       .lean()
       .exec();
     if (!updated || updated.failedLogins < MAX_FAILED_LOGINS) return null;
 
     const lockedUntil = new Date(now.getTime() + LOCKOUT_MS);
-    await this.model.updateOne({ _id: id }, { $set: { lockedUntil, failedLogins: 0 } }).exec();
+    await this.model
+      .updateOne({ _id: id }, { $set: { lockedUntil, failedLogins: 0 } })
+      .exec();
     return lockedUntil;
+  }
+
+  /** An active (not deleted) account by email, regardless of role. */
+  findActiveByEmail(email: string): Promise<UserLean | null> {
+    return this.findOne({ email: email.trim().toLowerCase(), deletedAt: null });
+  }
+
+  /** Marks an address verified (email link or Google). Idempotent. */
+  async markEmailVerified(
+    id: Types.ObjectId | string,
+    now = new Date(),
+    session?: ClientSession,
+  ): Promise<void> {
+    await this.model
+      .updateOne(
+        { _id: id },
+        { $set: { emailVerified: true, emailVerifiedAt: now } },
+        { session },
+      )
+      .exec();
+  }
+
+  /** Access tokens issued before `at` stop working (see `User.tokensValidAfter`). */
+  async setTokensValidAfter(id: Types.ObjectId | string, at: Date): Promise<void> {
+    await this.model.updateOne({ _id: id }, { $set: { tokensValidAfter: at } }).exec();
+  }
+
+  /** Links a Google account (`sub`) to the user. */
+  async setGoogleSub(id: Types.ObjectId | string, googleSub: string): Promise<void> {
+    await this.model.updateOne({ _id: id }, { $set: { googleSub } }).exec();
   }
 
   async recordSuccessfulLogin(id: Types.ObjectId, now: Date): Promise<void> {
     await this.model
-      .updateOne({ _id: id }, { $set: { failedLogins: 0, lastLoginAt: now }, $unset: { lockedUntil: 1 } })
+      .updateOne(
+        { _id: id },
+        {
+          $set: { failedLogins: 0, lastLoginAt: now },
+          $unset: { lockedUntil: 1 },
+        },
+      )
       .exec();
   }
 
   /** Phone used by any other account (customers' phones are unique, SPEC §5.1). */
   phoneTakenByOther(phone: string, userId: string): Promise<boolean> {
-    return this.exists({ phone, _id: trusted({ $ne: new Types.ObjectId(userId) }) });
+    return this.exists({
+      phone,
+      deletedAt: null,
+      _id: trusted({ $ne: new Types.ObjectId(userId) }),
+    });
   }
 
   /** `companyName: null` clears it; `undefined` leaves it as is. Returns the updated user. */
@@ -114,11 +210,20 @@ export class UsersRepository extends BaseRepository<User, UserLean> {
     userId: string,
     profile: { name: string; phone: string; companyName?: string | null },
   ): Promise<UserLean | null> {
-    const set: Partial<Pick<User, 'name' | 'phone' | 'companyName'>> = { name: profile.name, phone: profile.phone };
+    const set: Partial<Pick<User, 'name' | 'phone' | 'companyName'>> = {
+      name: profile.name,
+      phone: profile.phone,
+    };
     if (profile.companyName) set.companyName = profile.companyName;
-    const update = profile.companyName === null ? { $set: set, $unset: { companyName: 1 } } : { $set: set };
+    const update =
+      profile.companyName === null
+        ? { $set: set, $unset: { companyName: 1 } }
+        : { $set: set };
     return this.model
-      .findByIdAndUpdate(userId, update, { returnDocument: 'after', runValidators: true })
+      .findByIdAndUpdate(userId, update, {
+        returnDocument: 'after',
+        runValidators: true,
+      })
       .lean<UserLean>()
       .exec();
   }
@@ -136,7 +241,11 @@ export class UsersRepository extends BaseRepository<User, UserLean> {
    * Replaces the addresses only if nobody saved them since `version` was read (two tabs editing at
    * once). Returns false on such a conflict. Schema validators (max 10, one default) still run.
    */
-  async saveAddresses(userId: string, version: number, addresses: readonly AddressData[]): Promise<boolean> {
+  async saveAddresses(
+    userId: string,
+    version: number,
+    addresses: readonly AddressData[],
+  ): Promise<boolean> {
     const result = await this.model
       .updateOne(
         { _id: new Types.ObjectId(userId), __v: version },
@@ -157,9 +266,17 @@ export class UsersRepository extends BaseRepository<User, UserLean> {
   }
 
   /** Active admins other than `exceptId` (SPEC §4.5 rule 4: there must always be one). */
-  countOtherActiveAdmins(exceptId: string, session?: ClientSession): Promise<number> {
+  countOtherActiveAdmins(
+    exceptId: string,
+    session?: ClientSession,
+  ): Promise<number> {
     return this.model
-      .countDocuments({ role: 'ADMIN', status: 'active', _id: trusted({ $ne: new Types.ObjectId(exceptId) }) })
+      .countDocuments({
+        role: 'ADMIN',
+        status: 'active',
+        deletedAt: null,
+        _id: trusted({ $ne: new Types.ObjectId(exceptId) }),
+      })
       .session(session ?? null)
       .exec();
   }
@@ -167,31 +284,63 @@ export class UsersRepository extends BaseRepository<User, UserLean> {
   /** `$set` / `$unset` on a staff account; validators run. Returns the updated user. */
   updateFields(
     id: string,
-    set: Partial<Pick<User, 'name' | 'phone' | 'role' | 'permissions' | 'status'>>,
-    unset: readonly 'phone'[] = [],
+    set: Partial<
+      Pick<
+        User,
+        'name' | 'phone' | 'role' | 'permissions' | 'status' | 'deletedAt'
+      >
+    >,
+    unset: readonly ('phone' | 'deletedAt')[] = [],
     session?: ClientSession,
   ): Promise<UserLean | null> {
-    const update = unset.length > 0 ? { $set: set, $unset: Object.fromEntries(unset.map((key) => [key, 1])) } : { $set: set };
-    return this.model.findByIdAndUpdate(id, update, { returnDocument: 'after', runValidators: true, session }).lean<UserLean>().exec();
+    const update =
+      unset.length > 0
+        ? {
+            $set: set,
+            $unset: Object.fromEntries(unset.map((key) => [key, 1])),
+          }
+        : { $set: set };
+    return this.model
+      .findByIdAndUpdate(id, update, {
+        returnDocument: 'after',
+        runValidators: true,
+        session,
+      })
+      .lean<UserLean>()
+      .exec();
   }
 
   /** Admin reset (SPEC §6.11): a new temporary password the staff member must change at next login. */
-  async setTemporaryPassword(id: string, passwordHash: string, session?: ClientSession): Promise<void> {
+  async setTemporaryPassword(
+    id: string,
+    passwordHash: string,
+    session?: ClientSession,
+  ): Promise<void> {
     await this.model
       .updateOne(
         { _id: new Types.ObjectId(id) },
-        { $set: { passwordHash, mustChangePassword: true, failedLogins: 0 }, $unset: { lockedUntil: 1 } },
+        {
+          $set: { passwordHash, mustChangePassword: true, failedLogins: 0 },
+          $unset: { lockedUntil: 1 },
+        },
         { session },
       )
       .exec();
   }
 
   /** New password; also clears a lockout and the forced-change flag. */
-  async setPassword(id: Types.ObjectId | string, passwordHash: string, session?: ClientSession): Promise<void> {
+  async setPassword(
+    id: Types.ObjectId | string,
+    passwordHash: string,
+    session?: ClientSession,
+  ): Promise<void> {
     await this.model
       .updateOne(
         { _id: id },
-        { $set: { passwordHash, mustChangePassword: false, failedLogins: 0 }, $unset: { lockedUntil: 1 } },
+        {
+          $set: { passwordHash, mustChangePassword: false, failedLogins: 0 },
+          $unset: { lockedUntil: 1 },
+        },
         { session },
       )
       .exec();

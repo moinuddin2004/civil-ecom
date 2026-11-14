@@ -297,6 +297,7 @@ async function seedPeople(
     ...CUSTOMER,
     passwordHash,
     role: 'CUSTOMER',
+    emailVerified: true,
     addresses: [
       { _id: homeAddressId, label: 'Home', contactName: CUSTOMER.name, phone: CUSTOMER.phone, line1: 'House 12, Street 5', line2: 'Block 3', landmark: 'Near Al-Noor Mosque', areaId: gulshan, isDefault: true },
       { label: 'Site office', contactName: CUSTOMER.name, phone: CUSTOMER.phone, line1: 'Plot 45, Sector 9', landmark: 'Opposite DHA Phase 6 gate', areaId: dha, isDefault: false },
@@ -305,7 +306,7 @@ async function seedPeople(
 
   const staff = [];
   for (const member of STAFF) {
-    staff.push(await users.create({ ...member, permissions: [...member.permissions], passwordHash, role: 'STAFF', mustChangePassword: false }));
+    staff.push(await users.create({ ...member, permissions: [...member.permissions], passwordHash, role: 'STAFF', mustChangePassword: false, emailVerified: true }));
   }
   const manager = staff[0];
   if (!manager) throw new Error('No order manager was created.');

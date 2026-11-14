@@ -34,6 +34,8 @@ export const routes = {
   checkoutSuccess: (orderNumber: string) => `/checkout/success/${orderNumber}`,
   login: (next?: string) => withQuery('/login', { next }),
   signup: (next?: string) => withQuery('/signup', { next }),
+  verifyEmail: (email?: string, next?: string) => withQuery('/verify-email', { email, next }),
+  googleSignIn: (next?: string) => withQuery('/api/auth/google/start', { next }),
   forgotPassword: '/forgot-password',
   account: '/account',
   accountOrders: '/account/orders',

@@ -8,12 +8,22 @@ import { AuthCookies, clientContext } from './auth-cookies.service.js';
 import { CurrentUser, CustomerOnly, Public } from './auth.decorators.js';
 import type { Principal } from './auth.types.js';
 import { CustomerAuthService } from './customer-auth.service.js';
-import { ForgotPasswordDto, LoginDto, ResetPasswordDto, SignupDto } from './dto/auth.request.dto.js';
+import {
+  ForgotPasswordDto,
+  LoginDto,
+  ResetPasswordDto,
+  ResendVerificationDto,
+  SignupDto,
+  VerifyEmailDto,
+} from './dto/auth.request.dto.js';
 import { CustomerResponseDto } from './dto/auth.response.dto.js';
+import { EmailVerificationService } from './email-verification.service.js';
 import { PasswordResetService } from './password-reset.service.js';
 
 export const FORGOT_PASSWORD_MESSAGE =
   "If an account exists for that email, we've sent a link to reset your password. It works for 60 minutes.";
+export const VERIFICATION_SENT_MESSAGE =
+  "If an account exists for that email, we've sent a verification link. It works for 60 minutes.";
 
 class MessageResponseDto {
   @ApiProperty({ example: FORGOT_PASSWORD_MESSAGE })
@@ -30,23 +40,18 @@ export class CustomerAuthController {
   constructor(
     private readonly auth: CustomerAuthService,
     private readonly resets: PasswordResetService,
+    private readonly verifications: EmailVerificationService,
     private readonly cookies: AuthCookies,
   ) {}
 
   @Post('signup')
   @Public()
   @Throttle({ default: { limit: 5, ttl: hours(1) } })
-  @ApiOperation({ summary: 'Create a customer account and sign in' })
+  @ApiOperation({ summary: 'Create a customer account; sends a verification email' })
   @ApiDataResponse(CustomerResponseDto, { status: 201 })
   @ApiErrorResponses(400, 409, 429)
-  async signup(
-    @Body() body: SignupDto,
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ): Promise<CustomerDTO> {
-    const session = await this.auth.signup(body, clientContext(req));
-    this.cookies.set(res, 'customer', session.tokens);
-    return session.customer;
+  async signup(@Body() body: SignupDto): Promise<CustomerDTO> {
+    return this.auth.signup(body);
   }
 
   @Post('login')
@@ -100,6 +105,28 @@ export class CustomerAuthController {
   @ApiErrorResponses(401, 403)
   me(@CurrentUser() user: Principal): Promise<CustomerDTO> {
     return this.auth.me(user.userId);
+  }
+
+  @Post('verify-email')
+  @Public()
+  @HttpCode(204)
+  @Throttle({ default: { limit: 10, ttl: hours(1) } })
+  @ApiOperation({ summary: 'Verify an email address with the link token (single use)' })
+  @ApiErrorResponses(400, 429)
+  async verifyEmail(@Body() body: VerifyEmailDto): Promise<void> {
+    await this.verifications.verify(body.token);
+  }
+
+  @Post('resend-verification')
+  @Public()
+  @HttpCode(200)
+  @Throttle({ default: { limit: 3, ttl: hours(1) } })
+  @ApiOperation({ summary: 'Email a new verification link (the answer is the same either way)' })
+  @ApiDataResponse(MessageResponseDto)
+  @ApiErrorResponses(400, 429)
+  async resendVerification(@Body() body: ResendVerificationDto): Promise<MessageResponseDto> {
+    await this.verifications.resend(body.email);
+    return { message: VERIFICATION_SENT_MESSAGE };
   }
 
   @Post('forgot-password')

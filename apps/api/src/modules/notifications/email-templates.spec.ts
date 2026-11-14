@@ -10,6 +10,165 @@ const store: EmailStore = {
 };
 
 describe('renderEmail', () => {
+  it('uses the supplied Aricon layout for every notification event', () => {
+    const renderers: (() => ReturnType<typeof renderEmail>)[] = [
+      () =>
+        renderEmail(
+          'user.welcome',
+          { to: 'a@example.com', name: 'A', shopUrl: store.appUrl },
+          store,
+        ),
+      () =>
+        renderEmail(
+          'auth.password_reset',
+          {
+            to: 'a@example.com',
+            name: 'A',
+            resetUrl: `${store.appUrl}/reset-password`,
+            expiresInMinutes: 60,
+          },
+          store,
+        ),
+      () =>
+        renderEmail(
+          'order.placed',
+          {
+            to: 'a@example.com',
+            name: 'A',
+            orderNumber: 'ARC-2026-000001',
+            orderUrl: `${store.appUrl}/account/orders/ARC-2026-000001`,
+            items: [],
+            subtotal: 0,
+            deliveryFee: 0,
+            total: 0,
+            paymentMethod: 'BANK_TRANSFER',
+            bankTransfer: null,
+          },
+          store,
+        ),
+      () =>
+        renderEmail(
+          'order.placed.staff',
+          {
+            to: [],
+            orderNumber: 'ARC-2026-000001',
+            customerName: 'A',
+            customerPhone: '+923001234567',
+            areaName: 'Karachi',
+            total: 0,
+            paymentMethod: 'BANK_TRANSFER',
+            adminUrl: `${store.appUrl}/admin/orders/1`,
+          },
+          store,
+        ),
+      () =>
+        renderEmail(
+          'order.receipt_uploaded.staff',
+          {
+            to: [],
+            orderNumber: 'ARC-2026-000001',
+            adminUrl: `${store.appUrl}/admin/orders/1`,
+          },
+          store,
+        ),
+      () =>
+        renderEmail(
+          'order.payment_received',
+          {
+            to: 'a@example.com',
+            name: 'A',
+            orderNumber: 'ARC-2026-000001',
+            orderUrl: `${store.appUrl}/account/orders/1`,
+          },
+          store,
+        ),
+      () =>
+        renderEmail(
+          'order.payment_rejected',
+          {
+            to: 'a@example.com',
+            name: 'A',
+            orderNumber: 'ARC-2026-000001',
+            reason: 'Unreadable',
+            uploadUrl: `${store.appUrl}/account/orders/1`,
+          },
+          store,
+        ),
+      () =>
+        renderEmail(
+          'order.confirmed',
+          {
+            to: 'a@example.com',
+            name: 'A',
+            orderNumber: 'ARC-2026-000001',
+            orderUrl: `${store.appUrl}/account/orders/1`,
+          },
+          store,
+        ),
+      () =>
+        renderEmail(
+          'order.dispatched',
+          {
+            to: 'a@example.com',
+            name: 'A',
+            orderNumber: 'ARC-2026-000001',
+            orderUrl: `${store.appUrl}/account/orders/1`,
+            riderName: 'Rider',
+            riderPhone: '+923001234567',
+          },
+          store,
+        ),
+      () =>
+        renderEmail(
+          'order.delivered',
+          {
+            to: 'a@example.com',
+            name: 'A',
+            orderNumber: 'ARC-2026-000001',
+            orderUrl: `${store.appUrl}/account/orders/1`,
+            invoiceUrl: `${store.appUrl}/invoice/1`,
+          },
+          store,
+        ),
+      () =>
+        renderEmail(
+          'order.cancelled',
+          {
+            to: 'a@example.com',
+            name: 'A',
+            orderNumber: 'ARC-2026-000001',
+            reason: 'Customer request',
+            orderUrl: `${store.appUrl}/account/orders/1`,
+          },
+          store,
+        ),
+      () =>
+        renderEmail(
+          'rfp.inquiry',
+          {
+            to: 'sales@example.com',
+            replyTo: 'a@example.com',
+            company: 'Aricon',
+            contactPerson: 'A',
+            email: 'a@example.com',
+            phone: null,
+            location: null,
+            service: 'Construction',
+            brief: 'Project details',
+          },
+          store,
+        ),
+    ];
+
+    for (const render of renderers) {
+      const email = render();
+      expect(email.html).toContain('background:#F5F7FA');
+      expect(email.html).toContain('max-width:600px');
+      expect(email.html).toContain('ARICON');
+      expect(email.text).toContain('Aricon Shop');
+    }
+  });
+
   it('renders an order email in HTML and plain text with the order details', () => {
     const email = renderEmail(
       'order.placed',
@@ -18,13 +177,28 @@ describe('renderEmail', () => {
         name: 'Ahmed',
         orderNumber: 'ARC-2026-000123',
         orderUrl: 'https://shop.aricon.com.pk/account/orders/ARC-2026-000123',
-        items: [{ productName: 'Lucky Cement OPC', variantLabel: '50 kg bag', qty: 40, unitPrice: 1_490, lineTotal: 59_600 }],
+        items: [
+          {
+            productName: 'Lucky Cement OPC',
+            variantLabel: '50 kg bag',
+            qty: 40,
+            unitPrice: 1_490,
+            lineTotal: 59_600,
+          },
+        ],
         subtotal: 59_600,
         deliveryFee: 0,
         total: 59_600,
         paymentMethod: 'BANK_TRANSFER',
         bankTransfer: {
-          accounts: [{ bankName: 'Meezan Bank', accountTitle: 'Aricon', accountNumber: '0101-0123456', iban: null }],
+          accounts: [
+            {
+              bankName: 'Meezan Bank',
+              accountTitle: 'Aricon',
+              accountNumber: '0101-0123456',
+              iban: null,
+            },
+          ],
           instructions: 'Send the receipt within 24 hours.',
         },
       },
@@ -37,7 +211,9 @@ describe('renderEmail', () => {
       expect(part).toContain('Meezan Bank');
       expect(part).toContain('Upload receipt');
     }
-    expect(email.text).toContain('Upload receipt: https://shop.aricon.com.pk/account/orders/ARC-2026-000123');
+    expect(email.text).toContain(
+      'Upload receipt: https://shop.aricon.com.pk/account/orders/ARC-2026-000123',
+    );
   });
 
   it('escapes whatever people typed and never links to non-web URLs', () => {
@@ -60,7 +236,16 @@ describe('renderEmail', () => {
     expect(email.html).toContain('&lt;script&gt;');
     expect(email.html).toContain('A &amp; B');
 
-    const reset = renderEmail('auth.password_reset', { to: 'a@b.co', name: 'A', resetUrl: 'javascript:alert(1)', expiresInMinutes: 60 }, store);
+    const reset = renderEmail(
+      'auth.password_reset',
+      {
+        to: 'a@b.co',
+        name: 'A',
+        resetUrl: 'javascript:alert(1)',
+        expiresInMinutes: 60,
+      },
+      store,
+    );
     expect(reset.html).not.toContain('javascript:');
   });
 });

@@ -1,4 +1,4 @@
-import 'server-only';
+import "server-only";
 import type {
   AdminBrandDTO,
   AdminCategoryDTO,
@@ -32,12 +32,12 @@ import type {
   StockMovementReason,
   TopProductsReportDTO,
   UserStatus,
-} from '@aricon/shared';
-import { redirect } from 'next/navigation';
-import { cache } from 'react';
-import { ApiError, isApiError } from './api-errors';
-import { apiServer, getAdminMe } from './api-server';
-import { routes } from './routes';
+} from "@aricon/shared";
+import { redirect } from "next/navigation";
+import { cache } from "react";
+import { ApiError, isApiError } from "./api-errors";
+import { apiServer, getAdminMe } from "./api-server";
+import { routes } from "./routes";
 
 /**
  * Admin data for Server Components: `/api/admin/*` reads with the visitor's admin cookies
@@ -61,31 +61,35 @@ export function can(me: AdminMeDTO, permission: Permission): boolean {
   return me.permissions.includes(permission);
 }
 
-export function canAny(me: AdminMeDTO, permissions: readonly Permission[]): boolean {
+export function canAny(
+  me: AdminMeDTO,
+  permissions: readonly Permission[],
+): boolean {
   return permissions.some((permission) => can(me, permission));
 }
 
 export function isAdmin(me: AdminMeDTO): boolean {
-  return me.user.role === 'ADMIN';
+  return me.user.role === "ADMIN";
 }
 
 /* Requests */
 
-type QueryValue = string | number | boolean | readonly string[] | undefined | null;
+type QueryValue =
+  string | number | boolean | readonly string[] | undefined | null;
 
 /** `?a=1&b=x` from the defined, non-empty values; arrays are comma-joined (the API's list form). */
 function query(params: Record<string, QueryValue>): string {
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
-    if (value === undefined || value === null || value === '') continue;
+    if (value === undefined || value === null || value === "") continue;
     if (Array.isArray(value)) {
-      if (value.length > 0) search.set(key, value.join(','));
+      if (value.length > 0) search.set(key, value.join(","));
     } else {
       search.set(key, String(value));
     }
   }
   const qs = search.toString();
-  return qs ? `?${qs}` : '';
+  return qs ? `?${qs}` : "";
 }
 
 /**
@@ -96,7 +100,8 @@ async function adminRead<T>(path: string): Promise<T> {
   try {
     return await apiServer<T>(`/api/admin${path}`);
   } catch (error) {
-    if (isApiError(error) && error.status === 401) redirect(routes.adminLogin());
+    if (isApiError(error) && error.status === 401)
+      redirect(routes.adminLogin());
     throw error;
   }
 }
@@ -106,7 +111,9 @@ async function getData<T>(path: string): Promise<T> {
   return response.data;
 }
 
-function getList<T, Extra extends object = object>(path: string): Promise<ApiListResponse<T> & Extra> {
+function getList<T, Extra extends object = object>(
+  path: string,
+): Promise<ApiListResponse<T> & Extra> {
   return adminRead<ApiListResponse<T> & Extra>(path);
 }
 
@@ -114,17 +121,19 @@ const OBJECT_ID = /^[a-f0-9]{24}$/i;
 
 /** An id from the URL that can't be an id is a 404 without a request (use with `orNotFound()`). */
 function byId<T>(id: string, load: (id: string) => Promise<T>): Promise<T> {
-  return OBJECT_ID.test(id) ? load(id) : Promise.reject(new ApiError('NOT_FOUND', 404, "We couldn't find that."));
+  return OBJECT_ID.test(id)
+    ? load(id)
+    : Promise.reject(new ApiError("NOT_FOUND", 404, "We couldn't find that."));
 }
 
 /* Dashboard and permissions (any signed-in staff; the API leaves out widgets they can't see) */
 
 export function getDashboard(): Promise<DashboardDTO> {
-  return getData<DashboardDTO>('/dashboard');
+  return getData<DashboardDTO>("/dashboard");
 }
 
 export function getPermissionCatalog(): Promise<PermissionCatalogDTO> {
-  return getData<PermissionCatalogDTO>('/permissions');
+  return getData<PermissionCatalogDTO>("/permissions");
 }
 
 /* Orders */
@@ -142,16 +151,18 @@ export interface AdminOrderListParams {
   pageSize?: number;
 }
 
-export type OrderStatusCounts = Record<OrderStatus | 'all', number>;
+export type OrderStatusCounts = Record<OrderStatus | "all", number>;
 
 /** Orders for the list, plus counts per status for the tabs (independent of `status`). */
 export function getAdminOrders(params: AdminOrderListParams = {}) {
-  return getList<AdminOrderListItemDTO, { statusCounts: OrderStatusCounts }>(`/orders${query({ ...params })}`);
+  return getList<AdminOrderListItemDTO, { statusCounts: OrderStatusCounts }>(
+    `/orders${query({ ...params })}`,
+  );
 }
 
 /** Cached per request, so `generateMetadata` and the page share one call. */
-export const getAdminOrder = cache(
-  (id: string): Promise<AdminOrderDTO> => byId(id, (valid) => getData<AdminOrderDTO>(`/orders/${valid}`)),
+export const getAdminOrder = cache((id: string): Promise<AdminOrderDTO> =>
+  byId(id, (valid) => getData<AdminOrderDTO>(`/orders/${valid}`)),
 );
 
 /* Products and stock */
@@ -160,7 +171,7 @@ export interface AdminProductListParams {
   q?: string;
   categoryId?: string;
   brandId?: string;
-  status?: ProductStatus | 'all';
+  status?: ProductStatus | "all";
   lowStock?: boolean;
   sort?: string;
   page?: number;
@@ -168,11 +179,13 @@ export interface AdminProductListParams {
 }
 
 export function getAdminProducts(params: AdminProductListParams = {}) {
-  return getList<AdminProductListItemDTO>(`/products${query({ ...params, lowStock: params.lowStock || undefined })}`);
+  return getList<AdminProductListItemDTO>(
+    `/products${query({ ...params, lowStock: params.lowStock || undefined })}`,
+  );
 }
 
-export const getAdminProduct = cache(
-  (id: string): Promise<AdminProductDTO> => byId(id, (valid) => getData<AdminProductDTO>(`/products/${valid}`)),
+export const getAdminProduct = cache((id: string): Promise<AdminProductDTO> =>
+  byId(id, (valid) => getData<AdminProductDTO>(`/products/${valid}`)),
 );
 
 export interface StockMovementListParams {
@@ -192,32 +205,32 @@ export function getStockMovements(params: StockMovementListParams = {}) {
 /* Catalog */
 
 export function getAdminCategories(): Promise<AdminCategoryDTO[]> {
-  return getData<AdminCategoryDTO[]>('/categories');
+  return getData<AdminCategoryDTO[]>("/categories");
 }
 
 export function getAdminBrands(): Promise<AdminBrandDTO[]> {
-  return getData<AdminBrandDTO[]>('/brands');
+  return getData<AdminBrandDTO[]>("/brands");
 }
 
 export function getAdminHomepage(): Promise<AdminHomepageDTO> {
-  return getData<AdminHomepageDTO>('/homepage');
+  return getData<AdminHomepageDTO>("/homepage");
 }
 
 /* Delivery */
 
 export function getAdminDeliveryAreas(): Promise<AdminDeliveryAreaDTO[]> {
-  return getData<AdminDeliveryAreaDTO[]>('/delivery-areas');
+  return getData<AdminDeliveryAreaDTO[]>("/delivery-areas");
 }
 
 export function getRiders(): Promise<RiderDTO[]> {
-  return getData<RiderDTO[]>('/riders');
+  return getData<RiderDTO[]>("/riders");
 }
 
 /* Customers and staff */
 
 export interface AdminCustomerListParams {
   q?: string;
-  status?: UserStatus;
+  status?: UserStatus | "deleted";
   page?: number;
   pageSize?: number;
 }
@@ -227,21 +240,35 @@ export function getAdminCustomers(params: AdminCustomerListParams = {}) {
 }
 
 export function getAdminCustomer(id: string): Promise<AdminCustomerDetailDTO> {
-  return byId(id, (valid) => getData<AdminCustomerDetailDTO>(`/customers/${valid}`));
+  return byId(id, (valid) =>
+    getData<AdminCustomerDetailDTO>(`/customers/${valid}`),
+  );
 }
 
 export function getStaffList(): Promise<StaffDTO[]> {
-  return getData<StaffDTO[]>('/staff');
+  return getData<StaffDTO[]>("/staff");
 }
 
 /* Reports */
 
-export function getSalesReport(from: string, to: string, groupBy: 'day' | 'month' = 'day'): Promise<SalesReportDTO> {
-  return getData<SalesReportDTO>(`/reports/sales${query({ from, to, groupBy })}`);
+export function getSalesReport(
+  from: string,
+  to: string,
+  groupBy: "day" | "month" = "day",
+): Promise<SalesReportDTO> {
+  return getData<SalesReportDTO>(
+    `/reports/sales${query({ from, to, groupBy })}`,
+  );
 }
 
-export function getTopProductsReport(from: string, to: string, limit = 20): Promise<TopProductsReportDTO> {
-  return getData<TopProductsReportDTO>(`/reports/top-products${query({ from, to, limit })}`);
+export function getTopProductsReport(
+  from: string,
+  to: string,
+  limit = 20,
+): Promise<TopProductsReportDTO> {
+  return getData<TopProductsReportDTO>(
+    `/reports/top-products${query({ from, to, limit })}`,
+  );
 }
 
 export function getCodReport(from: string, to: string): Promise<CodReportDTO> {
@@ -251,7 +278,7 @@ export function getCodReport(from: string, to: string): Promise<CodReportDTO> {
 /* ADMIN only: settings and the audit log */
 
 export function getAdminSettings(): Promise<AdminSettingsDTO> {
-  return getData<AdminSettingsDTO>('/settings');
+  return getData<AdminSettingsDTO>("/settings");
 }
 
 export interface AuditLogListParams {

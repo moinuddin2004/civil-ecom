@@ -6,6 +6,8 @@ import { Cart, CartSchema } from './cart.model.js';
 import { Category, CategorySchema } from './category.model.js';
 import { Counter, CounterSchema } from './counter.model.js';
 import { DeliveryArea, DeliveryAreaSchema } from './delivery-area.model.js';
+import { EmailVerificationToken, EmailVerificationTokenSchema } from './email-verification-token.model.js';
+import { EmailVerificationMigration } from './email-verification-migration.js';
 import { Homepage, HomepageSchema } from './homepage.model.js';
 import { ImportJob, ImportJobSchema } from './import-job.model.js';
 import { Order, OrderSchema } from './order.model.js';
@@ -16,6 +18,7 @@ import { Rider, RiderSchema } from './rider.model.js';
 import { Settings, SettingsSchema } from './settings.model.js';
 import { StockMovement, StockMovementSchema } from './stock-movement.model.js';
 import { User, UserSchema } from './user.model.js';
+import { UserContactIndexMigration } from './user-contact-index-migration.js';
 
 /**
  * Every collection (SPEC §5), registered once and available to every module's repositories via
@@ -25,6 +28,7 @@ const MODELS = MongooseModule.forFeature([
   { name: User.name, schema: UserSchema },
   { name: RefreshToken.name, schema: RefreshTokenSchema },
   { name: PasswordReset.name, schema: PasswordResetSchema },
+  { name: EmailVerificationToken.name, schema: EmailVerificationTokenSchema },
   { name: Category.name, schema: CategorySchema },
   { name: Brand.name, schema: BrandSchema },
   { name: Product.name, schema: ProductSchema },
@@ -43,6 +47,7 @@ const MODELS = MongooseModule.forFeature([
 @Global()
 @Module({
   imports: [MODELS],
+  providers: [UserContactIndexMigration, EmailVerificationMigration],
   exports: [MODELS],
 })
 export class ModelsModule {}

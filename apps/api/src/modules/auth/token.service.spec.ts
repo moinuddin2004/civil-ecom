@@ -4,6 +4,8 @@ import { AppError } from '../../common/errors/app-error.js';
 import type { AppConfig } from '../../config/app-config.service.js';
 import type { Env } from '../../config/env.schema.js';
 import type { Audience, RevokeReason } from '../../models/refresh-token.model.js';
+import type { UsersRepository } from '../users/users.repository.js';
+import type { AuthUserCache } from './auth-user-cache.service.js';
 import type { NewRefreshToken, RefreshTokenRepository } from './refresh-token.repository.js';
 import { REUSE_GRACE_MS, TokenService } from './token.service.js';
 
@@ -90,10 +92,38 @@ async function unauthenticated(promise: Promise<unknown>): Promise<void> {
 describe('TokenService', () => {
   let repo: FakeRefreshTokens;
   let tokens: TokenService;
+  let validAfter: Map<string, Date>;
+  let revokedFamilies: string[];
+  let invalidated: string[];
 
   beforeEach(() => {
     repo = new FakeRefreshTokens();
-    tokens = new TokenService(new JwtService({}), config, repo as unknown as RefreshTokenRepository);
+    validAfter = new Map();
+    revokedFamilies = [];
+    invalidated = [];
+    const users = {
+      setTokensValidAfter: async (id: string, at: Date) => {
+        validAfter.set(id, at);
+      },
+    } as unknown as UsersRepository;
+    const cache = {
+      revokeFamilyAccess: (familyId: string) => revokedFamilies.push(familyId),
+      invalidate: (id: string) => invalidated.push(id),
+    } as unknown as AuthUserCache;
+    tokens = new TokenService(new JwtService({}), config, repo as unknown as RefreshTokenRepository, users, cache);
+  });
+
+  it('puts a logged-out family on the access-token deny list', async () => {
+    const issued = await tokens.startSession(USER, 'customer', {});
+    await tokens.revokeByToken(issued.refreshToken, 'customer', 'logout');
+    expect(revokedFamilies).toEqual([issued.familyId]);
+  });
+
+  it('refuses older access tokens when a user is signed out everywhere', async () => {
+    const now = new Date('2026-10-01T10:00:00Z');
+    await tokens.revokeAllForUser(USER, 'password_changed', {}, now);
+    expect(validAfter.get(USER)).toEqual(now);
+    expect(invalidated).toEqual([USER]);
   });
 
   it('issues an access token that only its own audience accepts', async () => {

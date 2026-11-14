@@ -32,7 +32,12 @@ export function uniqueContact(): { email: string; phone: string } {
 /** Creates a staff/admin account directly (there is no staff-management API yet). */
 export async function createStaff(
   app: INestApplication,
-  options: { role?: Extract<Role, 'ADMIN' | 'STAFF'>; permissions?: Permission[]; mustChangePassword?: boolean } = {},
+  options: {
+    role?: Extract<Role, 'ADMIN' | 'STAFF'>;
+    permissions?: Permission[];
+    mustChangePassword?: boolean;
+    emailVerified?: boolean;
+  } = {},
 ): Promise<{ email: string; password: string; id: string }> {
   const { email } = uniqueContact();
   const passwordHash = await app.get(PasswordHasher).hash(PASSWORD);
@@ -43,6 +48,7 @@ export async function createStaff(
     role: options.role ?? 'STAFF',
     permissions: options.permissions ?? [],
     mustChangePassword: options.mustChangePassword ?? false,
+    emailVerified: options.emailVerified ?? true,
   });
   return { email, password: PASSWORD, id: String(user._id) };
 }

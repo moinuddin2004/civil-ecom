@@ -52,6 +52,16 @@ export const resetPasswordSchema = z.strictObject({
 });
 export type ResetPasswordInput = z.input<typeof resetPasswordSchema>;
 
+/** Email verification links use the same 32-byte token format as password resets. */
+export const verifyEmailSchema = z.strictObject({
+  token: resetTokenSchema,
+});
+export type VerifyEmailInput = z.input<typeof verifyEmailSchema>;
+
+/** Resending a verification email never reveals whether the address is registered. */
+export const resendVerificationSchema = z.strictObject({ email: emailSchema });
+export type ResendVerificationInput = z.input<typeof resendVerificationSchema>;
+
 export const changePasswordSchema = z
   .strictObject({
     currentPassword: z.string().min(1, 'Enter your current password.').max(200),

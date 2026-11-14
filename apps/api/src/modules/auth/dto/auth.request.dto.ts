@@ -83,6 +83,21 @@ export class ResetPasswordDto {
   password!: string;
 }
 
+/** `POST /api/auth/verify-email`. Same 32-byte token format as password resets. */
+export class VerifyEmailDto {
+  @ApiProperty({ description: 'The token from the verification link.' })
+  @IsString()
+  @Matches(/^[A-Za-z0-9_-]{43}$/, { message: 'This verification link is not valid.' })
+  token!: string;
+}
+
+/** `POST /api/auth/resend-verification`. The answer is the same whether the email exists. */
+export class ResendVerificationDto {
+  @ApiProperty({ example: 'ahmed@example.com' })
+  @IsNormalizedEmail()
+  email!: string;
+}
+
 /** `POST /api/admin/auth/change-password` (and later `/api/account/change-password`). */
 export class ChangePasswordDto {
   @ApiProperty()

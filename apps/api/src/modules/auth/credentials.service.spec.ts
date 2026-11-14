@@ -54,6 +54,7 @@ function makeUser(role: Role, overrides: Partial<UserWithPassword> = {}): UserWi
     status: 'active',
     addresses: [],
     mustChangePassword: false,
+    emailVerified: true,
     failedLogins: 0,
     createdAt: new Date(),
     updatedAt: new Date(),

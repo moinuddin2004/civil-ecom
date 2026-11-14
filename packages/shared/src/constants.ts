@@ -31,6 +31,8 @@ export const PASSWORD_MAX = 72;
 export const MAX_FAILED_LOGINS = 5;
 export const LOCKOUT_MINUTES = 15;
 export const PASSWORD_RESET_TTL_MINUTES = 60;
+/** Email verification links (SPEC §6.11): one hour, single use. */
+export const EMAIL_VERIFICATION_TTL_MINUTES = 60;
 
 /** Search suggestions (SPEC §7.2). */
 export const SUGGEST_MIN_QUERY = 2;

@@ -1,4 +1,4 @@
-import type { AdminMeDTO, StaffDTO } from '@aricon/shared';
+import type { AdminMeDTO, StaffDTO } from "@aricon/shared";
 
 /**
  * UI-side mirror of SPEC §4.5 rule 4: "Cannot demote, block or delete the last active ADMIN. An
@@ -8,9 +8,15 @@ import type { AdminMeDTO, StaffDTO } from '@aricon/shared';
  */
 
 /** True when `target` is the only `active` `ADMIN` in the current staff list. */
-export function isLastActiveAdmin(target: StaffDTO, allStaff: readonly StaffDTO[]): boolean {
-  if (target.role !== 'ADMIN' || target.status !== 'active') return false;
-  const activeAdmins = allStaff.filter((s) => s.role === 'ADMIN' && s.status === 'active');
+export function isLastActiveAdmin(
+  target: StaffDTO,
+  allStaff: readonly StaffDTO[],
+): boolean {
+  if (target.deletedAt || target.role !== "ADMIN" || target.status !== "active")
+    return false;
+  const activeAdmins = allStaff.filter(
+    (s) => !s.deletedAt && s.role === "ADMIN" && s.status === "active",
+  );
   return activeAdmins.length === 1 && activeAdmins[0]?.id === target.id;
 }
 
@@ -27,12 +33,24 @@ export interface StaffGuard {
   message: string | null;
 }
 
-export function staffGuard(target: StaffDTO, me: AdminMeDTO, allStaff: readonly StaffDTO[]): StaffGuard {
+export function staffGuard(
+  target: StaffDTO,
+  me: AdminMeDTO,
+  allStaff: readonly StaffDTO[],
+): StaffGuard {
   if (isLastActiveAdmin(target, allStaff)) {
-    return { roleLocked: true, statusLocked: true, message: "You can't remove the last admin." };
+    return {
+      roleLocked: true,
+      statusLocked: true,
+      message: "You can't remove the last admin.",
+    };
   }
   if (isSelf(target, me)) {
-    return { roleLocked: true, statusLocked: true, message: "You can't change your own role or block yourself." };
+    return {
+      roleLocked: true,
+      statusLocked: true,
+      message: "You can't change, block or delete your own account.",
+    };
   }
   return { roleLocked: false, statusLocked: false, message: null };
 }

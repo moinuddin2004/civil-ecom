@@ -17,6 +17,9 @@ const PROD = {
   JWT_ADMIN_SECRET: 'y'.repeat(40),
   REVALIDATE_SECRET: 'z'.repeat(40),
   APP_URL: 'https://shop.aricon.com.pk',
+  GOOGLE_CLIENT_ID: 'prod-google-client-id.apps.googleusercontent.com',
+  GOOGLE_CLIENT_SECRET: 'prod-google-client-secret-value',
+  GOOGLE_CALLBACK_URL: 'https://shop.aricon.com.pk/api/auth/google/callback',
   STORAGE_DRIVER: 'r2',
   R2_ACCOUNT_ID: 'a',
   R2_ACCESS_KEY_ID: 'b',
@@ -89,5 +92,42 @@ describe('parseEnv', () => {
 
   it('requires the R2 credentials when the r2 driver is chosen', () => {
     expect(problems({ ...DEV, STORAGE_DRIVER: 'r2' })).toContain('R2_ACCOUNT_ID: is required when STORAGE_DRIVER=r2');
+  });
+
+  it('accepts Google sign-in only as a complete set', () => {
+    expect(
+      parseEnv({
+        ...DEV,
+        GOOGLE_CLIENT_ID: 'dev-client-id.apps.googleusercontent.com',
+        GOOGLE_CLIENT_SECRET: 'dev-client-secret',
+        GOOGLE_CALLBACK_URL: 'http://localhost:3000/api/auth/google/callback',
+      }).GOOGLE_CLIENT_ID,
+    ).toBe('dev-client-id.apps.googleusercontent.com');
+
+    const message = problems({ ...DEV, GOOGLE_CLIENT_ID: 'dev-client-id.apps.googleusercontent.com' });
+    expect(message).toContain('GOOGLE_CLIENT_SECRET: is required when Google sign-in is configured');
+    expect(message).toContain('GOOGLE_CALLBACK_URL: is required when Google sign-in is configured');
+  });
+
+  it('keeps the Google callback on the same site as APP_URL', () => {
+    const message = problems({
+      ...DEV,
+      GOOGLE_CLIENT_ID: 'dev-client-id.apps.googleusercontent.com',
+      GOOGLE_CLIENT_SECRET: 'dev-client-secret',
+      GOOGLE_CALLBACK_URL: 'http://127.0.0.1:4000/api/auth/google/callback',
+    });
+    expect(message).toContain('must be on the same site as APP_URL');
+  });
+
+  it('requires Google sign-in in production', () => {
+    const message = problems({
+      ...PROD,
+      GOOGLE_CLIENT_ID: '',
+      GOOGLE_CLIENT_SECRET: '',
+      GOOGLE_CALLBACK_URL: '',
+    });
+    expect(message).toContain('GOOGLE_CLIENT_ID: is required in production');
+    expect(message).toContain('GOOGLE_CLIENT_SECRET: is required in production');
+    expect(message).toContain('GOOGLE_CALLBACK_URL: is required in production');
   });
 });

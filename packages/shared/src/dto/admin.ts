@@ -13,10 +13,14 @@ import type {
   StockMovementReason,
   Unit,
   UserStatus,
-} from '../enums.js';
-import type { Permission } from '../permissions.js';
-import type { BulkTier } from '../pricing.js';
-import type { OrderItemDTO, ReceiptDTO, ShippingAddressDTO } from './customer.js';
+} from "../enums.js";
+import type { Permission } from "../permissions.js";
+import type { BulkTier } from "../pricing.js";
+import type {
+  OrderItemDTO,
+  ReceiptDTO,
+  ShippingAddressDTO,
+} from "./customer.js";
 
 /** Admin API responses (SPEC §7.3). Dates are ISO strings. */
 
@@ -42,7 +46,10 @@ export interface AdminMeDTO {
 export interface StaffDTO extends AdminUserDTO {
   permissions: Permission[];
   mustChangePassword: boolean;
+  /** False until the staff member verifies their email (or an admin marks it verified). */
+  emailVerified: boolean;
   createdAt: string;
+  deletedAt: string | null;
 }
 
 /** Returned once by staff create and password reset; never stored in plain text. */
@@ -54,7 +61,12 @@ export interface TemporaryPasswordDTO {
 export interface PermissionCatalogDTO {
   groups: {
     group: string;
-    permissions: { key: Permission; label: string; dependsOn: Permission[]; sensitive: boolean }[];
+    permissions: {
+      key: Permission;
+      label: string;
+      dependsOn: Permission[];
+      sensitive: boolean;
+    }[];
   }[];
   presets: { key: string; label: string; permissions: Permission[] }[];
   defaultStaffPermissions: Permission[];
@@ -132,7 +144,12 @@ export interface AdminOrderDTO {
   statusHistory: AdminStatusHistoryEntryDTO[];
   riderId: string | null;
   rider: { name: string; phone: string } | null;
-  codCollected: { amount: number; at: string; byName: string | null; note: string | null } | null;
+  codCollected: {
+    amount: number;
+    at: string;
+    byName: string | null;
+    note: string | null;
+  } | null;
   customerNote: string | null;
   internalNote: string | null;
   cancelReason: string | null;
@@ -142,7 +159,12 @@ export interface AdminVariantDTO {
   id: string;
   sku: string;
   label: string;
-  options: { packSize?: string; grade?: string; colour?: string; size?: string };
+  options: {
+    packSize?: string;
+    grade?: string;
+    colour?: string;
+    size?: string;
+  };
   mrp: number;
   price: number;
   bulkTiers: BulkTier[];
@@ -243,6 +265,7 @@ export interface AdminCustomerListItemDTO {
   totalSpent: number;
   status: UserStatus;
   createdAt: string;
+  deletedAt: string | null;
 }
 
 export interface AdminCustomerDetailDTO extends AdminCustomerListItemDTO {
@@ -272,7 +295,7 @@ export interface StockMovementDTO {
   change: number;
   stockAfter: number;
   reason: StockMovementReason;
-  refType: 'order' | 'import' | null;
+  refType: "order" | "import" | null;
   refId: string | null;
   /** Order number when `refType` is "order". */
   refLabel: string | null;
@@ -320,14 +343,22 @@ export interface DashboardDTO {
   codToCollect?: { count: number; amount: number };
   lowStock?: {
     count: number;
-    items: { productId: string; productName: string; variantId: string; sku: string; variantLabel: string; stock: number; threshold: number }[];
+    items: {
+      productId: string;
+      productName: string;
+      variantId: string;
+      sku: string;
+      variantLabel: string;
+      stock: number;
+      threshold: number;
+    }[];
   };
 }
 
 export interface SalesReportDTO {
   from: string;
   to: string;
-  groupBy: 'day' | 'month';
+  groupBy: "day" | "month";
   totals: {
     orders: number;
     /** Sum of order totals (after discounts, delivery included); cancelled and returned orders left out. */
@@ -342,16 +373,39 @@ export interface SalesReportDTO {
     /** Revenue of orders whose payment hasn't been received yet. */
     pending: number;
   };
-  series: { period: string; orders: number; revenue: number; collected: number }[];
+  series: {
+    period: string;
+    orders: number;
+    revenue: number;
+    collected: number;
+  }[];
   /** Per payment method: what was sold and what has come in. */
-  byPayment: { method: PaymentMethod; orders: number; revenue: number; collected: number; pending: number }[];
+  byPayment: {
+    method: PaymentMethod;
+    orders: number;
+    revenue: number;
+    collected: number;
+    pending: number;
+  }[];
 }
 
 export interface TopProductsReportDTO {
   from: string;
   to: string;
-  byQuantity: { productId: string; productName: string; sku: string; qty: number; revenue: number }[];
-  byRevenue: { productId: string; productName: string; sku: string; qty: number; revenue: number }[];
+  byQuantity: {
+    productId: string;
+    productName: string;
+    sku: string;
+    qty: number;
+    revenue: number;
+  }[];
+  byRevenue: {
+    productId: string;
+    productName: string;
+    sku: string;
+    qty: number;
+    revenue: number;
+  }[];
 }
 
 export interface CodReportDTO {
@@ -369,8 +423,23 @@ export interface CodReportDTO {
     /** Sum of what was collected above the order total. */
     extra: number;
   };
-  byRider: { riderId: string | null; riderName: string; collected: number; pending: number; expected: number; short: number; extra: number }[];
-  byDay: { date: string; collected: number; pending: number; expected: number; short: number; extra: number }[];
+  byRider: {
+    riderId: string | null;
+    riderName: string;
+    collected: number;
+    pending: number;
+    expected: number;
+    short: number;
+    extra: number;
+  }[];
+  byDay: {
+    date: string;
+    collected: number;
+    pending: number;
+    expected: number;
+    short: number;
+    extra: number;
+  }[];
   /** Orders where the cash collected differs from the total, biggest shortfall first (at most 100). */
   differences: {
     orderId: string;
@@ -396,10 +465,26 @@ export interface AdminSettingsDTO {
   paymentMethods: { cod: boolean; bankTransfer: boolean };
   codMaxOrderAmount: number | null;
   defaultDeliveryFee: number;
-  bankAccounts: { id: string; bankName: string; accountTitle: string; accountNumber: string; iban: string | null; raastId: string | null }[];
+  bankAccounts: {
+    id: string;
+    bankName: string;
+    accountTitle: string;
+    accountNumber: string;
+    iban: string | null;
+    raastId: string | null;
+  }[];
   bankTransferInstructions: string;
   lowStockDefault: number;
-  pages: Record<'about' | 'faq' | 'contact' | 'refundPolicy' | 'deliveryPolicy' | 'privacyPolicy' | 'terms', string>;
+  pages: Record<
+    | "about"
+    | "faq"
+    | "contact"
+    | "refundPolicy"
+    | "deliveryPolicy"
+    | "privacyPolicy"
+    | "terms",
+    string
+  >;
   /** null until an admin first saves the settings (defaults are shown until then). */
   updatedAt: string | null;
 }
@@ -414,8 +499,18 @@ export interface AdminHomepageDTO {
     isActive: boolean;
     sortOrder: number;
   }[];
-  featuredProducts: { id: string; name: string; imageKey: string | null; status: ProductStatus }[];
-  dealProducts: { id: string; name: string; imageKey: string | null; status: ProductStatus }[];
+  featuredProducts: {
+    id: string;
+    name: string;
+    imageKey: string | null;
+    status: ProductStatus;
+  }[];
+  dealProducts: {
+    id: string;
+    name: string;
+    imageKey: string | null;
+    status: ProductStatus;
+  }[];
 }
 
 /** Upload endpoints return the stored key plus the id it was stored under. */

@@ -6,7 +6,7 @@ import { BASE_SCHEMA_OPTIONS, type Lean, TimestampedEntity } from './common.js';
 export const AUDIENCES = ['customer', 'admin'] as const;
 export type Audience = (typeof AUDIENCES)[number];
 
-export const REVOKE_REASONS = ['logout', 'reuse', 'password_changed', 'blocked', 'role_changed'] as const;
+export const REVOKE_REASONS = ['logout', 'reuse', 'password_changed', 'blocked', 'deleted', 'role_changed'] as const;
 export type RevokeReason = (typeof REVOKE_REASONS)[number];
 
 /**

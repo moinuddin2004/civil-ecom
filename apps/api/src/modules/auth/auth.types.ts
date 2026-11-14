@@ -56,6 +56,8 @@ export interface AccessClaims {
   aud: Audience;
   /** Refresh-token family (lets change-password keep this login while signing out others). */
   fam: string;
+  /** Issued-at, epoch seconds (set by the JWT library). */
+  iat: number;
 }
 
 declare global {

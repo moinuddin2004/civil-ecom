@@ -13,6 +13,7 @@ export interface EmailOrderLine {
 export interface NotificationPayloads {
   'user.welcome': { to: string; name: string; shopUrl: string };
   'auth.password_reset': { to: string; name: string; resetUrl: string; expiresInMinutes: number };
+  'auth.verify_email': { to: string; name: string; verifyUrl: string; expiresInMinutes: number };
   'order.placed': {
     to: string;
     name: string;

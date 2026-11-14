@@ -1,5 +1,5 @@
-import type { PermissionCatalogDTO } from './dto/admin.js';
-import type { Role } from './enums.js';
+import type { PermissionCatalogDTO } from "./dto/admin.js";
+import type { Role } from "./enums.js";
 
 /**
  * Staff permission catalog (SPEC §4.2). The admin UI (checkboxes, sidebar), the API
@@ -8,15 +8,15 @@ import type { Role } from './enums.js';
  */
 
 export const PERMISSION_GROUPS = [
-  'Dashboard',
-  'Orders',
-  'Products',
-  'Catalog',
-  'Customers',
-  'Delivery',
-  'Content',
-  'Reports',
-  'Stock',
+  "Dashboard",
+  "Orders",
+  "Products",
+  "Catalog",
+  "Customers",
+  "Delivery",
+  "Content",
+  "Reports",
+  "Stock",
 ] as const;
 export type PermissionGroup = (typeof PERMISSION_GROUPS)[number];
 
@@ -30,219 +30,230 @@ interface PermissionDefinition {
 
 export const PERMISSIONS = [
   {
-    key: 'dashboard.view',
-    group: 'Dashboard',
-    label: 'View sales dashboard',
+    key: "dashboard.view",
+    group: "Dashboard",
+    label: "View sales dashboard",
     dependsOn: [],
     sensitive: false,
   },
   {
-    key: 'orders.view',
-    group: 'Orders',
-    label: 'View orders and invoices',
+    key: "orders.view",
+    group: "Orders",
+    label: "View orders and invoices",
     dependsOn: [],
     sensitive: false,
   },
   {
-    key: 'orders.create',
-    group: 'Orders',
-    label: 'Create orders for customers',
-    dependsOn: ['orders.view', 'customers.view'],
+    key: "orders.create",
+    group: "Orders",
+    label: "Create orders for customers",
+    dependsOn: ["orders.view", "customers.view"],
     sensitive: false,
   },
   {
-    key: 'orders.discount',
-    group: 'Orders',
-    label: 'Give a discount when creating an order',
-    dependsOn: ['orders.view', 'customers.view', 'orders.create'],
+    key: "orders.discount",
+    group: "Orders",
+    label: "Give a discount when creating an order",
+    dependsOn: ["orders.view", "customers.view", "orders.create"],
     sensitive: true,
   },
   {
-    key: 'orders.update_status',
-    group: 'Orders',
-    label: 'Confirm, dispatch and deliver orders',
-    dependsOn: ['orders.view'],
+    key: "orders.update_status",
+    group: "Orders",
+    label: "Confirm, dispatch and deliver orders",
+    dependsOn: ["orders.view"],
     sensitive: false,
   },
   {
-    key: 'orders.cancel',
-    group: 'Orders',
-    label: 'Cancel and return orders',
-    dependsOn: ['orders.view'],
+    key: "orders.cancel",
+    group: "Orders",
+    label: "Cancel and return orders",
+    dependsOn: ["orders.view"],
     sensitive: true,
   },
   {
-    key: 'orders.assign_rider',
-    group: 'Orders',
-    label: 'Assign riders',
-    dependsOn: ['orders.view'],
+    key: "orders.assign_rider",
+    group: "Orders",
+    label: "Assign riders",
+    dependsOn: ["orders.view"],
     sensitive: false,
   },
   {
-    key: 'orders.cod_collect',
-    group: 'Orders',
-    label: 'Mark cash on delivery collected',
-    dependsOn: ['orders.view'],
+    key: "orders.cod_collect",
+    group: "Orders",
+    label: "Mark cash on delivery collected",
+    dependsOn: ["orders.view"],
     sensitive: false,
   },
   {
-    key: 'orders.verify_payment',
-    group: 'Orders',
-    label: 'Approve or reject bank receipts',
-    dependsOn: ['orders.view'],
+    key: "orders.verify_payment",
+    group: "Orders",
+    label: "Approve or reject bank receipts",
+    dependsOn: ["orders.view"],
     sensitive: false,
   },
   {
-    key: 'orders.export',
-    group: 'Orders',
-    label: 'Export orders to Excel',
-    dependsOn: ['orders.view'],
+    key: "orders.export",
+    group: "Orders",
+    label: "Export orders to Excel",
+    dependsOn: ["orders.view"],
     sensitive: false,
   },
   {
-    key: 'products.view',
-    group: 'Products',
-    label: 'View products',
+    key: "products.view",
+    group: "Products",
+    label: "View products",
     dependsOn: [],
     sensitive: false,
   },
   {
-    key: 'products.create',
-    group: 'Products',
-    label: 'Create products',
-    dependsOn: ['products.view'],
+    key: "products.create",
+    group: "Products",
+    label: "Create products",
+    dependsOn: ["products.view"],
     sensitive: false,
   },
   {
-    key: 'products.edit',
-    group: 'Products',
-    label: 'Edit product details and images',
-    dependsOn: ['products.view'],
+    key: "products.edit",
+    group: "Products",
+    label: "Edit product details and images",
+    dependsOn: ["products.view"],
     sensitive: false,
   },
   {
-    key: 'products.edit_price',
-    group: 'Products',
-    label: 'Change prices and bulk tiers',
-    dependsOn: ['products.view'],
+    key: "products.edit_price",
+    group: "Products",
+    label: "Change prices and bulk tiers",
+    dependsOn: ["products.view"],
     sensitive: true,
   },
   {
-    key: 'products.edit_stock',
-    group: 'Products',
-    label: 'Adjust stock',
-    dependsOn: ['products.view'],
+    key: "products.edit_stock",
+    group: "Products",
+    label: "Adjust stock",
+    dependsOn: ["products.view"],
     sensitive: true,
   },
   {
-    key: 'products.archive',
-    group: 'Products',
-    label: 'Hide and archive products',
-    dependsOn: ['products.view'],
+    key: "products.archive",
+    group: "Products",
+    label: "Hide and archive products",
+    dependsOn: ["products.view"],
     sensitive: false,
   },
   {
-    key: 'products.import',
-    group: 'Products',
-    label: 'Import products from Excel',
-    dependsOn: ['products.view'],
+    key: "products.import",
+    group: "Products",
+    label: "Import products from Excel",
+    dependsOn: ["products.view"],
     sensitive: false,
   },
   {
-    key: 'products.export',
-    group: 'Products',
-    label: 'Export products to Excel',
-    dependsOn: ['products.view'],
+    key: "products.export",
+    group: "Products",
+    label: "Export products to Excel",
+    dependsOn: ["products.view"],
     sensitive: false,
   },
   {
-    key: 'categories.manage',
-    group: 'Catalog',
-    label: 'Manage categories',
+    key: "categories.manage",
+    group: "Catalog",
+    label: "Manage categories",
     dependsOn: [],
     sensitive: false,
   },
   {
-    key: 'brands.manage',
-    group: 'Catalog',
-    label: 'Manage brands',
+    key: "brands.manage",
+    group: "Catalog",
+    label: "Manage brands",
     dependsOn: [],
     sensitive: false,
   },
   {
-    key: 'customers.view',
-    group: 'Customers',
-    label: 'View customers',
+    key: "customers.view",
+    group: "Customers",
+    label: "View customers",
     dependsOn: [],
     sensitive: false,
   },
   {
-    key: 'customers.block',
-    group: 'Customers',
-    label: 'Block and unblock customers',
-    dependsOn: ['customers.view'],
+    key: "customers.block",
+    group: "Customers",
+    label: "Block and unblock customers",
+    dependsOn: ["customers.view"],
     sensitive: false,
   },
   {
-    key: 'customers.export',
-    group: 'Customers',
-    label: 'Export customers to Excel',
-    dependsOn: ['customers.view'],
+    key: "customers.delete",
+    group: "Customers",
+    label: "Delete and restore customer accounts",
+    dependsOn: ["customers.view"],
     sensitive: true,
   },
   {
-    key: 'delivery_areas.manage',
-    group: 'Delivery',
-    label: 'Manage delivery areas and charges',
+    key: "customers.export",
+    group: "Customers",
+    label: "Export customers to Excel",
+    dependsOn: ["customers.view"],
+    sensitive: true,
+  },
+  {
+    key: "delivery_areas.manage",
+    group: "Delivery",
+    label: "Manage delivery areas and charges",
     dependsOn: [],
     sensitive: false,
   },
   {
-    key: 'riders.manage',
-    group: 'Delivery',
-    label: 'Manage riders',
+    key: "riders.manage",
+    group: "Delivery",
+    label: "Manage riders",
     dependsOn: [],
     sensitive: false,
   },
   {
-    key: 'homepage.manage',
-    group: 'Content',
-    label: 'Manage homepage banners and featured products',
+    key: "homepage.manage",
+    group: "Content",
+    label: "Manage homepage banners and featured products",
     dependsOn: [],
     sensitive: false,
   },
   {
-    key: 'reports.view',
-    group: 'Reports',
-    label: 'View reports',
+    key: "reports.view",
+    group: "Reports",
+    label: "View reports",
     dependsOn: [],
     sensitive: false,
   },
   {
-    key: 'reports.export',
-    group: 'Reports',
-    label: 'Export reports to Excel',
-    dependsOn: ['reports.view'],
+    key: "reports.export",
+    group: "Reports",
+    label: "Export reports to Excel",
+    dependsOn: ["reports.view"],
     sensitive: false,
   },
   {
-    key: 'stock_movements.view',
-    group: 'Stock',
-    label: 'View stock history',
+    key: "stock_movements.view",
+    group: "Stock",
+    label: "View stock history",
     dependsOn: [],
     sensitive: false,
   },
 ] as const satisfies readonly PermissionDefinition[];
 
-export type Permission = (typeof PERMISSIONS)[number]['key'];
+export type Permission = (typeof PERMISSIONS)[number]["key"];
 export type PermissionDef = (typeof PERMISSIONS)[number];
 
-export const PERMISSION_KEYS: readonly Permission[] = PERMISSIONS.map((p) => p.key);
+export const PERMISSION_KEYS: readonly Permission[] = PERMISSIONS.map(
+  (p) => p.key,
+);
 
-const BY_KEY = new Map<string, PermissionDef>(PERMISSIONS.map((p) => [p.key, p]));
+const BY_KEY = new Map<string, PermissionDef>(
+  PERMISSIONS.map((p) => [p.key, p]),
+);
 
 export function isPermission(value: unknown): value is Permission {
-  return typeof value === 'string' && BY_KEY.has(value);
+  return typeof value === "string" && BY_KEY.has(value);
 }
 
 export function getPermission(key: Permission): PermissionDef {
@@ -294,7 +305,10 @@ export function dependentsOf(perm: Permission): Permission[] {
  * Removes `perm` and everything that needs it (UI: unticking a dependency unticks the
  * permissions that depend on it, SPEC §10.8).
  */
-export function withoutPermission(perms: Iterable<Permission>, perm: Permission): Permission[] {
+export function withoutPermission(
+  perms: Iterable<Permission>,
+  perm: Permission,
+): Permission[] {
   const removed = new Set<Permission>([perm, ...dependentsOf(perm)]);
   return inCatalogOrder([...perms].filter((key) => !removed.has(key)));
 }
@@ -302,45 +316,53 @@ export function withoutPermission(perms: Iterable<Permission>, perm: Permission)
 /** Presets are UI shortcuts only; the database stores the resulting list (SPEC §4.4). */
 export const PERMISSION_PRESETS = {
   orderManager: {
-    label: 'Order Manager',
+    label: "Order Manager",
     permissions: [
-      'orders.view',
-      'orders.create',
-      'orders.update_status',
-      'orders.assign_rider',
-      'orders.cod_collect',
-      'orders.verify_payment',
-      'customers.view',
+      "orders.view",
+      "orders.create",
+      "orders.update_status",
+      "orders.assign_rider",
+      "orders.cod_collect",
+      "orders.verify_payment",
+      "customers.view",
     ],
   },
   catalogManager: {
-    label: 'Catalog Manager',
+    label: "Catalog Manager",
     permissions: [
-      'products.view',
-      'products.create',
-      'products.edit',
-      'products.edit_price',
-      'products.edit_stock',
-      'products.archive',
-      'products.import',
-      'products.export',
-      'categories.manage',
-      'brands.manage',
-      'stock_movements.view',
+      "products.view",
+      "products.create",
+      "products.edit",
+      "products.edit_price",
+      "products.edit_stock",
+      "products.archive",
+      "products.import",
+      "products.export",
+      "categories.manage",
+      "brands.manage",
+      "stock_movements.view",
     ],
   },
   accountantViewer: {
-    label: 'Accountant / Viewer',
-    permissions: ['dashboard.view', 'reports.view', 'reports.export', 'orders.view'],
+    label: "Accountant / Viewer",
+    permissions: [
+      "dashboard.view",
+      "reports.view",
+      "reports.export",
+      "orders.view",
+    ],
   },
-} as const satisfies Record<string, { label: string; permissions: readonly Permission[] }>;
+} as const satisfies Record<
+  string,
+  { label: string; permissions: readonly Permission[] }
+>;
 
 export type PermissionPresetKey = keyof typeof PERMISSION_PRESETS;
 
 /** Permissions given to a new staff member unless the admin chooses otherwise (SPEC §4.4). */
 export const DEFAULT_STAFF_PERMISSIONS: readonly Permission[] = [
-  'orders.view',
-  'orders.update_status',
+  "orders.view",
+  "orders.update_status",
 ];
 
 export interface PermissionSubject {
@@ -349,25 +371,34 @@ export interface PermissionSubject {
 }
 
 /** ADMIN → always true. STAFF → only listed permissions. CUSTOMER → never. */
-export function hasPermission(user: PermissionSubject, perm: Permission): boolean {
-  if (user.role === 'ADMIN') return true;
-  if (user.role !== 'STAFF') return false;
+export function hasPermission(
+  user: PermissionSubject,
+  perm: Permission,
+): boolean {
+  if (user.role === "ADMIN") return true;
+  if (user.role !== "STAFF") return false;
   return user.permissions.includes(perm);
 }
 
-export function hasAnyPermission(user: PermissionSubject, perms: readonly Permission[]): boolean {
+export function hasAnyPermission(
+  user: PermissionSubject,
+  perms: readonly Permission[],
+): boolean {
   return perms.some((perm) => hasPermission(user, perm));
 }
 
 /** The permissions that apply to this user: all of them for ADMIN, known keys only for STAFF. */
 export function effectivePermissions(user: PermissionSubject): Permission[] {
-  if (user.role === 'ADMIN') return [...PERMISSION_KEYS];
-  if (user.role !== 'STAFF') return [];
+  if (user.role === "ADMIN") return [...PERMISSION_KEYS];
+  if (user.role !== "STAFF") return [];
   return inCatalogOrder(user.permissions.filter(isPermission));
 }
 
 /** Catalog grouped for the permission checkboxes. */
-export function permissionsByGroup(): { group: PermissionGroup; permissions: PermissionDef[] }[] {
+export function permissionsByGroup(): {
+  group: PermissionGroup;
+  permissions: PermissionDef[];
+}[] {
   return PERMISSION_GROUPS.map((group) => ({
     group,
     permissions: PERMISSIONS.filter((p) => p.group === group),

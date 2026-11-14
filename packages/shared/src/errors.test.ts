@@ -8,6 +8,7 @@ describe('error codes', () => {
       UNAUTHENTICATED: 401,
       FORBIDDEN: 403,
       ACCOUNT_BLOCKED: 403,
+      EMAIL_NOT_VERIFIED: 403,
       NOT_FOUND: 404,
       CONFLICT: 409,
       EMAIL_TAKEN: 409,
@@ -21,7 +22,7 @@ describe('error codes', () => {
       RATE_LIMITED: 429,
       INTERNAL: 500,
     });
-    expect(ERROR_CODES).toHaveLength(16);
+    expect(ERROR_CODES).toHaveLength(17);
   });
 
   it('recognises known codes only', () => {

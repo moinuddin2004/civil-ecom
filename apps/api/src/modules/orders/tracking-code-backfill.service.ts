@@ -1,6 +1,6 @@
 import { Injectable, Logger, type OnApplicationBootstrap } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import type { Model } from 'mongoose';
+import { trusted, type Model } from 'mongoose';
 import { Order } from '../../models/order.model.js';
 import { newTrackingCode } from './order-tracking-code.js';
 
@@ -22,12 +22,13 @@ export class TrackingCodeBackfillService implements OnApplicationBootstrap {
     try {
       let done = 0;
       for (;;) {
-        const batch = await this.orders.find({ trackingCode: { $exists: false } }, { _id: 1 }).limit(BATCH).lean().exec();
+        // `trusted()`: the global sanitizeFilter would otherwise cast the `$exists` operator to a string.
+        const batch = await this.orders.find({ trackingCode: trusted({ $exists: false }) }, { _id: 1 }).limit(BATCH).lean().exec();
         if (batch.length === 0) break;
         for (const { _id } of batch) {
           for (let attempt = 0; attempt < ATTEMPTS_PER_ORDER; attempt += 1) {
             try {
-              await this.orders.updateOne({ _id, trackingCode: { $exists: false } }, { $set: { trackingCode: newTrackingCode() } }, { timestamps: false }).exec();
+              await this.orders.updateOne({ _id, trackingCode: trusted({ $exists: false }) }, { $set: { trackingCode: newTrackingCode() } }, { timestamps: false }).exec();
               done += 1;
               break;
             } catch (error) {

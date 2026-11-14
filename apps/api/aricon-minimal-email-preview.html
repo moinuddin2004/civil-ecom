@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ARICON — Minimal Email System Preview</title>
+<style>
+:root{--ink:#17212b;--body:#526170;--muted:#84909c;--line:#e9edf1;--paper:#fff;--canvas:#f5f7fa;--blue:#eaf3ff;--blue-ink:#3569a8;--pink:#fff0f5;--pink-ink:#a94e72;--lav:#f2efff;--lav-ink:#6654a6}
+*{box-sizing:border-box}body{margin:0;padding:34px 15px;background:var(--canvas);font-family:Arial,Helvetica,sans-serif;color:var(--ink)}
+.wrap{max-width:720px;margin:auto}.intro{text-align:center;margin:0 auto 34px}.intro h1{font-size:24px;letter-spacing:-.5px;margin:0 0 8px}.intro p{font-size:13px;color:var(--muted);line-height:1.6;margin:0}
+.preview{max-width:600px;margin:0 auto 38px}.preview h2{font-size:15px;margin:0 0 5px}.meta{font-size:11px;color:var(--muted);margin:0 0 11px}
+.email{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 8px 30px rgba(24,39,56,.035)}
+.inner{padding:27px 32px 29px}.brand{display:flex;align-items:center;gap:9px;margin-bottom:34px}.logo{width:29px;height:29px;border-radius:8px;background:#eaf3ff;color:#3569a8;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;letter-spacing:-.5px}.brand-name{font-size:12px;letter-spacing:1.5px;font-weight:800;color:#263442}.brand-sub{font-size:10px;color:#96a0aa;margin-left:2px;letter-spacing:.2px}
+.kicker{font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#8b96a2;margin:0 0 12px}
+h1.event{font-size:34px;line-height:1.12;letter-spacing:-1.25px;font-weight:750;margin:0 0 17px;max-width:490px;color:#17212b}
+p{font-size:14px;line-height:1.75;color:var(--body);margin:0 0 15px}
+.ref{display:inline-block;margin:5px 0 18px;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:#fbfcfd;color:#536170;font-size:12px}
+.ref strong{color:#253342;letter-spacing:.35px}
+.block-title{font-size:12px;font-weight:700;color:#344353;margin:22px 0 10px}
+.product{display:flex;gap:14px;align-items:center;border:1px solid var(--line);border-radius:11px;padding:12px;margin:12px 0 17px}
+.product-img{width:76px;height:70px;flex:0 0 76px;border-radius:8px;background:linear-gradient(135deg,#f0f5fa,#e7edf4);display:flex;align-items:center;justify-content:center;color:#8b9aaa;font-size:10px;text-align:center}
+.product-name{font-size:13px;font-weight:700;color:#263442;margin-bottom:5px}.product-meta{font-size:11px;color:var(--muted);line-height:1.5}.product-price{font-size:13px;font-weight:700;color:#263442;margin-top:6px}
+.summary{width:100%;border-collapse:collapse;margin:8px 0 18px}.summary td{font-size:12px;padding:7px 0;border-bottom:1px solid #f0f2f4;color:var(--muted)}.summary td:last-child{text-align:right;color:#344353}.summary tr.total td{font-size:14px;font-weight:700;color:#1d2b38;border-bottom:0;padding-top:12px}
+.info{background:#f7f9fc;border:1px solid #edf1f5;border-radius:10px;padding:14px 15px;margin:17px 0}.info.blue{background:#f3f8ff;border-color:#e6effb}.info.pink{background:#fff6f9;border-color:#f8e9ef}.info p{font-size:12px;margin:0;line-height:1.65}.info strong{color:#2c3b49}
+.codebox{border:1px dashed #cbd9e8;background:#f6faff;border-radius:11px;padding:17px;text-align:center;margin:20px 0}.code-label{font-size:10px;letter-spacing:1.3px;color:#7f8fa0;font-weight:700}.code{font-size:30px;letter-spacing:7px;font-weight:750;color:#263e59;margin-top:8px}
+.button{display:inline-block;text-decoration:none!important;background:#dcecff;color:#285b91!important;border-radius:8px;padding:12px 19px;font-size:13px;font-weight:700;margin:5px 0 13px}.button.pink{background:#fce7ef;color:#914c69!important}.button.lav{background:#ece8ff;color:#5e5098!important}
+.buttonline{margin:18px 0 3px}.fallback{font-size:11px!important;color:#8a96a1!important;overflow-wrap:anywhere}
+.details{width:100%;border-collapse:collapse;margin:10px 0 18px}.details td{font-size:12px;padding:9px 0;border-bottom:1px solid #eff1f3}.details td:first-child{color:#8995a0}.details td:last-child{text-align:right;color:#354352;font-weight:600}
+.steps{margin:17px 0 20px;padding:0;list-style:none}.steps li{display:flex;gap:11px;margin:0 0 13px;font-size:12px;color:#526170;line-height:1.5}.step{width:21px;height:21px;border-radius:50%;background:#eaf3ff;color:#3569a8;display:flex;align-items:center;justify-content:center;flex:0 0 21px;font-size:10px;font-weight:700}
+.footer{border-top:1px solid #f0f2f4;padding:17px 32px 20px;color:#99a3ad;font-size:10px;line-height:1.8}.footer strong{color:#65717d}.footlinks{color:#8a9aab}
+@media(max-width:520px){body{padding:20px 9px}.inner{padding:23px 20px}.footer{padding:16px 20px}.brand{margin-bottom:29px}h1.event{font-size:29px}.product{gap:10px}.product-img{width:65px;height:64px;flex-basis:65px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="intro"><h1>ARICON · Email design preview</h1><p>Minimal white layout · Oversized event headlines · Soft blue and blush accents</p></header>
+
+  <section class="preview">
+    <h2>01 · Order placed</h2><p class="meta">order.placed · Subject: Your order has been received</p>
+    <div class="email"><div class="inner">
+      <div class="brand"><div class="logo">A</div><div><div class="brand-name">ARICON</div><div class="brand-sub">SHOP</div></div></div>
+      <div class="kicker">Order confirmation</div>
+      <h1 class="event">Your order is in.</h1>
+      <p>Hi Ahmed, thank you for shopping with ARICON. We’ve received your order and our team will review it shortly.</p>
+      <div class="ref">Order reference &nbsp; <strong>ARC-2026-000123</strong></div>
+      <div class="block-title">A little recap of your order</div>
+      <div class="product"><div class="product-img">Product<br>image</div><div style="flex:1"><div class="product-name">Bestway Cement PPC</div><div class="product-meta">50 kg bag · Quantity: 10</div><div class="product-price">Rs 14,500</div></div></div>
+      <div class="product"><div class="product-img">Product<br>image</div><div style="flex:1"><div class="product-name">Master Tiles Floor Tile</div><div class="product-meta">60 × 60 · Quantity: 4</div><div class="product-price">Rs 3,600</div></div></div>
+      <table class="summary"><tr><td>Subtotal</td><td>Rs 18,100</td></tr><tr><td>Discount</td><td>− Rs 500</td></tr><tr><td>Delivery</td><td>Free</td></tr><tr class="total"><td>Total</td><td>Rs 17,600</td></tr></table>
+      <div class="info blue"><p><strong>Pay by bank transfer</strong><br>Please transfer Rs 17,600 to your selected bank account and upload the receipt from your order page. Use your order reference as the transfer description.</p></div>
+      <div class="ref">Tracking code &nbsp; <strong>482915</strong></div>
+      <div class="buttonline"><a class="button" href="https://shop.aricon.com.pk/account/orders/ARC-2026-000123">View your order&nbsp; →</a></div>
+      <p class="fallback">If the button doesn’t work, visit: https://shop.aricon.com.pk/account/orders/ARC-2026-000123</p>
+    </div><div class="footer"><strong>ARICON Shop</strong><br>Aricon Engineering Consultants · Karachi, Pakistan<br>+92 21 111 000 111 · shop@aricon.com.pk</div></div>
+  </section>
+
+  <section class="preview">
+    <h2>02 · Order dispatched</h2><p class="meta">order.dispatched · Subject: Your order is on its way</p>
+    <div class="email"><div class="inner">
+      <div class="brand"><div class="logo">A</div><div><div class="brand-name">ARICON</div><div class="brand-sub">SHOP</div></div></div>
+      <div class="kicker">Shipping update</div>
+      <h1 class="event">It’s on its way.</h1>
+      <p>Hi Ahmed, your order has left our warehouse. Here are the delivery details so you know what to expect.</p>
+      <div class="ref">Order reference &nbsp; <strong>ARC-2026-000123</strong></div>
+      <ul class="steps"><li><span class="step">✓</span><span><strong>Order confirmed</strong><br>Your order has been received.</span></li><li><span class="step">✓</span><span><strong>Prepared</strong><br>Your items are ready for delivery.</span></li><li><span class="step">3</span><span><strong>Dispatched</strong><br>Your order is with the rider.</span></li><li><span class="step">4</span><span><strong>Delivered</strong><br>We’ll let you know when it arrives.</span></li></ul>
+      <div class="info"><p><strong>Your delivery contact</strong></p><table class="details"><tr><td>Rider</td><td>Imran Ali</td></tr><tr><td>Phone</td><td>+92 312 1234567</td></tr></table></div>
+      <div class="buttonline"><a class="button" href="https://shop.aricon.com.pk/account/orders/ARC-2026-000123">Track your order&nbsp; →</a></div>
+    </div><div class="footer"><strong>ARICON Shop</strong><br>Questions? Reply to this email or contact shop@aricon.com.pk</div></div>
+  </section>
+
+  <section class="preview">
+    <h2>03 · New order for staff</h2><p class="meta">order.placed.staff · Subject: New order ARC-2026-000123</p>
+    <div class="email"><div class="inner">
+      <div class="brand"><div class="logo">A</div><div><div class="brand-name">ARICON</div><div class="brand-sub">SHOP · STAFF</div></div></div>
+      <div class="kicker">New order notification</div>
+      <h1 class="event">A new order just came in.</h1>
+      <p>An order has been placed and is ready for your review. Check the customer and payment details below.</p>
+      <div class="ref">Order reference &nbsp; <strong>ARC-2026-000123</strong></div>
+      <div class="block-title">Order total</div><h1 style="font-size:27px;letter-spacing:-.6px;margin:0 0 17px">Rs 17,600</h1>
+      <table class="details"><tr><td>Customer</td><td>Ahmed Raza</td></tr><tr><td>Phone</td><td>+92 300 1234567</td></tr><tr><td>Delivery area</td><td>Gulshan-e-Iqbal</td></tr><tr><td>Payment method</td><td>Cash on delivery</td></tr><tr><td>Payment status</td><td>Pending</td></tr></table>
+      <div class="block-title">Items ordered</div>
+      <div class="product"><div class="product-img">Product<br>image</div><div style="flex:1"><div class="product-name">Bestway Cement PPC</div><div class="product-meta">50 kg bag · Qty 10</div><div class="product-price">Rs 14,500</div></div></div>
+      <div class="buttonline"><a class="button" href="https://shop.aricon.com.pk/admin/orders/1">Review order in admin&nbsp; →</a></div>
+    </div><div class="footer"><strong>ARICON Shop · Staff notification</strong><br>Automated operational email.</div></div>
+  </section>
+
+  <section class="preview">
+    <h2>04 · Password reset</h2><p class="meta">auth.password_reset · Subject: Reset your ARICON password</p>
+    <div class="email"><div class="inner">
+      <div class="brand"><div class="logo">A</div><div><div class="brand-name">ARICON</div><div class="brand-sub">SHOP</div></div></div>
+      <div class="kicker">Account security</div>
+      <h1 class="event">Let’s get you back in.</h1>
+      <p>Hi Ahmed, we received a request to reset your ARICON Shop password. Use the button below to create a new one.</p>
+      <div class="codebox"><div class="code-label">PASSWORD RESET CODE</div><div class="code">482 915</div></div>
+      <p style="font-size:12px;text-align:center;color:#84909c">This code expires in 10 minutes.</p>
+      <div class="buttonline" style="text-align:center"><a class="button pink" href="https://shop.aricon.com.pk/reset-password?token=abc">Reset your password&nbsp; →</a></div>
+      <div class="info pink"><p><strong>Wasn’t you?</strong><br>If you didn’t request a password reset, you can safely ignore this email. Your password won’t change.</p></div>
+      <p class="fallback">For your security, never share this code or reset link with anyone.</p>
+    </div><div class="footer"><strong>ARICON Shop</strong><br>Aricon Engineering Consultants · Karachi, Pakistan<br>shop@aricon.com.pk</div></div>
+  </section>
+</div>
+</body></html>

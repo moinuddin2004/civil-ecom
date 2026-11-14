@@ -54,13 +54,13 @@ async function main(): Promise<void> {
     }
 
     const users = app.get(UsersRepository);
-    if (await users.emailExists(input.email)) {
+    if (await users.activeEmailExists(input.email)) {
       print(`An account with the email ${input.email} already exists. Nothing was changed.`);
       return;
     }
 
     const passwordHash = await app.get(PasswordHasher).hash(input.password);
-    await users.create({ name: input.name, email: input.email, passwordHash, role: 'ADMIN' });
+    await users.create({ name: input.name, email: input.email, passwordHash, role: 'ADMIN', emailVerified: true });
     print(`Admin account created for ${input.email}.`);
     print(`Sign in at ${config.get('APP_URL')}/admin/login.`);
   } finally {

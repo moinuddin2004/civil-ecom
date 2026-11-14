@@ -43,6 +43,8 @@ lerna-debug.log*
 # (`.env.local`, `.env.*.local`) stay out of git; the API no longer reads them.
 .env.local
 .env.*.local
+.env
+
 
 # Local file storage (STORAGE_DRIVER=local)
 /.uploads

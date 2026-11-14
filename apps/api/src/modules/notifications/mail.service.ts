@@ -38,7 +38,9 @@ export class MailService {
   async send(email: OutgoingEmail): Promise<void> {
     const to = typeof email.to === 'string' ? [email.to] : [...email.to];
     if (!this.transport) {
-      this.logger.log({ to, subject: email.subject, text: email.text }, `Email "${email.subject}" (no SMTP configured: logged, not sent)`);
+      // URLs are redacted: reset and verification links carry live tokens and must not reach logs.
+      const text = email.text.replace(/https?:\/\/\S+/g, '[link redacted]');
+      this.logger.log({ to, subject: email.subject, text }, `Email "${email.subject}" (no SMTP configured: logged, not sent)`);
       return;
     }
     await this.transport.sendMail({

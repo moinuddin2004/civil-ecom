@@ -5,6 +5,8 @@ import { AppError } from '../../common/errors/app-error.js';
 import { AppConfig } from '../../config/app-config.service.js';
 import type { RevokeReason } from '../../models/refresh-token.model.js';
 import type { AccessClaims, Audience, ClientContext, IssuedTokens } from './auth.types.js';
+import { UsersRepository } from '../users/users.repository.js';
+import { AuthUserCache } from './auth-user-cache.service.js';
 import { hashToken, randomToken } from './password-hasher.service.js';
 import { RefreshTokenRepository } from './refresh-token.repository.js';
 
@@ -34,6 +36,8 @@ export class TokenService {
     private readonly jwt: JwtService,
     private readonly config: AppConfig,
     private readonly refreshTokens: RefreshTokenRepository,
+    private readonly users: UsersRepository,
+    private readonly cache: AuthUserCache,
   ) {}
 
   private secretFor(audience: Audience): string {
@@ -48,7 +52,9 @@ export class TokenService {
         issuer: ISSUER,
         algorithms: ['HS256'],
       });
-      if (typeof claims.sub !== 'string' || typeof claims.fam !== 'string') throw new Error('malformed claims');
+      if (typeof claims.sub !== 'string' || typeof claims.fam !== 'string' || typeof claims.iat !== 'number') {
+        throw new Error('malformed claims');
+      }
       return claims;
     } catch {
       throw AppError.unauthenticated(SESSION_EXPIRED);
@@ -87,6 +93,7 @@ export class TokenService {
       if (!existing || !rotatedAt) throw AppError.unauthenticated(SESSION_EXPIRED);
       if (now.getTime() - rotatedAt.getTime() > REUSE_GRACE_MS) {
         await this.refreshTokens.revokeFamily(existing.familyId, 'reuse', now);
+        this.cache.revokeFamilyAccess(existing.familyId);
         this.logger.warn({ userId: String(existing.userId), audience }, 'Refresh token reuse detected; family revoked');
         throw AppError.unauthenticated(SESSION_EXPIRED);
       }
@@ -105,17 +112,26 @@ export class TokenService {
   /** Logout: the presented token's whole family. Unknown tokens are ignored (logout always succeeds). */
   async revokeByToken(refreshToken: string, audience: Audience, reason: RevokeReason, now = new Date()): Promise<void> {
     const existing = await this.refreshTokens.findByHash(hashToken(refreshToken), audience);
-    if (existing) await this.refreshTokens.revokeFamily(existing.familyId, reason, now);
+    if (!existing) return;
+    await this.refreshTokens.revokeFamily(existing.familyId, reason, now);
+    // The family's access token must stop working too, not only its refresh token.
+    this.cache.revokeFamilyAccess(existing.familyId);
   }
 
-  /** Signs a user out everywhere, optionally keeping one login (e.g. the one changing the password). */
-  revokeAllForUser(
+  /**
+   * Signs a user out everywhere, optionally keeping one login (e.g. the one changing the password):
+   * revokes the refresh tokens and refuses every access token issued before now (the kept login's
+   * access token included; its next refresh gets a fresh one).
+   */
+  async revokeAllForUser(
     userId: string,
     reason: RevokeReason,
     options: { audience?: Audience; exceptFamilyId?: string } = {},
     now = new Date(),
   ): Promise<void> {
-    return this.refreshTokens.revokeAllForUser(userId, reason, now, options);
+    await this.refreshTokens.revokeAllForUser(userId, reason, now, options);
+    await this.users.setTokensValidAfter(userId, now);
+    this.cache.invalidate(userId);
   }
 
   private async issue(
@@ -127,7 +143,7 @@ export class TokenService {
     now: Date,
   ): Promise<IssuedTokens> {
     const ttlSeconds = this.config.get('JWT_ACCESS_TTL_SECONDS');
-    const claims: AccessClaims = { sub: userId, aud: audience, fam: familyId };
+    const claims: Omit<AccessClaims, 'iat'> = { sub: userId, aud: audience, fam: familyId };
     const accessToken = await this.jwt.signAsync(
       { fam: claims.fam },
       {

@@ -1,19 +1,24 @@
-import { BackButton } from '@/components/ui/back-button';
-import { imageUrl, type ProductDetail } from '@aricon/shared';
-import type { Metadata } from 'next';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { Breadcrumbs } from '@/components/shop/breadcrumbs';
-import { breadcrumbList, JsonLd } from '@/components/shop/json-ld';
-import { ProductCard } from '@/components/shop/product-card';
-import { ProductImage } from '@/components/shop/product-image';
-import { ProductPurchasePanel } from '@/components/shop/product-purchase-panel';
-import { ProductSection } from '@/components/shop/product-rail';
-import { CARD_CLASS } from '@/components/shop/styles';
-import { getProduct, getPublicSettings, getRelated, orNotFound } from '@/lib/api-server';
-import { absoluteUrl, imageBaseUrl } from '@/lib/site';
-import { routes } from '@/lib/routes';
-import { cn } from '@/lib/utils';
+import { BackButton } from "@/components/ui/back-button";
+import { imageUrl, type ProductDetail } from "@aricon/shared";
+import type { Metadata } from "next";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { Breadcrumbs } from "@/components/shop/breadcrumbs";
+import { breadcrumbList, JsonLd } from "@/components/shop/json-ld";
+import { ProductCard } from "@/components/shop/product-card";
+import { ProductPurchasePanel } from "@/components/shop/product-purchase-panel";
+import { ProductSection } from "@/components/shop/product-rail";
+import { CARD_CLASS } from "@/components/shop/styles";
+import {
+  getProduct,
+  getPublicSettings,
+  getRelated,
+  orNotFound,
+} from "@/lib/api-server";
+import { absoluteUrl, imageBaseUrl } from "@/lib/site";
+import { routes } from "@/lib/routes";
+import { cn } from "@/lib/utils";
+import { ProductImageGallery } from "@/components/shop/product-image-gallery";
 
 interface ProductPageParams {
   slug: string;
@@ -29,11 +34,11 @@ interface ProductPageProps {
  */
 function excerptFromMarkdown(markdown: string, maxLength = 160): string {
   const plain = markdown
-    .replace(/```[\s\S]*?```/g, ' ')
-    .replace(/!\[[^\]]*]\([^)]*\)/g, ' ')
-    .replace(/\[([^\]]*)]\([^)]*\)/g, '$1')
-    .replace(/[#>*_~`|-]/g, ' ')
-    .replace(/\s+/g, ' ')
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/!\[[^\]]*]\([^)]*\)/g, " ")
+    .replace(/\[([^\]]*)]\([^)]*\)/g, "$1")
+    .replace(/[#>*_~`|-]/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
   if (plain.length <= maxLength) return plain;
   return `${plain.slice(0, maxLength - 1).trimEnd()}…`;
@@ -45,11 +50,15 @@ function mainImageUrl(product: ProductDetail): string | null {
   return key ? imageUrl(imageBaseUrl, key, 800) : null;
 }
 
-export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
   const product = await orNotFound(getProduct(slug));
   // Many product names already start with the brand ("Lucky Cement OPC"); don't say it twice.
-  const title = product.name.toLowerCase().startsWith(product.brand.name.toLowerCase())
+  const title = product.name
+    .toLowerCase()
+    .startsWith(product.brand.name.toLowerCase())
     ? product.name
     : `${product.brand.name} ${product.name}`;
   const description =
@@ -66,8 +75,10 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
       title,
       description,
       url: path,
-      type: 'website',
-      ...(image && { images: [{ url: image, alt: product.images[0]?.alt || product.name }] }),
+      type: "website",
+      ...(image && {
+        images: [{ url: image, alt: product.images[0]?.alt || product.name }],
+      }),
     },
   };
 }
@@ -84,24 +95,29 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const inStock = product.variants.some((variant) => variant.stock > 0);
   const image = mainImageUrl(product);
   const productJsonLd = {
-    '@type': 'Product',
+    "@type": "Product",
     name: product.name,
     ...(image && { image }),
     description: excerptFromMarkdown(product.description),
     sku: product.variants[0]?.sku,
-    brand: { '@type': 'Brand', name: product.brand.name },
+    brand: { "@type": "Brand", name: product.brand.name },
     offers: {
-      '@type': 'Offer',
+      "@type": "Offer",
       url: absoluteUrl(routes.product(product.slug)),
-      priceCurrency: 'PKR',
+      priceCurrency: "PKR",
       price: product.minPrice,
-      availability: inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      availability: inStock
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
     },
   };
 
   const breadcrumbJsonLd = breadcrumbList([
-    { name: 'Home', url: absoluteUrl(routes.home) },
-    ...product.breadcrumbs.map((crumb) => ({ name: crumb.name, url: absoluteUrl(routes.category(crumb.slug)) })),
+    { name: "Home", url: absoluteUrl(routes.home) },
+    ...product.breadcrumbs.map((crumb) => ({
+      name: crumb.name,
+      url: absoluteUrl(routes.category(crumb.slug)),
+    })),
     { name: product.name, url: absoluteUrl(routes.product(product.slug)) },
   ]);
 
@@ -122,7 +138,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
             {/* Every fixture image is null for now, so this renders the category placeholder icon.
                 Once products have real images, thumbnails go in a row below this box (max 10, SPEC
                 §5.6) and this becomes the selected image with a next/image `priority` on the first. */}
-            <div className="relative aspect-square overflow-hidden rounded-xl border border-concrete-150 bg-concrete-50">
+            {/* <div className="relative aspect-square overflow-hidden rounded-xl border border-concrete-150 bg-concrete-50">
               <div className="flex size-full items-center justify-center">
                 <ProductImage
                   imageKey={product.images[0]?.key ?? null}
@@ -134,23 +150,34 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   preload
                 />
               </div>
-            </div>
+            </div> */}
+            <ProductImageGallery product={product} />
           </div>
 
           <div className="lg:col-span-5">
-            <ProductPurchasePanel product={product} whatsapp={settings.whatsapp} className="lg:sticky lg:top-24" />
+            <ProductPurchasePanel
+              product={product}
+              whatsapp={settings.whatsapp}
+              className="lg:sticky lg:top-24"
+            />
           </div>
         </div>
 
         {product.specifications.length > 0 ? (
           <section className="flex flex-col gap-4">
             <h2 className="type-h2">Specifications</h2>
-            <div className={cn(CARD_CLASS, 'overflow-hidden')}>
+            <div className={cn(CARD_CLASS, "overflow-hidden")}>
               <table className="w-full text-sm">
                 <tbody>
                   {product.specifications.map((spec) => (
-                    <tr key={spec.label} className="border-b border-concrete-150 last:border-b-0">
-                      <th scope="row" className="w-2/5 px-4 py-3 text-left font-medium text-ink-700">
+                    <tr
+                      key={spec.label}
+                      className="border-b border-concrete-150 last:border-b-0"
+                    >
+                      <th
+                        scope="row"
+                        className="w-2/5 px-4 py-3 text-left font-medium text-ink-700"
+                      >
                         {spec.label}
                       </th>
                       <td className="px-4 py-3 text-ink">{spec.value}</td>
@@ -170,12 +197,24 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
-                h1: ({ node: _node, ...props }) => <h3 className="type-h3" {...props} />,
-                h2: ({ node: _node, ...props }) => <h3 className="type-h3" {...props} />,
-                h3: ({ node: _node, ...props }) => <h3 className="type-h3" {...props} />,
-                h4: ({ node: _node, ...props }) => <h3 className="type-h3" {...props} />,
-                h5: ({ node: _node, ...props }) => <h3 className="type-h3" {...props} />,
-                h6: ({ node: _node, ...props }) => <h3 className="type-h3" {...props} />,
+                h1: ({ node: _node, ...props }) => (
+                  <h3 className="type-h3" {...props} />
+                ),
+                h2: ({ node: _node, ...props }) => (
+                  <h3 className="type-h3" {...props} />
+                ),
+                h3: ({ node: _node, ...props }) => (
+                  <h3 className="type-h3" {...props} />
+                ),
+                h4: ({ node: _node, ...props }) => (
+                  <h3 className="type-h3" {...props} />
+                ),
+                h5: ({ node: _node, ...props }) => (
+                  <h3 className="type-h3" {...props} />
+                ),
+                h6: ({ node: _node, ...props }) => (
+                  <h3 className="type-h3" {...props} />
+                ),
               }}
             >
               {product.description}
@@ -186,7 +225,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
         {related.length > 0 ? (
           <ProductSection title="Customers also buy">
             {related.map((item) => (
-              <ProductCard key={item.id} product={item} categoryHint={product.category.slug} />
+              <ProductCard
+                key={item.id}
+                product={item}
+                categoryHint={product.category.slug}
+              />
             ))}
           </ProductSection>
         ) : null}

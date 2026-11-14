@@ -1,7 +1,23 @@
-import type { AdminCustomerDetailDTO, AdminCustomerListItemDTO } from '@aricon/shared';
-import { Body, Controller, Get, HttpCode, Param, Post, Query, type StreamableFile } from '@nestjs/common';
+import type {
+  AdminCustomerDetailDTO,
+  AdminCustomerListItemDTO,
+} from '@aricon/shared';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  Query,
+  type StreamableFile,
+} from '@nestjs/common';
 import { ApiOperation, ApiProduces, ApiTags } from '@nestjs/swagger';
-import { ApiDataResponse, ApiErrorResponses } from '../../common/http/api-response.decorators.js';
+import {
+  ApiDataResponse,
+  ApiErrorResponses,
+} from '../../common/http/api-response.decorators.js';
 import type { Paginated } from '../../common/http/envelope.js';
 import { ParseObjectIdPipe } from '../../common/validation/parse-object-id.pipe.js';
 import { CurrentActor, type AuditActor } from '../audit/audit.service.js';
@@ -15,7 +31,8 @@ import {
   CustomerStatusNoteDto,
 } from './dto/customers.dto.js';
 
-const customerId = () => new ParseObjectIdPipe("We couldn't find that customer.");
+const customerId = () =>
+  new ParseObjectIdPipe("We couldn't find that customer.");
 
 /** SPEC §7.3 "Customers". */
 @ApiTags('Admin · Customers')
@@ -25,11 +42,20 @@ export class CustomersController {
 
   @Get()
   @RequirePermission('customers.view')
-  @ApiOperation({ summary: 'Customers with order count and total spent; search by name, email or phone' })
+  @ApiOperation({
+    summary:
+      'Customers with order count and total spent; search by name, email or phone',
+  })
   @ApiDataResponse(AdminCustomerListItemDto, { paginated: true })
   @ApiErrorResponses(400, 401, 403)
-  list(@Query() query: CustomerListQueryDto): Promise<Paginated<AdminCustomerListItemDTO>> {
-    return this.customers.list({ q: query.q, status: query.status }, query.page, query.pageSize);
+  list(
+    @Query() query: CustomerListQueryDto,
+  ): Promise<Paginated<AdminCustomerListItemDTO>> {
+    return this.customers.list(
+      { q: query.q, status: query.status },
+      query.page,
+      query.pageSize,
+    );
   }
 
   // Before ':id', so "export" isn't read as a customer id.
@@ -47,7 +73,9 @@ export class CustomersController {
   @ApiOperation({ summary: 'Profile, addresses and recent orders' })
   @ApiDataResponse(AdminCustomerDetailDto)
   @ApiErrorResponses(401, 403, 404)
-  detail(@Param('id', customerId()) id: string): Promise<AdminCustomerDetailDTO> {
+  detail(
+    @Param('id', customerId()) id: string,
+  ): Promise<AdminCustomerDetailDTO> {
     return this.customers.detail(id);
   }
 
@@ -77,5 +105,33 @@ export class CustomersController {
     @Body() body: CustomerStatusNoteDto,
   ): Promise<AdminCustomerDetailDTO> {
     return this.customers.setStatus(actor, id, 'active', body.note);
+  }
+
+  @Delete(':id')
+  @RequirePermission('customers.delete')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Soft-delete a customer; order history remains available',
+  })
+  @ApiDataResponse(AdminCustomerDetailDto)
+  @ApiErrorResponses(401, 403, 404)
+  delete(
+    @CurrentActor() actor: AuditActor,
+    @Param('id', customerId()) id: string,
+  ): Promise<AdminCustomerDetailDTO> {
+    return this.customers.delete(actor, id);
+  }
+
+  @Post(':id/restore')
+  @RequirePermission('customers.delete')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Restore a soft-deleted customer' })
+  @ApiDataResponse(AdminCustomerDetailDto)
+  @ApiErrorResponses(401, 403, 404)
+  restore(
+    @CurrentActor() actor: AuditActor,
+    @Param('id', customerId()) id: string,
+  ): Promise<AdminCustomerDetailDTO> {
+    return this.customers.restore(actor, id);
   }
 }

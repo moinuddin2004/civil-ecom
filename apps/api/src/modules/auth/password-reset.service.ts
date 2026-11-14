@@ -30,8 +30,8 @@ export class PasswordResetService {
 
   /** Always resolves: whether an email was sent is never revealed. */
   async requestReset(email: string, now = new Date()): Promise<void> {
-    const user = await this.users.findOne({ email, role: 'CUSTOMER' });
-    if (!user || user.status !== 'active') return;
+    const user = await this.users.findActiveByEmail(email);
+    if (!user || user.role !== 'CUSTOMER' || user.status !== 'active') return;
 
     const token = randomToken();
     await this.resets.invalidateOpen(user._id, now);

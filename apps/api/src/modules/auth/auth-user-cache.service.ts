@@ -1,5 +1,11 @@
-import { effectivePermissions, type Permission, type Role, type UserStatus } from '@aricon/shared';
+import {
+  effectivePermissions,
+  type Permission,
+  type Role,
+  type UserStatus,
+} from '@aricon/shared';
 import { Injectable } from '@nestjs/common';
+import { AppConfig } from '../../config/app-config.service.js';
 import { UsersRepository } from '../users/users.repository.js';
 
 /** SPEC §3.2: "loaded from the database on every request (cache at most 30 s in memory)". */
@@ -13,8 +19,12 @@ export interface AuthUser {
   email: string;
   role: Role;
   status: UserStatus;
+  isDeleted: boolean;
   permissions: Permission[];
   mustChangePassword: boolean;
+  emailVerified: boolean;
+  /** Access tokens issued before this (epoch ms) are refused; null when never set. */
+  tokensValidAfter: number | null;
 }
 
 interface Entry {
@@ -31,7 +41,35 @@ interface Entry {
 export class AuthUserCache {
   private readonly entries = new Map<string, Entry>();
 
-  constructor(private readonly users: UsersRepository) {}
+  /**
+   * Refresh-token families signed out by a single-session logout, until their access tokens expire
+   * (family id → expiry). In-process only: the API runs as ONE PM2 process, so every request sees
+   * it. If the API is ever scaled to several processes this must move to shared storage.
+   */
+  private readonly revokedFamilies = new Map<string, number>();
+
+  constructor(
+    private readonly users: UsersRepository,
+    private readonly config: AppConfig,
+  ) {}
+
+  /** Refuses the family's access tokens for as long as they could still be valid. */
+  revokeFamilyAccess(familyId: string, now = Date.now()): void {
+    for (const [family, expiresAt] of this.revokedFamilies) {
+      if (expiresAt <= now) this.revokedFamilies.delete(family);
+    }
+    this.revokedFamilies.set(familyId, now + this.config.get('JWT_ACCESS_TTL_SECONDS') * 1000);
+  }
+
+  isFamilyRevoked(familyId: string, now = Date.now()): boolean {
+    const expiresAt = this.revokedFamilies.get(familyId);
+    if (expiresAt === undefined) return false;
+    if (expiresAt <= now) {
+      this.revokedFamilies.delete(familyId);
+      return false;
+    }
+    return true;
+  }
 
   async get(userId: string, now = Date.now()): Promise<AuthUser | null> {
     const cached = this.entries.get(userId);
@@ -45,8 +83,15 @@ export class AuthUserCache {
           email: view.email,
           role: view.role,
           status: view.status,
-          permissions: effectivePermissions({ role: view.role, permissions: view.permissions }),
+          isDeleted: view.deletedAt !== undefined,
+          permissions: effectivePermissions({
+            role: view.role,
+            permissions: view.permissions,
+          }),
           mustChangePassword: view.mustChangePassword,
+          // Legacy documents may predate the field until the startup backfill has run.
+          emailVerified: view.emailVerified !== false,
+          tokensValidAfter: view.tokensValidAfter?.getTime() ?? null,
         }
       : null;
 

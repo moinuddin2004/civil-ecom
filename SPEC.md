@@ -131,6 +131,7 @@ Defined once in `packages/shared/src/permissions.ts`. The admin UI (checkboxes, 
 | Catalog | `brands.manage` | Manage brands | – | |
 | Customers | `customers.view` | View customers | – | |
 | Customers | `customers.block` | Block and unblock customers | `customers.view` | |
+| Customers | `customers.delete` | Delete and restore customer accounts | `customers.view` | ✓ |
 | Customers | `customers.export` | Export customers to Excel | `customers.view` | ✓ |
 | Delivery | `delivery_areas.manage` | Manage delivery areas and charges | – | |
 | Delivery | `riders.manage` | Manage riders | – | |
@@ -176,7 +177,7 @@ New staff default: `orders.view`, `orders.update_status`.
 1. `withDependencies()` is applied when saving permissions (API) and when ticking checkboxes (UI).
 2. Unknown permission keys are rejected (400).
 3. `orders.view` includes the customer name, phone and address **of that order** (needed for delivery). The customer directory needs `customers.view`.
-4. Cannot demote, block or delete the last active ADMIN. An admin cannot change their own role or block themselves.
+4. Cannot demote, block or delete the last active ADMIN. An admin cannot change their own role, block themselves or delete their own account.
 5. Blocking a staff member or changing their role deletes all their `adminSessions`.
 6. Every role/permission/status change writes an `auditLogs` entry with before/after.
 7. Customer accounts cannot be converted to staff. Staff are created only through "Add staff" with their own email.
@@ -198,12 +199,13 @@ General rules:
 | Field | Type | Rules |
 |---|---|---|
 | `name` | string | required, 2–80 chars |
-| `email` | string | required, lowercase, unique |
-| `phone` | string | `+923XXXXXXXXX`; required for `CUSTOMER`, optional for staff; unique (partial index where exists) |
+| `email` | string | required, lowercase, unique among accounts without `deletedAt` |
+| `phone` | string | `+923XXXXXXXXX`; required for `CUSTOMER`, optional for staff; unique among accounts without `deletedAt` when present |
 | `passwordHash` | string | bcryptjs, cost 12; never returned by the API |
 | `role` | enum `ADMIN` \| `STAFF` \| `CUSTOMER` | default `CUSTOMER` |
 | `permissions` | string[] | only meaningful for `STAFF`; validated against catalog |
 | `status` | enum `active` \| `blocked` | default `active` |
+| `deletedAt` | Date? | soft-deleted accounts cannot sign in; user and order history is retained |
 | `companyName` | string? | customers (contractors) |
 | `addresses` | Address[] | customers only, max 10 |
 | `mustChangePassword` | boolean | default false; true for new staff and after admin reset |
@@ -213,7 +215,7 @@ General rules:
 
 **Address (embedded, has `_id`):** `label` (e.g. "Site – Gulshan"), `contactName`, `phone`, `line1`, `line2?`, `landmark?`, `areaId` (ref `deliveryAreas`), `city`, `isDefault`. Exactly one default when addresses exist.
 
-Indexes: `email` unique; `phone` unique partial; `{ role: 1, status: 1 }`; text-ish search via regex on `name`/`email`/`phone` in admin (paginated).
+Indexes: `email` unique among accounts without `deletedAt`; `phone` unique partial among accounts without `deletedAt`; `{ role: 1, status: 1 }`; text-ish search via regex on `name`/`email`/`phone` in admin (paginated).
 
 ### 5.2 `userSessions`, `adminSessions`
 
@@ -534,6 +536,7 @@ Defined in `packages/shared/src/order-status.ts` as a table used by API and UI.
 
 ### 6.12 Soft delete
 
+- Users (customers and staff): set `deletedAt`; retain the user and all order/audit history. Deleted users cannot sign in. Admins can restore accounts; customers require `customers.delete`, and staff deletion/restoration is ADMIN-only. Do not hard-delete users.
 - Products: `hidden` (not in store, still editable) or `archived` (not in store, hidden from default admin lists). Products are never hard-deleted.
 - Categories/brands: `hidden`; cannot hide a category that still has active products (409 with a count).
 - Delivery areas: set `isServiceable = false` instead of delete if used by any address or order.
@@ -555,7 +558,7 @@ Defined in `packages/shared/src/order-status.ts` as a table used by API and UI.
 - Pagination: `?page=1&pageSize=20` (max 100) → `meta: { page, pageSize, total }`.
 - Sorting: `?sort=createdAt:desc` (whitelisted fields per endpoint).
 - Every body, query and params object is validated with a strict Zod schema (unknown keys rejected).
-- Error codes: `VALIDATION_ERROR` (400), `UNAUTHENTICATED` (401), `FORBIDDEN` (403), `ACCOUNT_BLOCKED` (403), `NOT_FOUND` (404), `CONFLICT` (409), `EMAIL_TAKEN` (409), `PHONE_TAKEN` (409), `OUT_OF_STOCK` (409), `PRICE_CHANGED` (409), `INVALID_TRANSITION` (409), `ACCOUNT_LOCKED` (423), `PAYLOAD_TOO_LARGE` (413), `UNSUPPORTED_FILE` (415), `RATE_LIMITED` (429), `INTERNAL` (500).
+- Error codes: `VALIDATION_ERROR` (400), `UNAUTHENTICATED` (401), `FORBIDDEN` (403), `ACCOUNT_BLOCKED` (403), `EMAIL_NOT_VERIFIED` (403), `NOT_FOUND` (404), `CONFLICT` (409), `EMAIL_TAKEN` (409), `PHONE_TAKEN` (409), `OUT_OF_STOCK` (409), `PRICE_CHANGED` (409), `INVALID_TRANSITION` (409), `ACCOUNT_LOCKED` (423), `PAYLOAD_TOO_LARGE` (413), `UNSUPPORTED_FILE` (415), `RATE_LIMITED` (429), `INTERNAL` (500).
 - Rate limits (per IP, plus per identifier for login): customer login 10/15 min, admin login 5/15 min, signup 5/hour, forgot password 3/hour, receipt upload 10/hour, RFP 5/hour.
 - Origin check on all non-GET requests except `POST /api/public/rfp`.
 
@@ -712,7 +715,11 @@ Defined in `packages/shared/src/order-status.ts` as a table used by API and UI.
 | GET | `/api/admin/customers` (`q`, `status`) — includes order count and total spent | `customers.view` |
 | GET | `/api/admin/customers/:id` — profile, addresses, recent orders | `customers.view` |
 | POST | `/api/admin/customers/:id/block` / `unblock` | `customers.block` |
+| DELETE | `/api/admin/customers/:id` — soft-delete and revoke sessions | `customers.delete` |
+| POST | `/api/admin/customers/:id/restore` — clear `deletedAt` | `customers.delete` |
 | GET | `/api/admin/customers/export` | `customers.export` |
+| DELETE | `/api/admin/staff/:id` — soft-delete; last-admin and self-delete guards apply | ADMIN |
+| POST | `/api/admin/staff/:id/restore` | ADMIN |
 
 **Delivery**
 
@@ -747,6 +754,7 @@ Defined in `packages/shared/src/order-status.ts` as a table used by API and UI.
 | POST | `/api/admin/staff` | ADMIN | `{ name, email, phone?, role, permissions }` → returns `temporaryPassword` once |
 | PATCH | `/api/admin/staff/:id` | ADMIN | `{ name?, phone?, role?, permissions?, status? }` (§4.5 rules) |
 | POST | `/api/admin/staff/:id/reset-password` | ADMIN | returns new `temporaryPassword` once |
+| POST | `/api/admin/staff/:id/verify-email` | ADMIN | marks the staff member's email verified (audit `user.email_verified`); for when the verification email can't be delivered |
 | GET/PUT | `/api/admin/settings` | ADMIN | |
 | GET | `/api/admin/audit-logs` (`actorId`, `entity`, `entityId`, `action`, `from`, `to`) | ADMIN | |
 
@@ -904,7 +912,7 @@ Two tabs: **Staff & admins** (ADMIN only) and **Customers** (`customers.view`). 
 
 **Staff & admins tab**
 
-- Table: name, email, role, status, last login, actions (Edit, Reset password, Block/Unblock).
+- Table: name, email, role, status, last login, actions (Edit, Reset password, Block/Unblock, Delete). Soft-deleted accounts remain hidden in the UI.
 - **Add / edit staff** (side sheet):
   - Name, email (not editable after create), phone, role (Admin / Staff), status.
   - On create: the temporary password is generated by the API and shown once in a dialog with a copy button and the note "Share this securely. They must change it at first login."
@@ -919,8 +927,8 @@ Two tabs: **Staff & admins** (ADMIN only) and **Customers** (`customers.view`). 
 
 **Customers tab**
 
-- Table: name, email, phone, company, orders, total spent, status, joined; search and status filter; export (`customers.export`).
-- Customer detail: profile, addresses, orders list (links to order detail if `orders.view`), Block / Unblock (`customers.block`) with confirmation.
+- Table: name, email, phone, company, orders, total spent, status, joined; search and status filter; export (`customers.export`). Soft-deleted accounts remain hidden in the UI.
+- Customer detail: profile, addresses, orders list (links to order detail if `orders.view`), Block / Unblock (`customers.block`) and Delete (`customers.delete`) with confirmation.
 
 ### 10.9 Delivery areas and riders
 
@@ -947,7 +955,7 @@ Table: time, user, role, action, entity (link), summary; filters: user, entity, 
 
 ## 11. Emails
 
-Sent through one `notify(event, payload)` service → Agenda job `send-email` (3 retries, exponential backoff; failures logged, never block the request). HTML + plain-text versions, simple branded layout (logo, store contact in footer), links use `APP_URL`.
+Sent through one `notify(event, payload)` service → Agenda job `send-email` (3 retries, exponential backoff; failures logged, never block the request). Every event uses the approved Aricon email design: a responsive white card, ARICON brand header, event kicker and headline, soft blue/pink/lavender accents, clear order details and buttons, and the store contact footer. Keep HTML + plain-text versions, escape dynamic content, and use safe `APP_URL` links.
 
 | Event | To | Content |
 |---|---|---|
