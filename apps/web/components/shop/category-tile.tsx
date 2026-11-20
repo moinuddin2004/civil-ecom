@@ -1,6 +1,8 @@
 import { formatNumber, type CategoryTileDTO } from '@aricon/shared';
+import Image from 'next/image';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { staticImageSrc } from '@/lib/images';
 import { routes } from '@/lib/routes';
 import { cn } from '@/lib/utils';
 import { CategoryGlyph } from './category-glyph';
@@ -11,8 +13,10 @@ export function productCountLabel(count: number): string {
   return `${formatNumber(count)} ${count === 1 ? 'product' : 'products'}`;
 }
 
+const photographedDepartments = new Set(['cement-plaster', 'tiles-adhesives', 'paint', 'electrical', 'plumbing', 'hardware']);
+
 export interface CategoryTileProps {
-  category: Pick<CategoryTileDTO, 'name' | 'slug' | 'productCount'>;
+  category: Pick<CategoryTileDTO, 'name' | 'slug' | 'productCount'> & Partial<Pick<CategoryTileDTO, 'imageKey'>>;
   /** Defaults to the category page. */
   href?: string;
   className?: string;
@@ -20,9 +24,12 @@ export interface CategoryTileProps {
 
 /**
  * "Shop by category" tile (v2 §2.3): icon well, name and product count; lifts on hover. Uses the
- * custom category icon picked from the slug (categories have no icon field, v2 §11).
+ * category photo when available and the technical icon as a fallback.
  */
 export function CategoryTile({ category, href, className }: CategoryTileProps) {
+  const photo = category.imageKey
+    ? staticImageSrc(category.imageKey)
+    : photographedDepartments.has(category.slug) ? `/images/categories/${category.slug}.webp` : null;
   return (
     <Link
       href={href ?? routes.category(category.slug)}
@@ -34,8 +41,12 @@ export function CategoryTile({ category, href, className }: CategoryTileProps) {
         className,
       )}
     >
-      <span className="flex size-16 shrink-0 items-center justify-center rounded-xl bg-concrete-100 text-ink">
-        <CategoryGlyph hint={category.slug} size={48} className="lg:size-14" />
+      <span className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-concrete-100 text-ink">
+        {photo ? (
+          <Image src={photo} width={64} height={64} alt="" className="size-full object-cover" />
+        ) : (
+          <CategoryGlyph hint={category.slug} size={48} className="lg:size-14" />
+        )}
       </span>
       <span className="flex flex-col">
         <span className="text-base/[22px] font-semibold">{category.name}</span>

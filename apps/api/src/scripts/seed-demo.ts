@@ -3,6 +3,7 @@ import type { INestApplicationContext } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { getModelToken } from '@nestjs/mongoose';
 import { randomUUID } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 import mongoose, { Types, type Model } from 'mongoose';
 import { AppModule } from '../app.module.js';
@@ -32,7 +33,7 @@ import { SHORT_CACHE, StorageService } from '../modules/storage/storage.service.
 import { BRANDS } from './demo-data/brands.js';
 import { CATEGORIES } from './demo-data/categories.js';
 import { DELIVERY_AREAS } from './demo-data/delivery-areas.js';
-import { bannerPlaceholder, categoryColour, productPlaceholder } from './demo-data/placeholder-images.js';
+import { categoryColour, productPlaceholder } from './demo-data/placeholder-images.js';
 import { PRODUCTS } from './demo-data/products.js';
 import { RIDERS } from './demo-data/riders.js';
 import { PAGE_CONTENT, STORE_SETTINGS } from './demo-data/settings.js';
@@ -47,7 +48,7 @@ import { PAGE_CONTENT, STORE_SETTINGS } from './demo-data/settings.js';
  *   pnpm --filter api seed:demo -- --reset  # deletes the demo data (and its customers/orders) first
  *
  * Refuses when NODE_ENV=production unless `--force`. Product photos and homepage banners are
- * generated placeholders (sharp), stored through the configured storage driver like real uploads.
+ * stored through the configured storage driver like real uploads.
  */
 
 const DEMO_PASSWORD = 'Demo2026pass';
@@ -98,32 +99,39 @@ function topLevelSlug(slug: string): string {
   return CATEGORIES.find((parent) => parent.slug === slug || parent.children.some((child) => child.slug === slug))?.slug ?? slug;
 }
 
-/** One generated photo per product, processed and stored exactly like an upload (SPEC §12). */
-async function addPlaceholderPhoto(app: INestApplicationContext, productId: Types.ObjectId, name: string, colour: string): Promise<void> {
-  const sizes = await app.get(FileProcessingService).productImageFromBytes(await productPlaceholder(name, colour));
+/** Seed photos use the same responsive sizes and storage keys as merchant uploads. */
+async function addDemoPhoto(app: INestApplicationContext, productId: Types.ObjectId, fixture: (typeof PRODUCTS)[number]): Promise<void> {
+  let photo: Buffer;
+  let alt = `${fixture.name} (illustrative product photo)`;
+  try {
+    photo = await readFile(new URL(`./demo-data/images/products/${fixture.slug}.webp`, import.meta.url));
+  } catch (error) {
+    if (!(error instanceof Error && 'code' in error && error.code === 'ENOENT')) throw error;
+    photo = await productPlaceholder(fixture.name, categoryColour(topLevelSlug(fixture.categorySlug)));
+    alt = `${fixture.name} (demo image)`;
+  }
+  const sizes = await app.get(FileProcessingService).productImageFromBytes(photo);
   const prefix = productImagePrefix(String(productId), new Types.ObjectId().toHexString());
   const storage = app.get(StorageService);
   await Promise.all([...sizes].map(([width, body]) => storage.putPublic(productImageFileKey(prefix, width), body, 'image/webp')));
-  await model<Product>(app, Product.name).updateOne({ _id: productId }, { $set: { images: [{ key: prefix, alt: `${name} (demo image)` }] } }).exec();
+  await model<Product>(app, Product.name).updateOne({ _id: productId }, { $set: { images: [{ key: prefix, alt }] } }).exec();
 }
 
 const DEMO_BANNERS = [
-  { heading: 'Buy more, pay less per bag', subline: 'Bulk prices on cement, delivered across Karachi', link: '/category/cement-plaster', tone: 'blue' },
-  { heading: 'Genuine wires and switches', subline: 'Trusted electrical brands for every site', link: '/category/electrical', tone: 'green' },
-  { heading: 'Cash on delivery or bank transfer', subline: 'Order today, pay the way that suits you', link: '/pages/delivery-policy', tone: 'sand' },
+  { heading: 'Buy more, pay less per bag', link: '/category/cement-plaster', photo: 'cement' },
+  { heading: 'Genuine wires and switches', link: '/category/electrical', photo: 'electrical' },
+  { heading: 'Cash on delivery or bank transfer', link: '/pages/delivery-policy', photo: 'delivery' },
 ] as const;
 
 /** Three demo banners (SPEC §19), desktop 1600 px and mobile 800 px wide. */
-async function placeholderBanners(app: INestApplicationContext) {
-  const files = app.get(FileProcessingService);
+async function seedBanners(app: INestApplicationContext) {
   const storage = app.get(StorageService);
   const banners = [];
   for (const [index, banner] of DEMO_BANNERS.entries()) {
     const id = new Types.ObjectId();
     const keys = { desktop: bannerImageKey(String(id), 'desktop'), mobile: bannerImageKey(String(id), 'mobile') };
     for (const variant of ['desktop', 'mobile'] as const) {
-      const png = variant === 'desktop' ? await bannerPlaceholder(1600, 600, banner.heading, banner.subline, banner.tone) : await bannerPlaceholder(800, 800, banner.heading, banner.subline, banner.tone);
-      const body = await files.bannerImage({ buffer: png, size: png.length }, variant);
+      const body = await readFile(new URL(`./demo-data/images/banners/${banner.photo}-${variant}.webp`, import.meta.url));
       await storage.putPublic(keys[variant], body, 'image/webp', SHORT_CACHE);
     }
     banners.push({ _id: id, desktopKey: keys.desktop, mobileKey: keys.mobile, alt: banner.heading, link: banner.link, isActive: true, sortOrder: index });
@@ -194,7 +202,7 @@ async function seedCatalog(app: INestApplicationContext): Promise<Map<string, Ty
       })),
     });
     productIds.set(fixture.slug, created._id);
-    await addPlaceholderPhoto(app, created._id, fixture.name, categoryColour(topLevelSlug(fixture.categorySlug)));
+    await addDemoPhoto(app, created._id, fixture);
     // Opening stock is a stock change like any other (SPEC §6.10).
     const opening = created.variants.filter((variant) => variant.stock > 0);
     if (opening.length > 0) {
@@ -219,7 +227,7 @@ async function seedCatalog(app: INestApplicationContext): Promise<Map<string, Ty
 
   await model<Homepage>(app, Homepage.name).create({
     _id: HOMEPAGE_ID,
-    banners: await placeholderBanners(app),
+    banners: await seedBanners(app),
     featuredProductIds: PRODUCTS.filter((product) => product.isFeatured).slice(0, 8).flatMap((product) => productIds.get(product.slug) ?? []),
     dealProductIds: PRODUCTS.filter((product) => product.isDeal).slice(0, 8).flatMap((product) => productIds.get(product.slug) ?? []),
   });

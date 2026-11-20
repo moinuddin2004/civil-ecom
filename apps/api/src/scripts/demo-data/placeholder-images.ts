@@ -1,9 +1,7 @@
 import sharp from 'sharp';
 
 /**
- * Demo pictures for `seed:demo` (SPEC §19): a solid colour with the product's initials, or a
- * banner with a heading — rendered from SVG by sharp, then stored through the same processing as
- * real uploads. Clearly placeholders, to be replaced by the client's photos.
+ * Fallback for demo products without a catalogue photograph.
  */
 
 /** One colour per top-level category, so a listing doesn't look like one grey wall. */
@@ -44,33 +42,6 @@ export function productPlaceholder(name: string, colour: string): Promise<Buffer
   <text x="800" y="860" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="420" font-weight="700" fill="#FFFFFF" fill-opacity="0.92">${escapeXml(initials(name))}</text>
   <text x="800" y="1130" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="72" fill="#FFFFFF" fill-opacity="0.85">${label}</text>
   <text x="1540" y="1550" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="44" fill="#FFFFFF" fill-opacity="0.6">Demo image</text>
-</svg>`;
-  return sharp(Buffer.from(svg)).png().toBuffer();
-}
-
-/** Light panel colours for the demo banners (ink text stays readable on all of them). */
-const BANNER_TONES = {
-  blue: '#E3EEFB',
-  green: '#E2F3E9',
-  sand: '#FFF3CC',
-} as const;
-export type BannerTone = keyof typeof BANNER_TONES;
-
-/** Banner PNG at the given size: light panel, amber accent bar, ink heading and sub-line. */
-export function bannerPlaceholder(
-  width: number,
-  height: number,
-  heading: string,
-  subline: string,
-  tone: BannerTone = 'blue',
-): Promise<Buffer> {
-  const scale = width / 1600;
-  const size = (value: number) => Math.round(value * (width < 1000 ? 1.6 : 1) * scale);
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
-  <rect width="${width}" height="${height}" fill="${BANNER_TONES[tone]}"/>
-  <rect x="${size(80)}" y="${Math.round(height * 0.3)}" width="${size(120)}" height="${size(14)}" fill="#F2A900"/>
-  <text x="${size(80)}" y="${Math.round(height * 0.3) + size(110)}" font-family="Arial, Helvetica, sans-serif" font-size="${size(84)}" font-weight="700" fill="#1E2A32">${escapeXml(heading)}</text>
-  <text x="${size(80)}" y="${Math.round(height * 0.3) + size(190)}" font-family="Arial, Helvetica, sans-serif" font-size="${size(40)}" fill="#33424D">${escapeXml(subline)}</text>
 </svg>`;
   return sharp(Buffer.from(svg)).png().toBuffer();
 }
